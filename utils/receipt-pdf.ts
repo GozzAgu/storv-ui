@@ -59,6 +59,8 @@ export interface ReceiptPdfData {
   money: (amount: number) => string
   /** Footer timestamp; defaults to now. */
   generatedAt?: Date
+  /** Set when the sale was corrected after it was recorded; printed in the footer. */
+  editedAt?: Date
 }
 
 /** Font files (base64 TTF) keyed by weight. Without them the built-in Helvetica is used. */
@@ -377,10 +379,19 @@ export function renderReceiptPdf(pdf: jsPDF, data: ReceiptPdfData, fonts: Receip
       month: 'short',
       year: 'numeric',
     })
-    text(`${data.receiptNumber}  ·  Issued with Storvv on ${stamp}  ·  storvv.com`, M, fy + 4.5, {
-      size: 7,
-      ink: FAINT,
-    })
+    const edited = data.editedAt
+      ? `  ·  Edited ${data.editedAt.toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        })}`
+      : ''
+    text(
+      `${data.receiptNumber}${edited}  ·  Issued with Storvv on ${stamp}  ·  storvv.com`,
+      M,
+      fy + 4.5,
+      { size: 7, ink: FAINT }
+    )
   }
   const ensure = (needed: number, repeatHead = false) => {
     if (y + needed <= H - FOOTER_SPACE) return

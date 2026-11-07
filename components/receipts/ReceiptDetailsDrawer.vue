@@ -9,9 +9,17 @@
     <template #default>
       <div v-if="receipt" class="s-form">
         <div class="s-record-meta">
-          <SBadge :tone="statusTone" size="md">{{ statusLabel }}</SBadge>
+          <span class="s-receipt-drawer__badges">
+            <SBadge :tone="statusTone" size="md">{{ statusLabel }}</SBadge>
+            <SBadge v-if="receipt.edited" tone="warning" size="md">Edited</SBadge>
+          </span>
           <span class="s-record-meta__date">{{ formatDate(receipt.date) }}</span>
         </div>
+        <p v-if="receipt.edited" class="s-form-meta s-receipt-drawer__edited">
+          Last edited
+          <template v-if="receipt.lastEditedByName"> by {{ receipt.lastEditedByName }}</template>
+          <template v-if="receipt.lastEditedAt"> · {{ formatDate(receipt.lastEditedAt) }}</template>
+        </p>
 
         <section class="s-form-section">
           <h3 class="s-form-section__title">Customer</h3>
@@ -113,6 +121,8 @@
         <p v-if="isOutstanding && !v2Sale && receipt.notes" class="s-form-meta">
           <strong>Note:</strong> {{ receipt.notes }}
         </p>
+
+        <ReceiptEditHistory :receipt="receipt" />
       </div>
     </template>
 
@@ -131,6 +141,12 @@
           Print / PDF
         </SButton>
       </div>
+      <SButton v-if="canEditSaleDetails" @click="emit('edit', receipt!)">
+        <template #leading>
+          <PencilSquareIcon :size="16" :stroke-width="2" aria-hidden="true" />
+        </template>
+        Edit
+      </SButton>
       <SButton v-if="isOutstanding && canClose" variant="danger" @click="emit('cancel', receipt!)">
         Cancel order
       </SButton>
@@ -155,7 +171,8 @@ import SAvatar from '~/components/s/SAvatar.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import ReceiptTableLineItems from '~/components/receipts/ReceiptTableLineItems.vue'
-import { EyeIcon, PrinterIcon } from '~/utils/app-icons'
+import { EyeIcon, PencilSquareIcon, PrinterIcon } from '~/utils/app-icons'
+import ReceiptEditHistory from '~/components/receipts/ReceiptEditHistory.vue'
 import type { Receipt } from '~/stores/receipts'
 import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
 import { getReceiptStatusLabel, getReceiptStatusTone } from '~/utils/receipt-status'
@@ -180,9 +197,10 @@ const emit = defineEmits<{
   'record-payment': [receipt: Receipt]
   cancel: [receipt: Receipt]
   refund: [receipt: Receipt]
+  edit: [receipt: Receipt]
 }>()
 
-const { canEditReceipts, canViewProfitAndCost } = usePermissions()
+const { canEditReceipts, canEditSaleDetails, canViewProfitAndCost } = usePermissions()
 
 const showCommission = computed(
   () => canViewProfitAndCost.value && (props.receipt?.commissionAmount ?? 0) > 0
@@ -228,3 +246,15 @@ function formatDate(d: Date | { toDate?: () => Date } | string | undefined) {
   return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 </script>
+
+<style scoped>
+.s-receipt-drawer__badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--s-space-1);
+}
+
+.s-receipt-drawer__edited {
+  margin: calc(var(--s-space-1) * -1) 0 0;
+}
+</style>

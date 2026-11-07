@@ -252,7 +252,7 @@ const { canEditStaffPermissions, isStoreOwner } = usePermissions()
 
 const isRemovedStaff = computed(() => props.staff?.status === 'inactive')
 
-/** An admin's transfers stay off until "Transfer stock to other branches" is on; then tweakable. */
+/** An admin can always view transfers; changing them waits for "Transfer stock to other branches". */
 const targetIsAdmin = ref(false)
 const targetCanTransfer = ref(false)
 const lockedPermissionModules = computed<PermissionModule[]>(() => {

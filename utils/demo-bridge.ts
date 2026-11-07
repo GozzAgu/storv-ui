@@ -230,8 +230,15 @@ export function demoReceiptToReceipt(r: DemoReceipt): Receipt {
     id: r.id,
     receiptNumber: r.receiptNumber,
     customerName: r.customerName,
-    customerEmail: '',
+    customerEmail: r.customerEmail ?? '',
     customerPhone: r.customerPhone,
+    customerAddress: r.customerAddress,
+    notes: r.notes,
+    edited: r.edited === true,
+    editCount: r.editCount,
+    lastEditedAt: r.lastEditedAt ? new Date(r.lastEditedAt) : undefined,
+    lastEditedByName: r.lastEditedByName,
+    lastEditReason: r.lastEditReason,
     date: new Date(r.date),
     items,
     itemsCount: items.reduce((n, l) => n + l.quantity, 0),
@@ -522,6 +529,21 @@ export async function applyDemoReceiptUpdate(receiptId: string, updates: Partial
   if (updates.customerName !== undefined) {
     receipt.customerName = normalizeEntityName(updates.customerName) || updates.customerName.trim()
   }
+  for (const key of [
+    'customerPhone',
+    'customerEmail',
+    'customerAddress',
+    'notes',
+    'edited',
+    'editCount',
+    'lastEditedByName',
+    'lastEditReason',
+  ] as const) {
+    if (updates[key] !== undefined) (receipt as Record<string, unknown>)[key] = updates[key]
+  }
+  if (updates.lastEditedAt instanceof Date)
+    receipt.lastEditedAt = updates.lastEditedAt.toISOString()
+  demo.persist()
   if (updates.status === 'refunded') {
     demo.refundReceipt(receiptId)
   }

@@ -119,6 +119,7 @@
                     @click="toggleLoanLines(loan.id)"
                   >
                     <span class="s-list__primary">{{ loan.partyName }}</span>
+                    <span class="s-list__secondary s-loan__items">{{ loanItemNames(loan) }}</span>
                     <span class="s-list__secondary"
                       >{{ unitLabel(loan) }} · {{ formatDay(loan.createdAt) }}</span
                     >
@@ -141,9 +142,13 @@
                     <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
                   </SIconButton>
                 </div>
-                <ul v-if="expandedLoanIds.has(loan.id)" class="s-loan__lines">
-                  <li v-for="(line, index) in loan.lines" :key="index">{{ line.itemSummary }}</li>
-                </ul>
+                <div v-if="expandedLoanIds.has(loan.id)" class="s-loan__lines">
+                  <StockItemDetailsList
+                    :items="loanItemRows(loan)"
+                    :label="`Units lent to ${loan.partyName}`"
+                    show-empty
+                  />
+                </div>
               </li>
             </ul>
           </SCard>
@@ -154,6 +159,7 @@
               <thead>
                 <tr>
                   <th scope="col">Borrower</th>
+                  <th scope="col">Items</th>
                   <th scope="col" class="s-table__num">Units</th>
                   <th scope="col">Lent</th>
                   <th scope="col" class="s-hide-md">Closed</th>
@@ -179,6 +185,11 @@
                           </span>
                         </span>
                       </div>
+                    </td>
+                    <td>
+                      <span class="s-table__secondary s-loan__items">{{
+                        loanItemNames(loan)
+                      }}</span>
                     </td>
                     <td class="s-table__num">
                       <button
@@ -226,12 +237,14 @@
                     </td>
                   </tr>
                   <tr v-if="expandedLoanIds.has(loan.id)">
-                    <td colspan="6" class="s-table__nested">
-                      <ul class="s-list" :aria-label="`Units lent to ${loan.partyName}`">
-                        <li v-for="(line, index) in loan.lines" :key="index" class="s-list__item">
-                          <span class="s-list__main">{{ line.itemSummary }}</span>
-                        </li>
-                      </ul>
+                    <td colspan="7" class="s-table__nested">
+                      <div class="s-loan__lines">
+                        <StockItemDetailsList
+                          :items="loanItemRows(loan)"
+                          :label="`Units lent to ${loan.partyName}`"
+                          show-empty
+                        />
+                      </div>
                     </td>
                   </tr>
                 </template>
@@ -343,6 +356,9 @@ import SPagination from '~/components/s/SPagination.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import STabs from '~/components/s/STabs.vue'
 import PlanGate from '~/components/subscription/PlanGate.vue'
+import StockItemDetailsList from '~/components/inventory/StockItemDetailsList.vue'
+import { useStockItemDetailsLookup } from '~/composables/useStockItemDetailsLookup'
+import { groupedItemNames, type StockItemRow } from '~/utils/stock-item-details'
 import { formatSellerLoanStatusLabel } from '~/utils/status-labels'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { useSellerLoanOutsStore, type SellerLoanOut } from '~/stores/sellerLoanOuts'
@@ -433,6 +449,29 @@ const unitsOnLoan = computed(() =>
 
 function unitLabel(loan: SellerLoanOut) {
   return `${loan.lines.length} unit${loan.lines.length === 1 ? '' : 's'}`
+}
+
+const { detailsFor } = useStockItemDetailsLookup()
+
+/** Every item on the loan by name, e.g. "iPhone 13 × 2, Galaxy S22". */
+function loanItemNames(loan: SellerLoanOut): string {
+  return groupedItemNames(loan.lines.map((line) => line.itemSummary || 'Item'))
+}
+
+/** One row per unit with its serial, model and other details (looked up for older loans). */
+function loanItemRows(loan: SellerLoanOut): StockItemRow[] {
+  return loan.lines.map((line, index) => {
+    const { details, loading } = detailsFor(
+      { itemId: line.inventoryItemId, details: line.details },
+      [loan.storeId]
+    )
+    return {
+      key: `${line.inventoryItemId}-${index}`,
+      name: line.itemSummary || 'Item',
+      details,
+      loading,
+    }
+  })
 }
 
 function loanTone(status: SellerLoanOut['status']): 'info' | 'success' | 'neutral' {

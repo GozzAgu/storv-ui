@@ -82,9 +82,11 @@ describe('usePermissions for branch admins', () => {
     expect(p.can('receipts', 'refund')).toBe(true)
   })
 
-  it('unlocks transfers only when the owner turns on the stock-transfers extra', async () => {
+  it('lets an admin see transfers, and change them only with the stock-transfers extra', async () => {
     let p = await perms()
-    expect(p.can('multiStoreSync', 'view')).toBe(false)
+    expect(p.can('multiStoreSync', 'view')).toBe(true)
+    expect(p.can('multiStoreSync', 'create')).toBe(false)
+    expect(p.can('multiStoreSync', 'edit')).toBe(false)
     expect(p.hasAdminGrant('stockTransfers')).toBe(false)
 
     staffMember.value = {

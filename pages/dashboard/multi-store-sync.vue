@@ -28,7 +28,11 @@
         </div>
         <div class="s-tab-panel__body">
           <!-- New transfer -->
-          <SCard v-if="activeTab === 'transfer'" title="New transfer" class="s-transfer">
+          <SCard
+            v-if="activeTab === 'transfer' && canRequestTransfers"
+            title="New transfer"
+            class="s-transfer"
+          >
             <form class="s-form" @submit.prevent="requestTransfer">
               <p class="s-transfer__intro">
                 A transfer goes from requested, to approved and in transit, to complete. Stock only
@@ -226,7 +230,9 @@
                   ><ArrowLeftRight :size="24" :stroke-width="1.75" aria-hidden="true"
                 /></template>
                 <template #actions>
-                  <SButton @click="activeTab = 'transfer'">New transfer</SButton>
+                  <SButton v-if="canRequestTransfers" @click="activeTab = 'transfer'"
+                    >New transfer</SButton
+                  >
                 </template>
               </SEmptyState>
             </SCard>
@@ -235,29 +241,49 @@
               <!-- Phone -->
               <SCard flush class="s-only-sm">
                 <ul class="s-list">
-                  <li v-for="transfer in transferHistory" :key="transfer.id" class="s-list__item">
-                    <div class="s-list__main">
-                      <span class="s-list__primary">{{ transferRoute(transfer) }}</span>
-                      <span class="s-list__secondary">
-                        {{ formatTransferProductSummary(transfer) }} ·
-                        {{ formatDateShort(transfer.createdAt) }}
-                      </span>
-                    </div>
-                    <div class="s-list__end">
-                      <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
-                        {{ getTransferStatusLabel(transfer.status) }}
-                      </SBadge>
-                      <SIconButton
-                        v-if="isTransferActionable(transfer)"
-                        label="Transfer actions"
-                        size="sm"
-                        :data-transfer-actions-anchor="transfer.id"
-                        aria-haspopup="menu"
-                        :aria-expanded="openTransferMenuId === transfer.id"
-                        @click="toggleTransferMenu(transfer.id)"
+                  <li v-for="transfer in transferHistory" :key="transfer.id">
+                    <div class="s-list__item">
+                      <button
+                        type="button"
+                        class="s-list__main s-list__hit"
+                        :aria-expanded="expandedTransferIds.has(transfer.id)"
+                        @click="toggleTransferItems(transfer.id)"
                       >
-                        <EllipsisVertical :size="16" :stroke-width="2" />
-                      </SIconButton>
+                        <span class="s-list__primary">{{ transferRoute(transfer) }}</span>
+                        <span
+                          v-if="transferItemNames(transfer)"
+                          class="s-list__secondary s-loan__items"
+                        >
+                          {{ transferItemNames(transfer) }}
+                        </span>
+                        <span class="s-list__secondary">
+                          {{ formatTransferProductSummary(transfer) }} ·
+                          {{ formatDateShort(transfer.createdAt) }}
+                        </span>
+                      </button>
+                      <div class="s-list__end">
+                        <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
+                          {{ getTransferStatusLabel(transfer.status) }}
+                        </SBadge>
+                        <SIconButton
+                          v-if="isTransferActionable(transfer)"
+                          label="Transfer actions"
+                          size="sm"
+                          :data-transfer-actions-anchor="transfer.id"
+                          aria-haspopup="menu"
+                          :aria-expanded="openTransferMenuId === transfer.id"
+                          @click="toggleTransferMenu(transfer.id)"
+                        >
+                          <EllipsisVertical :size="16" :stroke-width="2" />
+                        </SIconButton>
+                      </div>
+                    </div>
+                    <div v-if="expandedTransferIds.has(transfer.id)" class="s-loan__lines">
+                      <StockItemDetailsList
+                        :items="transferItemRows(transfer)"
+                        :label="`Items in transfer ${transferRoute(transfer)}`"
+                        show-empty
+                      />
                     </div>
                   </li>
                 </ul>
@@ -278,52 +304,89 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="transfer in transferHistory" :key="transfer.id">
-                      <td>
-                        <span class="s-table__primary">{{ transferRoute(transfer) }}</span>
-                        <span v-if="transfer.notes" class="s-table__secondary">{{
-                          transfer.notes
-                        }}</span>
-                      </td>
-                      <td>
-                        <span class="s-table__primary">{{
-                          formatTransferProductSummary(transfer)
-                        }}</span>
-                        <span v-if="transferItemsPreview(transfer)" class="s-table__secondary">
-                          {{ transferItemsPreview(transfer) }}
-                        </span>
-                      </td>
-                      <td>
-                        <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
-                          {{ getTransferStatusLabel(transfer.status) }}
-                        </SBadge>
-                        <span
-                          v-if="transfer.carrier || transfer.trackingNumber"
-                          class="s-table__secondary s-transfer__tracking"
-                        >
-                          <Truck :size="14" :stroke-width="2" aria-hidden="true" />
-                          {{
-                            [transfer.carrier, transfer.trackingNumber].filter(Boolean).join(' · ')
-                          }}
-                        </span>
-                      </td>
-                      <td class="s-hide-md s-table__nowrap">
-                        {{ formatDateShort(transfer.createdAt) }}
-                      </td>
-                      <td class="s-table__actions">
-                        <SIconButton
-                          v-if="isTransferActionable(transfer)"
-                          label="Transfer actions"
-                          size="sm"
-                          :data-transfer-actions-anchor="transfer.id"
-                          aria-haspopup="menu"
-                          :aria-expanded="openTransferMenuId === transfer.id"
-                          @click="toggleTransferMenu(transfer.id)"
-                        >
-                          <EllipsisVertical :size="16" :stroke-width="2" />
-                        </SIconButton>
-                      </td>
-                    </tr>
+                    <template v-for="transfer in transferHistory" :key="transfer.id">
+                      <tr
+                        :class="{ 's-table__row--expanded': expandedTransferIds.has(transfer.id) }"
+                      >
+                        <td>
+                          <span class="s-table__primary">{{ transferRoute(transfer) }}</span>
+                          <span v-if="transfer.notes" class="s-table__secondary">{{
+                            transfer.notes
+                          }}</span>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            class="s-loan__toggle"
+                            :aria-expanded="expandedTransferIds.has(transfer.id)"
+                            :aria-label="`${
+                              expandedTransferIds.has(transfer.id) ? 'Hide' : 'Show'
+                            } item details for ${transferRoute(transfer)}`"
+                            @click="toggleTransferItems(transfer.id)"
+                          >
+                            {{ formatTransferProductSummary(transfer) }}
+                            <ChevronDown
+                              :size="14"
+                              :stroke-width="2"
+                              class="s-loan__chevron"
+                              :class="{
+                                's-loan__chevron--open': expandedTransferIds.has(transfer.id),
+                              }"
+                              aria-hidden="true"
+                            />
+                          </button>
+                          <span
+                            v-if="transferItemNames(transfer)"
+                            class="s-table__secondary s-loan__items"
+                          >
+                            {{ transferItemNames(transfer) }}
+                          </span>
+                        </td>
+                        <td>
+                          <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
+                            {{ getTransferStatusLabel(transfer.status) }}
+                          </SBadge>
+                          <span
+                            v-if="transfer.carrier || transfer.trackingNumber"
+                            class="s-table__secondary s-transfer__tracking"
+                          >
+                            <Truck :size="14" :stroke-width="2" aria-hidden="true" />
+                            {{
+                              [transfer.carrier, transfer.trackingNumber]
+                                .filter(Boolean)
+                                .join(' · ')
+                            }}
+                          </span>
+                        </td>
+                        <td class="s-hide-md s-table__nowrap">
+                          {{ formatDateShort(transfer.createdAt) }}
+                        </td>
+                        <td class="s-table__actions">
+                          <SIconButton
+                            v-if="isTransferActionable(transfer)"
+                            label="Transfer actions"
+                            size="sm"
+                            :data-transfer-actions-anchor="transfer.id"
+                            aria-haspopup="menu"
+                            :aria-expanded="openTransferMenuId === transfer.id"
+                            @click="toggleTransferMenu(transfer.id)"
+                          >
+                            <EllipsisVertical :size="16" :stroke-width="2" />
+                          </SIconButton>
+                        </td>
+                      </tr>
+                      <tr v-if="expandedTransferIds.has(transfer.id)">
+                        <td colspan="5" class="s-table__nested">
+                          <div class="s-loan__lines">
+                            <StockItemDetailsList
+                              :items="transferItemRows(transfer)"
+                              :label="`Items in transfer ${transferRoute(transfer)}`"
+                              show-empty
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
                   </tbody>
                 </table>
               </div>
@@ -512,11 +575,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted } from 'vue'
+import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import {
   ArrowLeftRight,
   BarChart3,
   CircleCheck,
+  ChevronDown,
   CircleX,
   Download,
   EllipsisVertical,
@@ -540,6 +604,14 @@ import SSelect from '~/components/s/SSelect.vue'
 import STabs from '~/components/s/STabs.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import PlanGate from '~/components/subscription/PlanGate.vue'
+import StockItemDetailsList from '~/components/inventory/StockItemDetailsList.vue'
+import { useStockItemDetailsLookup } from '~/composables/useStockItemDetailsLookup'
+import {
+  groupedItemNames,
+  snapshotStockItemDetails,
+  type StockItemDetails,
+  type StockItemRow,
+} from '~/utils/stock-item-details'
 import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 import DashboardFolderDrillPicker from '~/components/dashboard/DashboardFolderDrillPicker.vue'
 import { useStoresStore } from '~/stores/stores'
@@ -572,12 +644,24 @@ const { can, canViewFinancials, isAdmin, hasAdminGrant } = usePermissions()
 const staffStore = useStaffStore()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
-// Security: Enterprise plan + multi-store view (branch admins also need the stock-transfers extra)
+// Security: Enterprise plan + multi-store view. Branch admins can always see transfers touching
+// their branch; requesting or changing one also needs the stock-transfers extra (rules enforce it).
 const canAccess = computed(() => {
   if (!canUseSubscriptionFeature('multi_store_sync')) return false
   if (userStore.isSuperAdmin) return true
-  return can('multiStoreSync', 'view') && hasAdminGrant('stockTransfers')
+  return can('multiStoreSync', 'view')
 })
+
+const canRequestTransfers = computed(
+  () =>
+    userStore.isSuperAdmin ||
+    (can('multiStoreSync', 'create') && (!isAdmin.value || hasAdminGrant('stockTransfers')))
+)
+const canChangeTransfers = computed(
+  () =>
+    userStore.isSuperAdmin ||
+    (can('multiStoreSync', 'edit') && (!isAdmin.value || hasAdminGrant('stockTransfers')))
+)
 
 /** Branch admins send only from their assigned branch; the owner can pick any source. */
 const homeStoreId = computed(() => staffStore.getCurrentStaffMember?.storeId || '')
@@ -594,7 +678,13 @@ function formatDateShort(date: unknown) {
 }
 
 // State
-const activeTab = ref<'transfer' | 'reports' | 'history'>('transfer')
+const activeTab = ref<'transfer' | 'reports' | 'history'>(
+  canRequestTransfers.value ? 'transfer' : 'history'
+)
+// Permissions can arrive after the page: view-only admins never sit on the request form.
+watch(canRequestTransfers, (allowed) => {
+  if (!allowed && activeTab.value === 'transfer') activeTab.value = 'history'
+})
 const stores = ref<any[]>([])
 const sourceFolders = ref<any[]>([])
 const destinationFolders = ref<any[]>([])
@@ -867,6 +957,7 @@ const requestTransfer = async () => {
           itemId,
           quantity,
           itemName: item?.name || item?.itemName || 'Unnamed Item',
+          ...(item && { details: snapshotStockItemDetails(item, { maxKeys: 10 }) }),
         })
       }
       const { addDemoTransferRequest } = await import('~/utils/demo-multi-store')
@@ -945,6 +1036,8 @@ const requestTransfer = async () => {
         quantity,
         itemName: item?.name || item?.itemName || 'Unnamed Item',
         serialNumber: item?.serialNo || item?.serialNumber || null,
+        // Serial, IMEI, colour, condition… so both branches see exactly which units are moving.
+        ...(item && { details: snapshotStockItemDetails(item, { maxKeys: 10 }) }),
       })
     }
     if (transferredItems.length === 0) {
@@ -963,6 +1056,9 @@ const requestTransfer = async () => {
       itemsCount: transferredItems.length,
       hasSerialNumbers: hasSerialNumbers,
       notes: transferForm.value.notes || '',
+      // Both branches see the route even when they can't read each other's branch record.
+      sourceStoreName: String(sourceStore.name || sourceStore.branchName || '').slice(0, 120),
+      destinationStoreName: String(destStore.name || destStore.branchName || '').slice(0, 120),
       status: 'pending_approval',
       createdBy: userId,
       createdAt: serverTimestamp(),
@@ -1779,9 +1875,13 @@ const exportConsolidatedReport = async () => {
   }
 }
 
-const getStoreName = (storeId: string) => {
+/**
+ * Branch name from the branches this viewer can read, else the name saved on the transfer (admins
+ * without the transfer extra only read their own branch). Never shows a raw ID.
+ */
+const getStoreName = (storeId: string, savedName?: string) => {
   const store = stores.value.find((s) => s.id === storeId)
-  return store?.name || store?.branchName || storeId
+  return store?.name || store?.branchName || savedName || 'Another branch'
 }
 
 const formatTransferProductSummary = (transfer: any) => {
@@ -1806,6 +1906,7 @@ const getTransferStatusLabel = (status: string) => {
 }
 
 const isTransferActionable = (transfer: any) => {
+  if (!canChangeTransfers.value) return false
   const s = (transfer.status || '').toLowerCase()
   return s === 'pending_approval' || s === 'in_transit'
 }
@@ -1827,7 +1928,7 @@ const transferForOpenMenu = computed(() => {
 })
 
 const webTabs = computed(() => [
-  { value: 'transfer', label: 'New transfer' },
+  ...(canRequestTransfers.value ? [{ value: 'transfer', label: 'New transfer' }] : []),
   { value: 'history', label: 'History', count: transferHistory.value.length },
   ...(canViewFinancials.value ? [{ value: 'reports', label: 'Branch reports' }] : []),
 ])
@@ -1890,14 +1991,69 @@ function transferItemMeta(item: any): string {
 }
 
 function transferRoute(transfer: any): string {
-  return `${getStoreName(transfer.sourceStoreId)} → ${getStoreName(transfer.destinationStoreId)}`
+  return `${getStoreName(transfer.sourceStoreId, transfer.sourceStoreName)} → ${getStoreName(
+    transfer.destinationStoreId,
+    transfer.destinationStoreName
+  )}`
 }
 
-function transferItemsPreview(transfer: any): string {
-  const items: any[] = transfer.items || []
-  if (!items.length) return ''
-  const names = items.slice(0, 2).map((item) => item.itemName || 'Item')
-  return items.length > 2 ? `${names.join(', ')} +${items.length - 2} more` : names.join(', ')
+const expandedTransferIds = ref<Set<string>>(new Set())
+
+function toggleTransferItems(transferId: string) {
+  const next = new Set(expandedTransferIds.value)
+  if (next.has(transferId)) next.delete(transferId)
+  else next.add(transferId)
+  expandedTransferIds.value = next
+}
+
+interface TransferLine {
+  itemId?: string
+  itemName?: string
+  quantity?: number
+  serialNumber?: string | null
+  details?: StockItemDetails
+}
+
+interface TransferForItems {
+  status?: string
+  sourceStoreId?: string
+  destinationStoreId?: string
+  items?: TransferLine[]
+}
+
+/** Every item in the transfer by name and quantity; nothing is cut off. */
+function transferItemNames(transfer: TransferForItems): string {
+  const items = transfer.items || []
+  return groupedItemNames(
+    items.map((item) => ({ name: item.itemName || 'Item', quantity: item.quantity }))
+  )
+}
+
+const { detailsFor } = useStockItemDetailsLookup()
+
+/**
+ * One row per item with its serial, model, colour and so on. Transfers recorded before details
+ * were saved look the unit up where it is now: the sending branch until it arrives, then the
+ * receiving one.
+ */
+function transferItemRows(transfer: TransferForItems): StockItemRow[] {
+  const items = transfer.items || []
+  const arrived = ['completed', 'completed_partial', 'partial'].includes(transfer.status ?? '')
+  const stores = arrived
+    ? [transfer.destinationStoreId, transfer.sourceStoreId]
+    : [transfer.sourceStoreId, transfer.destinationStoreId]
+  return items.map((item, index) => {
+    const saved =
+      item.details ?? (item.serialNumber ? { serialNo: String(item.serialNumber) } : null)
+    const { details, loading } = detailsFor({ itemId: item.itemId, details: item.details }, stores)
+    return {
+      key: `${item.itemId}-${index}`,
+      name: item.itemName || 'Item',
+      quantity: Number(item.quantity) || 1,
+      details: details ?? saved,
+      loading: loading && !saved,
+    }
+  })
 }
 
 function transferStatusTone(status: string): 'warning' | 'info' | 'success' | 'neutral' {

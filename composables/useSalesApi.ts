@@ -2,6 +2,7 @@ import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { useAuthStore } from '~/stores/auth'
+import type { ReceiptEditableField, ReceiptEditChange } from '~/utils/receipt-edit'
 import {
   canSellOffline,
   enqueueSale,
@@ -191,6 +192,16 @@ export function useSalesApi() {
       ),
     cancelSale: (receiptId: string, reason: string) =>
       post<{ status: 'cancelled' }>('/api/sales/cancel', { receiptId, reason }),
+    /** Corrects customer details or notes; the server records the edit on the receipt. */
+    editSale: (
+      receiptId: string,
+      changes: Partial<Record<ReceiptEditableField, string>>,
+      reason: string
+    ) =>
+      post<{ status: 'edited'; editCount: number; changes: ReceiptEditChange[] }>(
+        '/api/sales/edit',
+        { receiptId, changes, reason }
+      ),
     refundSale: (receiptId: string, reason: string) =>
       post<{ status: 'refunded' }>('/api/sales/refund', { receiptId, reason }),
     approvers: () =>
