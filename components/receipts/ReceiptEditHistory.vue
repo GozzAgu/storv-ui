@@ -5,7 +5,6 @@
       <span class="s-form-section__count">{{ receipt.editCount ?? edits.length }}</span>
     </h3>
     <p v-if="loading && !edits.length" class="s-field__hint">Loading edits…</p>
-    <p v-else-if="error" class="s-field__hint">{{ error }}</p>
     <ol v-else class="s-receipt-edits">
       <li v-for="entry in entries" :key="entry.id" class="s-receipt-edits__entry">
         <p class="s-receipt-edits__who">
@@ -26,6 +25,7 @@
         </ul>
       </li>
     </ol>
+    <p v-if="error" class="s-field__hint s-receipt-edits__note">{{ error }}</p>
   </section>
 </template>
 
@@ -73,6 +73,10 @@ function formatWhen(date: Date): string {
 </script>
 
 <style scoped>
+.s-receipt-edits__note {
+  margin: var(--s-space-1) 0 0;
+}
+
 .s-receipt-edits {
   display: flex;
   flex-direction: column;
@@ -84,8 +88,7 @@ function formatWhen(date: Date): string {
 
 .s-receipt-edits__entry {
   padding: var(--s-space-1-5) var(--s-space-2);
-  border-left: 2px solid var(--s-warning, var(--s-border));
-  border-radius: var(--s-radius);
+  border-radius: var(--s-radius-lg, var(--s-radius));
   background: var(--s-surface-2);
 }
 
