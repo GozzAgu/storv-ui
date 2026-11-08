@@ -129,6 +129,10 @@ export default defineNuxtConfig({
     firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '',
     resendApiKey: process.env.RESEND_API_KEY || '',
     resendFromEmail: process.env.RESEND_FROM_EMAIL || 'receipts@storvv.com',
+    /** Where "Book a walkthrough" requests are emailed. */
+    demoLeadsNotifyEmail: process.env.DEMO_LEADS_NOTIFY_EMAIL || 'hello@storvv.com',
+    /** Comma-separated sign-in emails of Storvv team members who can see demo insights. */
+    storvvTeamEmails: process.env.STORVV_TEAM_EMAILS || '',
     whatsappCloudAccessToken: process.env.WHATSAPP_CLOUD_ACCESS_TOKEN || '',
     whatsappCloudPhoneNumberId: process.env.WHATSAPP_CLOUD_PHONE_NUMBER_ID || '',
     whatsappCloudApiVersion: process.env.WHATSAPP_CLOUD_API_VERSION || 'v21.0',
@@ -136,6 +140,10 @@ export default defineNuxtConfig({
     geminiModel: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
     // Public keys (exposed to client-side)
     public: {
+      /** Optional calendar link (Cal.com, Calendly…) offered after a walkthrough request. */
+      bookingUrl: process.env.NUXT_PUBLIC_BOOKING_URL || '',
+      /** Optional sales WhatsApp number in international format, e.g. 2348030000000. */
+      salesWhatsapp: process.env.NUXT_PUBLIC_SALES_WHATSAPP || '',
       /** Initial hint only; client refreshes via /api/assistant/status */
       assistantConfigured: Boolean(process.env.GEMINI_API_KEY || process.env.NUXT_GEMINI_API_KEY),
       appVersion: '0.1',

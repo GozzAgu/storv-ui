@@ -1,77 +1,131 @@
-import { onMounted, watch } from 'vue'
-import { isDemoModeActive } from '~/utils/demo-mode'
+import { onBeforeUnmount, onMounted, watch } from 'vue'
+import { isDemoModeActive, clearDemoSession } from '~/utils/demo-mode'
+import { demoEngagement, flushDemoActivity, trackDemoAction } from '~/utils/demo-tracker'
+import { hasRequested, useWalkthrough } from '~/composables/useWalkthrough'
+import type { DemoAction } from '~/utils/demo-insights'
 
-const DEMO_NUDGE_SHOWN_KEY = 'storvv-demo-signup-nudge-shown'
-const DEMO_PAGES_KEY = 'storvv-demo-pages-visited'
-const MIN_PAGES_FOR_NUDGE = 3
+const PROMPTED_KEY = 'storvv-demo-prompted'
+const SIGNUP_TOAST_KEY = 'storvv-demo-signup-nudge-shown'
+
+/** Real work in the demo that only lives in this browser. */
+const SAVE_MOMENTS: readonly DemoAction[] = ['sale_created', 'item_added', 'store_created']
+
+/** Never ask before they have had a proper look. */
+const MIN_SECONDS_BEFORE_SAVE_PROMPT = 45
+const MIN_SECONDS_BEFORE_EXIT_PROMPT = 60
+const MIN_PAGES_BEFORE_EXIT_PROMPT = 3
+const MIN_PAGES_FOR_SIGNUP_TOAST = 4
+
+function sessionFlag(key: string): boolean {
+  try {
+    return sessionStorage.getItem(key) === '1'
+  } catch {
+    return true
+  }
+}
+
+function setSessionFlag(key: string) {
+  try {
+    sessionStorage.setItem(key, '1')
+  } catch {
+    /* ignore */
+  }
+}
+
+function anyDialogOpen(): boolean {
+  return Boolean(document.querySelector('.s-dialog-layer, [role="dialog"][aria-modal="true"]'))
+}
 
 /**
- * Shows a one-time signup prompt while exploring the interactive demo.
+ * The demo's gentle prompts, at most one walkthrough prompt per visit:
+ * - after real work (a sale, new stock): "Ready to use this for real?"
+ * - when leaving after a proper look: "Before you go"
+ * - otherwise, after a few pages: a quiet "Create a free account" toast
+ * Nothing is asked of anyone who has already requested a walkthrough.
  */
-export function useDemoConversionNudge() {
-  const route = useRoute()
+export function useDemoConversionNudge(opts: { watchRoute?: boolean } = {}) {
+  const { open } = useWalkthrough()
   const toast = useAppToast()
-  const { isDemoDashboard } = useDashboardPaths()
+  const route = useRoute()
+  let waitTimer: ReturnType<typeof setInterval> | null = null
 
-  function hasShownNudge() {
-    if (!import.meta.client) return true
-    return sessionStorage.getItem(DEMO_NUDGE_SHOWN_KEY) === '1'
+  function canPrompt() {
+    return import.meta.client && !hasRequested() && !sessionFlag(PROMPTED_KEY)
   }
 
-  function markNudgeShown() {
-    if (!import.meta.client) return
-    sessionStorage.setItem(DEMO_NUDGE_SHOWN_KEY, '1')
+  function promptWhenFree(variant: 'save' | 'exit') {
+    if (!canPrompt()) return
+    setSessionFlag(PROMPTED_KEY)
+    // Let the sale or item dialog finish first; give up after a minute.
+    let waited = 0
+    if (waitTimer) clearInterval(waitTimer)
+    waitTimer = setInterval(() => {
+      waited += 1
+      if (!anyDialogOpen()) {
+        clearInterval(waitTimer!)
+        waitTimer = null
+        open(variant === 'save' ? 'demo_save' : 'demo_exit', variant)
+      } else if (waited > 60) {
+        clearInterval(waitTimer!)
+        waitTimer = null
+      }
+    }, 1000)
   }
 
-  function trackPageVisit(path: string) {
-    if (!import.meta.client || !path.startsWith('/demo')) return
-    const raw = sessionStorage.getItem(DEMO_PAGES_KEY)
-    const pages = raw ? (JSON.parse(raw) as string[]) : []
-    if (!pages.includes(path)) {
-      pages.push(path)
-      sessionStorage.setItem(DEMO_PAGES_KEY, JSON.stringify(pages))
-    }
-    maybeShowNudge(pages.length)
+  function onAction(event: Event) {
+    const name = (event as CustomEvent<DemoAction>).detail
+    if (!SAVE_MOMENTS.includes(name)) return
+    if (demoEngagement().seconds < MIN_SECONDS_BEFORE_SAVE_PROMPT) return
+    promptWhenFree('save')
   }
 
-  function maybeShowNudge(pageCount?: number) {
-    if (!import.meta.client) return
-    if (!isDemoModeActive() && !isDemoDashboard.value) return
-    if (hasShownNudge()) return
-
-    const count =
-      pageCount ??
-      (() => {
-        const raw = sessionStorage.getItem(DEMO_PAGES_KEY)
-        return raw ? (JSON.parse(raw) as string[]).length : 0
-      })()
-
-    if (count < MIN_PAGES_FOR_NUDGE) return
-
-    markNudgeShown()
+  function maybeSignupToast() {
+    if (!import.meta.client || !isDemoModeActive()) return
+    if (hasRequested() || sessionFlag(SIGNUP_TOAST_KEY) || sessionFlag(PROMPTED_KEY)) return
+    if (demoEngagement().pages < MIN_PAGES_FOR_SIGNUP_TOAST) return
+    setSessionFlag(SIGNUP_TOAST_KEY)
     toast.info('Enjoying the demo? Create a free account to save your own store data.', {
       duration: 8000,
       action: {
         label: 'Sign up',
-        onClick: () => navigateTo('/signup'),
+        onClick: () => {
+          trackDemoAction('signup_click')
+          void navigateTo('/signup')
+        },
       },
     })
   }
 
-  onMounted(() => {
-    if (isDemoModeActive() || isDemoDashboard.value) {
-      trackPageVisit(route.path)
+  /** Exit demo: ask once if they had a proper look, otherwise just leave. */
+  function requestExit() {
+    const { seconds, pages } = demoEngagement()
+    const engaged =
+      seconds >= MIN_SECONDS_BEFORE_EXIT_PROMPT || pages >= MIN_PAGES_BEFORE_EXIT_PROMPT
+    if (engaged && canPrompt()) {
+      setSessionFlag(PROMPTED_KEY)
+      open('demo_exit', 'exit')
+      return
     }
-  })
+    trackDemoAction('exit')
+    flushDemoActivity()
+    clearDemoSession()
+    void navigateTo('/')
+  }
 
-  watch(
-    () => route.path,
-    (path) => {
-      if (isDemoModeActive() || isDemoDashboard.value) {
-        trackPageVisit(path)
-      }
-    }
-  )
+  if (opts.watchRoute !== false) {
+    onMounted(() => {
+      window.addEventListener('storvv:demo-action', onAction)
+      maybeSignupToast()
+    })
+    watch(
+      () => route.path,
+      () => setTimeout(maybeSignupToast, 0)
+    )
+    onBeforeUnmount(() => {
+      window.removeEventListener('storvv:demo-action', onAction)
+      if (waitTimer) clearInterval(waitTimer)
+    })
+  }
 
-  return { maybeShowNudge }
+  return { requestExit, maybeShowNudge: maybeSignupToast }
 }

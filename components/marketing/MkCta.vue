@@ -16,6 +16,13 @@
               or {{ secondary.label.charAt(0).toLowerCase() + secondary.label.slice(1) }}
             </NuxtLink>
           </div>
+          <p v-if="walkthrough" class="mk-walk">
+            Prefer a guided tour?
+            <button type="button" class="mk-walk__btn" @click="openWalkthrough('landing_cta')">
+              <CalendarDays :size="16" aria-hidden="true" />
+              Book a walkthrough
+            </button>
+          </p>
           <p class="mk-cta__note">Free forever for one store · No card needed · Cancel any time</p>
         </div>
         <div class="mk-cta__shot" aria-hidden="true">
@@ -35,6 +42,8 @@
 
 <script setup lang="ts">
 import { useId } from 'vue'
+import { CalendarDays } from '@lucide/vue'
+import { useWalkthrough } from '~/composables/useWalkthrough'
 
 defineProps<{
   title: string
@@ -43,7 +52,11 @@ defineProps<{
   lede?: string
   primary: { label: string; to: string }
   secondary?: { label: string; to: string }
+  /** Adds "Prefer a guided tour? Book a walkthrough" under the actions. */
+  walkthrough?: boolean
 }>()
+
+const { open: openWalkthrough } = useWalkthrough()
 
 const titleId = useId()
 </script>

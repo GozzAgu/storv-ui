@@ -251,6 +251,7 @@
       accent="on us."
       :primary="{ label: 'Create your free store', to: signupUrl }"
       :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
+      walkthrough
     />
   </div>
 </template>

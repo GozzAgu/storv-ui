@@ -7,6 +7,11 @@ vi.mock('~/composables/useMarketingSite', () => ({
   useMarketingSignupUrl: () => computed(() => 'https://app.storvv.com/signup'),
 }))
 
+const openWalkthrough = vi.hoisted(() => vi.fn())
+vi.mock('~/composables/useWalkthrough', () => ({
+  useWalkthrough: () => ({ open: openWalkthrough }),
+}))
+
 function mountHero() {
   return mount(MkHero, {
     global: {
@@ -20,6 +25,14 @@ function mountHero() {
 }
 
 describe('MkHero', () => {
+  it('offers a walkthrough as a quiet secondary option', async () => {
+    const wrapper = mountHero()
+    const button = wrapper.find('.mkh__walk button')
+    expect(button.text()).toBe('Book a walkthrough')
+    await button.trigger('click')
+    expect(openWalkthrough).toHaveBeenCalledWith('landing_hero')
+  })
+
   it('has one filled call to action, marked for the header to step down', () => {
     const wrapper = mountHero()
     const primary = wrapper.findAll('[data-mk-primary]')

@@ -72,6 +72,7 @@
       lede="Set up Micro in about ten minutes, in the browser on the phone or laptop you already have."
       :primary="{ label: 'Create your free store', to: signupUrl }"
       :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
+      walkthrough
     />
 
     <!-- FAQ -->

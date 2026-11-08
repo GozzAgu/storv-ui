@@ -24,6 +24,13 @@
           </NuxtLink>
           <NuxtLink to="/demo/dashboard" class="mkh__demo">or try the live demo</NuxtLink>
         </div>
+        <p class="mk-walk mkh__walk mkh-in" style="--i: 3">
+          Prefer a guided tour?
+          <button type="button" class="mk-walk__btn" @click="walkthrough.open('landing_hero')">
+            <CalendarDays :size="16" aria-hidden="true" />
+            Book a walkthrough
+          </button>
+        </p>
       </div>
 
       <div class="mkh__stage mkh-in" style="--i: 4">
@@ -119,6 +126,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import {
+  CalendarDays,
   Car,
   CheckCheck,
   ChevronRight,
@@ -135,8 +143,10 @@ import {
 import MkFrame from '~/components/marketing/MkFrame.vue'
 import { useMarketingMotion } from '~/composables/useMarketingMotion'
 import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
+import { useWalkthrough } from '~/composables/useWalkthrough'
 
 const signupUrl = useMarketingSignupUrl()
+const walkthrough = useWalkthrough()
 
 const trades = [
   { icon: Smartphone, label: 'Gadget stores', tint: 'sky' },

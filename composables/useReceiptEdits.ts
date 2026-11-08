@@ -1,4 +1,4 @@
-import { ref, watch, type Ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
 import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
@@ -50,13 +50,25 @@ export function useReceiptEdits(
       })
     } catch (err) {
       console.warn('[receipts] edit history failed', err)
-      error.value = 'Couldn’t load the edit history.'
+      const code = (err as { code?: string })?.code
+      const offline =
+        code === 'unavailable' || (typeof navigator !== 'undefined' && navigator.onLine === false)
+      error.value = offline
+        ? 'You’re offline. The full history will load when you’re back online.'
+        : 'Only the latest edit is shown. The full history couldn’t be loaded.'
     } finally {
       loading.value = false
     }
   }
 
   watch([receiptId, editCount], () => void load(), { immediate: true })
+
+  // Try again once the connection comes back, if the last attempt failed.
+  const retry = () => {
+    if (error.value) void load()
+  }
+  onMounted(() => window.addEventListener('online', retry))
+  onBeforeUnmount(() => window.removeEventListener('online', retry))
 
   return { edits, loading, error, reload: load }
 }

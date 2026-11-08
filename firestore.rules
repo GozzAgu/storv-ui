@@ -1118,6 +1118,16 @@ service cloud.firestore {
     match /tradeLoans/{loanId} {
       allow read, write: if false;
     }
+
+    // Demo walkthrough requests (contact details) and anonymous demo activity. Written and read
+    // only by /api/demo/* with the Admin SDK; the team sees them through /api/demo/insights.
+    match /demoLeads/{leadId} {
+      allow read, write: if false;
+    }
+
+    match /demoSessions/{sessionId} {
+      allow read, write: if false;
+    }
     
     // Deny all other access by default
     match /{document=**} {

@@ -1516,4 +1516,26 @@ describe('firestore.rules', () => {
       await assertFails(getDoc(doc(db, 'users/u1/stores/s2/inventoryFolders/f1')))
     })
   })
+  describe('demo walkthrough requests and activity', () => {
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'demoLeads/l1'), { name: 'Ada', phone: '+234' })
+        await setDoc(doc(context.firestore(), 'demoSessions/s1'), { visitorId: 'v1' })
+      })
+    })
+
+    it('no visitor or signed-in user can read, add or change them', async () => {
+      for (const db of [
+        testEnv.unauthenticatedContext().firestore(),
+        testEnv.authenticatedContext('u1').firestore(),
+      ]) {
+        await assertFails(getDoc(doc(db, 'demoLeads/l1')))
+        await assertFails(getDoc(doc(db, 'demoSessions/s1')))
+        await assertFails(setDoc(doc(db, 'demoLeads/l2'), { name: 'Spam' }))
+        await assertFails(setDoc(doc(db, 'demoSessions/s2'), { visitorId: 'v2' }))
+        await assertFails(updateDoc(doc(db, 'demoLeads/l1'), { status: 'won' }))
+        await assertFails(getDocs(collection(db, 'demoLeads')))
+      }
+    })
+  })
 })

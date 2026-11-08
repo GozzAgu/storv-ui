@@ -122,6 +122,16 @@
             <ArrowRight class="mk-menu__demo-arrow" :size="18" aria-hidden="true" />
           </NuxtLink>
 
+          <button
+            type="button"
+            class="mk-menu__walkthrough mk-menu__stagger"
+            :style="{ '--i': pageLinks.length + 1 }"
+            @click="bookFromMenu"
+          >
+            <CalendarDays :size="16" aria-hidden="true" />
+            Prefer a guided tour? <span>Book a walkthrough</span>
+          </button>
+
           <div class="mk-menu__foot mk-menu__stagger" :style="{ '--i': pageLinks.length + 2 }">
             <div class="mk-menu__appearance">
               <span :id="appearanceLabelId" class="mk-menu__appearance-label">Appearance</span>
@@ -160,6 +170,10 @@
 
     <MkFooter />
 
+    <ClientOnly>
+      <BookWalkthroughDialog />
+    </ClientOnly>
+
     <div
       v-if="!cookiesAccepted && !menuOpen"
       class="mk-cookie"
@@ -194,12 +208,23 @@
 import '~/assets/css/marketing.css'
 import '~/assets/css/marketing-home.css'
 import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'vue'
-import { ArrowRight, ArrowUp, ChevronRight, Monitor, MonitorPlay, Moon, Sun } from '@lucide/vue'
+import {
+  ArrowRight,
+  ArrowUp,
+  CalendarDays,
+  ChevronRight,
+  Monitor,
+  MonitorPlay,
+  Moon,
+  Sun,
+} from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import MkFeatureMenu from '~/components/marketing/MkFeatureMenu.vue'
 import MkFooter from '~/components/marketing/MkFooter.vue'
 import MkProductMenu from '~/components/marketing/MkProductMenu.vue'
+import BookWalkthroughDialog from '~/components/demo/BookWalkthroughDialog.vue'
+import { useWalkthrough } from '~/composables/useWalkthrough'
 import { useTheme } from '~/composables/useTheme'
 import { useSectionScroll } from '~/composables/useSectionScroll'
 import {
@@ -213,6 +238,12 @@ import { readCookieChoice, saveCookieChoice, type CookieChoice } from '~/utils/c
 
 const route = useRoute()
 const signupUrl = useMarketingSignupUrl()
+const walkthrough = useWalkthrough()
+
+function bookFromMenu() {
+  menuOpen.value = false
+  walkthrough.open('landing_menu')
+}
 const signinUrl = useMarketingSigninUrl()
 const logoSrc = useMarketingLogo()
 const { scrollToSection, scrollToTop, goToSection } = useSectionScroll()
