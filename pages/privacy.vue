@@ -152,6 +152,14 @@
             indicate when a cookie is being sent. However, if you do not accept cookies, you may not
             be able to use some portions of our service.
           </p>
+          <p>
+            In the live demo, we record which demo pages you open, how long you spend on them and
+            what you try (for example, recording a sample sale), using a random id that does not
+            identify you. Unless you accept all cookies, that id lasts only for your current visit.
+            We do not record this if you choose "Essential only" or your browser sends Do Not Track
+            or Global Privacy Control. If you request a walkthrough, we keep the contact details you
+            give us and link them to that demo visit so we can prepare for your call.
+          </p>
         </section>
 
         <section>

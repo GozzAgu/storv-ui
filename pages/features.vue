@@ -136,6 +136,7 @@
       accent="from one place?"
       :primary="{ label: 'Create your free store', to: signupUrl }"
       :secondary="{ label: 'See pricing', to: '/pricing' }"
+      walkthrough
     />
   </div>
 </template>

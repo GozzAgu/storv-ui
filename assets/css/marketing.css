@@ -755,6 +755,74 @@ html.dark .mk-section--alt {
   color: var(--s-text-3);
 }
 
+.mk-menu__walkthrough {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-space-1);
+  min-height: var(--s-touch);
+  margin-top: var(--s-space-1);
+  padding: 0 var(--s-space-2);
+  border: 0;
+  border-radius: var(--s-radius);
+  background: none;
+  color: var(--s-text-2);
+  font: 500 0.9375rem / 1.25rem var(--s-font-sans);
+  cursor: pointer;
+}
+
+.mk-menu__walkthrough span {
+  color: var(--s-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--s-text) 35%, transparent);
+  text-underline-offset: 4px;
+}
+
+.mk-menu__walkthrough:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
+/* "Prefer a guided tour? Book a walkthrough": quiet line under a page's main actions */
+.mk-walk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  margin: var(--s-space-1-5) 0 0;
+  color: var(--s-text-2);
+  font: 400 0.9375rem / 1.4 var(--s-font-sans);
+}
+
+.mk-walk__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  min-height: var(--s-touch);
+  padding: 0 0.25em;
+  border: 0;
+  border-radius: var(--s-radius);
+  background: none;
+  color: var(--s-text);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--s-text) 35%, transparent);
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.mk-walk__btn:hover {
+  text-decoration-color: currentColor;
+}
+
+.mk-walk__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
 .mk-menu__foot {
   display: grid;
   gap: var(--s-space-2);

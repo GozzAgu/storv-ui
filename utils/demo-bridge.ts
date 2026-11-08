@@ -16,6 +16,7 @@ import { DEMO_SAVED_SEARCHES_KEY } from '~/utils/demo-mode'
 import { sanitizeDemoDisplayDashes } from '~/utils/demo-display-text'
 import { normalizeEntityName } from '~/utils/capitalize-text'
 import { demoId } from '~/utils/demo-seed'
+import { trackDemoAction } from '~/utils/demo-tracker'
 import { DEMO_USER_UID, isDemoModeActive, markDemoSessionActive } from '~/utils/demo-mode'
 import {
   getDemoExtrasActivityLogs,
@@ -467,6 +468,7 @@ export async function applyDemoInventoryItemCreate(
     swapIn: itemData.swapIn === true,
   })
   await syncDemoToPinia()
+  trackDemoAction('item_added')
   return item.id
 }
 
@@ -495,6 +497,7 @@ export async function applyDemoCreateReceipt(
 ) {
   const id = useDemoAppStore().importDashboardReceipt(receiptData)
   await syncDemoToPinia()
+  trackDemoAction('sale_created')
   return id
 }
 
@@ -548,6 +551,7 @@ export async function applyDemoReceiptUpdate(receiptId: string, updates: Partial
     demo.refundReceipt(receiptId)
   }
   await syncDemoToPinia()
+  if (updates.edited) trackDemoAction('receipt_edited')
 }
 
 export async function applyDemoSetCurrentStore(storeId: string) {
@@ -794,6 +798,7 @@ export async function applyDemoCreateStore(payload: {
     demo.setCurrentStore(id)
   }
   await syncDemoToPinia()
+  trackDemoAction('store_created')
   return id
 }
 

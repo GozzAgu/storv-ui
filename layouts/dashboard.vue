@@ -94,6 +94,7 @@
 
     <ClientOnly>
       <GrowthPromptsHost />
+      <BookWalkthroughDialog v-if="isDemoDashboard" />
     </ClientOnly>
 
     <!-- Sign out confirmation -->
@@ -150,6 +151,7 @@ import {
 } from '~/utils/shell-nav'
 import { usePageRefreshAction } from '~/composables/usePageRefreshAction'
 import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'
+import BookWalkthroughDialog from '~/components/demo/BookWalkthroughDialog.vue'
 import SubscriptionBillingBanner from '~/components/dashboard/SubscriptionBillingBanner.vue'
 import PlanViewOnlyBanner from '~/components/dashboard/PlanViewOnlyBanner.vue'
 import OfflineStatusBanner from '~/components/growth/OfflineStatusBanner.vue'
