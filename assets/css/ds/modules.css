@@ -513,6 +513,84 @@
   margin-top: var(--s-space-half);
 }
 
+/* Transfer history */
+.s-transfer-ref {
+  color: var(--s-text-muted);
+  font: 400 0.6875rem/1rem var(--s-font-mono);
+  letter-spacing: 0.02em;
+}
+
+.s-table__primary.s-transfer-ref {
+  color: var(--s-text);
+}
+
+.s-transfer-route {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--s-space-1);
+  min-width: 0;
+}
+
+.s-transfer-route__store {
+  overflow-wrap: anywhere;
+}
+
+.s-transfer-route__arrow {
+  flex: none;
+  color: var(--s-text-muted);
+}
+
+.s-transfer-table td {
+  height: 52px;
+  padding-top: var(--s-space-1);
+  padding-bottom: var(--s-space-1);
+}
+
+.s-transfer-table__row {
+  cursor: pointer;
+  transition: background var(--s-duration-fast) var(--s-ease);
+}
+
+.s-transfer-table__row:hover {
+  background: var(--s-surface-hover);
+}
+
+.s-transfer-table .s-transfer-table__toggle {
+  width: 40px;
+  padding-right: 0;
+}
+
+.s-transfer-table__chevron {
+  color: var(--s-text-muted);
+  transition: transform var(--s-duration-fast) var(--s-ease);
+}
+
+.s-transfer-table__chevron--open {
+  transform: rotate(90deg);
+}
+
+.s-transfer-table__items {
+  display: block;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.s-transfer-table tr.s-table__row--expanded td {
+  border-bottom-color: transparent;
+}
+
+.s-transfer-table td.s-transfer-table__nested {
+  height: auto;
+  padding: 0 var(--s-space-3) var(--s-space-2) 52px;
+}
+
+.s-transfer-expand {
+  padding: 0 var(--s-space-1-5) var(--s-space-1-5);
+}
+
 /* ── Reports ─────────────────────────────────────────────── */
 /* Reports is black and grey: accent and info colours resolve to ink and neutral greys here only.
    Status colours (success, warning, error) are kept for real signals such as low stock. */
