@@ -69,6 +69,43 @@ export const useUserStore = defineStore('user', {
       }
     },
 
+    /**
+     * Staff inherit the owner's plan and settings from a server call. When this device already has
+     * them saved from a previous visit, show the dashboard straight away and refresh them behind it;
+     * only a first sign-in waits for the server.
+     */
+    async applyStaffProfile(staff: Staff, userId: string) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) return
+      const { buildStaffUserData, buildStaffUserDataWithOwnerContext } = await import(
+        '~/utils/staff-user-bootstrap'
+      )
+      const prior = this.userData?.uid === userId ? this.userData : null
+      const hasSavedOwnerContext =
+        prior?.role === 'staff' && Boolean(prior.preferences || prior.storeDetails)
+
+      const refresh = buildStaffUserDataWithOwnerContext(db, staff, userId, prior).then(
+        (result) => {
+          if (useAuthStore().currentUser?.uid !== userId) return
+          // In the background, a failed refresh keeps the saved profile rather than a bare one.
+          if (hasSavedOwnerContext && !result.inheritedOwnerContext) return
+          this.userData = result.userData
+          // Only cache after owner plan inheritance so we never poison Micro over Enterprise.
+          if (result.inheritedOwnerContext) writeUserProfileCache(userId, this.userData)
+        }
+      )
+
+      if (!hasSavedOwnerContext) {
+        await refresh
+        return
+      }
+      this.userData = { ...prior, ...buildStaffUserData(staff, userId, prior) }
+      this.loading = false
+      void refresh.catch(() => {
+        /* keep the saved profile; the next load tries again */
+      })
+    },
+
     async fetchUserDataOnce(userId: string) {
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
@@ -112,22 +149,11 @@ export const useUserStore = defineStore('user', {
         if (!isStaffCreationInProgress) {
           const cachedStaff = (await import('./staff')).useStaffStore().getCurrentStaffMember
           if (cachedStaff?.authUid === userId) {
-            const { buildStaffUserDataWithOwnerContext } = await import(
-              '~/utils/staff-user-bootstrap'
-            )
-            const prior = this.userData?.uid === userId ? this.userData : null
-            const result = await buildStaffUserDataWithOwnerContext(db, cachedStaff, userId, prior)
-            this.userData = result.userData
-            // Only cache after owner plan inheritance so we never poison Micro over Enterprise.
-            if (result.inheritedOwnerContext) {
-              writeUserProfileCache(userId, this.userData)
-            }
+            await this.applyStaffProfile(cachedStaff, userId)
             return
           }
 
-          const { lookupStaffMemberByAuthUid, buildStaffUserDataWithOwnerContext } = await import(
-            '~/utils/staff-user-bootstrap'
-          )
+          const { lookupStaffMemberByAuthUid } = await import('~/utils/staff-user-bootstrap')
           const lookup = await lookupStaffMemberByAuthUid(db, userId)
 
           if (lookup.kind === 'active') {
@@ -139,12 +165,7 @@ export const useUserStore = defineStore('user', {
             } else {
               staffStore.staff[existingIndex] = lookup.staff
             }
-            const prior = this.userData?.uid === userId ? this.userData : null
-            const result = await buildStaffUserDataWithOwnerContext(db, lookup.staff, userId, prior)
-            this.userData = result.userData
-            if (result.inheritedOwnerContext) {
-              writeUserProfileCache(userId, this.userData)
-            }
+            await this.applyStaffProfile(lookup.staff, userId)
             return
           }
 

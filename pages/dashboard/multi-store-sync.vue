@@ -242,23 +242,35 @@
               <SCard flush class="s-only-sm">
                 <ul class="s-list">
                   <li v-for="transfer in transferHistory" :key="transfer.id">
-                    <div class="s-list__item">
+                    <div class="s-list__item s-transfer-row">
                       <button
                         type="button"
                         class="s-list__main s-list__hit"
                         :aria-expanded="expandedTransferIds.has(transfer.id)"
                         @click="toggleTransferItems(transfer.id)"
                       >
-                        <span class="s-list__primary">{{ transferRoute(transfer) }}</span>
-                        <span
-                          v-if="transferItemNames(transfer)"
-                          class="s-list__secondary s-loan__items"
-                        >
-                          {{ transferItemNames(transfer) }}
-                        </span>
                         <span class="s-list__secondary">
-                          {{ formatTransferProductSummary(transfer) }} ·
-                          {{ formatDateShort(transfer.createdAt) }}
+                          <span class="s-transfer-ref">{{ transferRef(transfer) }}</span> ·
+                          {{ formatTransferDate(transfer.createdAt) }}
+                        </span>
+                        <span class="s-transfer-route">
+                          <span class="s-transfer-route__store">{{
+                            transferSourceName(transfer)
+                          }}</span>
+                          <ArrowRight
+                            :size="12"
+                            :stroke-width="2"
+                            class="s-transfer-route__arrow"
+                            aria-label="to"
+                          />
+                          <span class="s-transfer-route__store">{{
+                            transferDestinationName(transfer)
+                          }}</span>
+                        </span>
+                        <span class="s-list__secondary s-loan__items">
+                          {{
+                            transferItemNames(transfer) || formatTransferProductSummary(transfer)
+                          }}
                         </span>
                       </button>
                       <div class="s-list__end">
@@ -278,11 +290,11 @@
                         </SIconButton>
                       </div>
                     </div>
-                    <div v-if="expandedTransferIds.has(transfer.id)" class="s-loan__lines">
-                      <StockItemDetailsList
-                        :items="transferItemRows(transfer)"
-                        :label="`Items in transfer ${transferRoute(transfer)}`"
-                        show-empty
+                    <div v-if="expandedTransferIds.has(transfer.id)" class="s-transfer-expand">
+                      <TransferDetailsPanel
+                        :rows="transferItemRows(transfer)"
+                        :facts="transferFacts(transfer)"
+                        :label="`Items in transfer ${transferRef(transfer)}`"
                       />
                     </div>
                   </li>
@@ -291,13 +303,16 @@
 
               <!-- Tablet and desktop -->
               <div class="s-table-wrap s-hide-sm">
-                <table class="s-table">
+                <table class="s-table s-transfer-table">
                   <thead>
                     <tr>
+                      <th scope="col" class="s-transfer-table__toggle">
+                        <span class="ds-sr-only">Details</span>
+                      </th>
+                      <th scope="col">Transfer</th>
                       <th scope="col">Route</th>
                       <th scope="col">Items</th>
                       <th scope="col">Status</th>
-                      <th scope="col" class="s-hide-md">Requested</th>
                       <th scope="col" class="s-table__actions">
                         <span class="ds-sr-only">Actions</span>
                       </th>
@@ -306,41 +321,63 @@
                   <tbody>
                     <template v-for="transfer in transferHistory" :key="transfer.id">
                       <tr
+                        class="s-transfer-table__row"
                         :class="{ 's-table__row--expanded': expandedTransferIds.has(transfer.id) }"
+                        @click="onTransferRowClick($event, transfer.id)"
                       >
+                        <td class="s-transfer-table__toggle">
+                          <SIconButton
+                            :label="`${
+                              expandedTransferIds.has(transfer.id) ? 'Hide' : 'Show'
+                            } details for transfer ${transferRef(transfer)}`"
+                            size="sm"
+                            :aria-expanded="expandedTransferIds.has(transfer.id)"
+                            @click="toggleTransferItems(transfer.id)"
+                          >
+                            <ChevronRight
+                              :size="16"
+                              :stroke-width="2"
+                              class="s-transfer-table__chevron"
+                              :class="{
+                                's-transfer-table__chevron--open': expandedTransferIds.has(
+                                  transfer.id
+                                ),
+                              }"
+                            />
+                          </SIconButton>
+                        </td>
+                        <td class="s-table__nowrap">
+                          <span class="s-table__primary s-transfer-ref">{{
+                            transferRef(transfer)
+                          }}</span>
+                          <span class="s-table__secondary">{{
+                            formatTransferDate(transfer.createdAt)
+                          }}</span>
+                        </td>
                         <td>
-                          <span class="s-table__primary">{{ transferRoute(transfer) }}</span>
+                          <span class="s-transfer-route">
+                            <span class="s-transfer-route__store">{{
+                              transferSourceName(transfer)
+                            }}</span>
+                            <ArrowRight
+                              :size="14"
+                              :stroke-width="2"
+                              class="s-transfer-route__arrow"
+                              aria-label="to"
+                            />
+                            <span class="s-transfer-route__store">{{
+                              transferDestinationName(transfer)
+                            }}</span>
+                          </span>
                           <span v-if="transfer.notes" class="s-table__secondary">{{
                             transfer.notes
                           }}</span>
                         </td>
                         <td>
-                          <button
-                            type="button"
-                            class="s-loan__toggle"
-                            :aria-expanded="expandedTransferIds.has(transfer.id)"
-                            :aria-label="`${
-                              expandedTransferIds.has(transfer.id) ? 'Hide' : 'Show'
-                            } item details for ${transferRoute(transfer)}`"
-                            @click="toggleTransferItems(transfer.id)"
-                          >
-                            {{ formatTransferProductSummary(transfer) }}
-                            <ChevronDown
-                              :size="14"
-                              :stroke-width="2"
-                              class="s-loan__chevron"
-                              :class="{
-                                's-loan__chevron--open': expandedTransferIds.has(transfer.id),
-                              }"
-                              aria-hidden="true"
-                            />
-                          </button>
-                          <span
-                            v-if="transferItemNames(transfer)"
-                            class="s-table__secondary s-loan__items"
-                          >
-                            {{ transferItemNames(transfer) }}
-                          </span>
+                          <span class="s-transfer-table__items">{{
+                            transferItemNames(transfer) || '—'
+                          }}</span>
+                          <span class="s-table__secondary">{{ transferUnitLabel(transfer) }}</span>
                         </td>
                         <td>
                           <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
@@ -358,9 +395,6 @@
                             }}
                           </span>
                         </td>
-                        <td class="s-hide-md s-table__nowrap">
-                          {{ formatDateShort(transfer.createdAt) }}
-                        </td>
                         <td class="s-table__actions">
                           <SIconButton
                             v-if="isTransferActionable(transfer)"
@@ -376,14 +410,12 @@
                         </td>
                       </tr>
                       <tr v-if="expandedTransferIds.has(transfer.id)">
-                        <td colspan="5" class="s-table__nested">
-                          <div class="s-loan__lines">
-                            <StockItemDetailsList
-                              :items="transferItemRows(transfer)"
-                              :label="`Items in transfer ${transferRoute(transfer)}`"
-                              show-empty
-                            />
-                          </div>
+                        <td colspan="6" class="s-table__nested s-transfer-table__nested">
+                          <TransferDetailsPanel
+                            :rows="transferItemRows(transfer)"
+                            :facts="transferFacts(transfer)"
+                            :label="`Items in transfer ${transferRef(transfer)}`"
+                          />
                         </td>
                       </tr>
                     </template>
@@ -578,9 +610,10 @@
 import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import {
   ArrowLeftRight,
+  ArrowRight,
   BarChart3,
   CircleCheck,
-  ChevronDown,
+  ChevronRight,
   CircleX,
   Download,
   EllipsisVertical,
@@ -604,7 +637,7 @@ import SSelect from '~/components/s/SSelect.vue'
 import STabs from '~/components/s/STabs.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import PlanGate from '~/components/subscription/PlanGate.vue'
-import StockItemDetailsList from '~/components/inventory/StockItemDetailsList.vue'
+import TransferDetailsPanel from '~/components/transfers/TransferDetailsPanel.vue'
 import { useStockItemDetailsLookup } from '~/composables/useStockItemDetailsLookup'
 import {
   groupedItemNames,
@@ -666,16 +699,6 @@ const canChangeTransfers = computed(
 /** Branch admins send only from their assigned branch; the owner can pick any source. */
 const homeStoreId = computed(() => staffStore.getCurrentStaffMember?.storeId || '')
 const sourceStoreLocked = computed(() => isAdmin.value && !userStore.isSuperAdmin)
-
-function formatDateShort(date: unknown) {
-  if (!date) return ''
-  const d =
-    date && typeof date === 'object' && 'toDate' in date
-      ? (date as { toDate: () => Date }).toDate()
-      : new Date(date as string | number)
-  if (Number.isNaN(d.getTime())) return ''
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
 
 // State
 const activeTab = ref<'transfer' | 'reports' | 'history'>(
@@ -1990,11 +2013,95 @@ function transferItemMeta(item: any): string {
     .join(' · ')
 }
 
-function transferRoute(transfer: any): string {
-  return `${getStoreName(transfer.sourceStoreId, transfer.sourceStoreName)} → ${getStoreName(
-    transfer.destinationStoreId,
-    transfer.destinationStoreName
-  )}`
+/** Fields the history list reads from a storeTransfers doc. */
+interface TransferRecord {
+  id?: string
+  sourceStoreId?: string
+  sourceStoreName?: string
+  destinationStoreId?: string
+  destinationStoreName?: string
+  items?: Array<{ quantity?: number | string }>
+  itemsCount?: number
+  createdAt?: unknown
+  approvedAt?: unknown
+  completedAt?: unknown
+  carrier?: string
+  trackingNumber?: string
+  notes?: string
+}
+
+function transferSourceName(transfer: TransferRecord): string {
+  return getStoreName(transfer.sourceStoreId || '', transfer.sourceStoreName)
+}
+
+function transferDestinationName(transfer: TransferRecord): string {
+  return getStoreName(transfer.destinationStoreId || '', transfer.destinationStoreName)
+}
+
+function transferRoute(transfer: TransferRecord): string {
+  return `${transferSourceName(transfer)} → ${transferDestinationName(transfer)}`
+}
+
+/** Short, stable reference people can quote to each other, e.g. "TR-7F3K2A". */
+function transferRef(transfer: { id?: string }): string {
+  const id = String(transfer.id || '').replace(/[^a-z0-9]/gi, '')
+  return `TR-${id.slice(-6).toUpperCase()}`
+}
+
+function toDate(value: unknown): Date | null {
+  if (!value) return null
+  const d =
+    typeof value === 'object' && value !== null && 'toDate' in value
+      ? (value as { toDate: () => Date }).toDate()
+      : new Date(value as string | number)
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
+/** "15 Oct 2026, 14:32". */
+function formatTransferDate(value: unknown): string {
+  const d = toDate(value)
+  if (!d) return '—'
+  return d.toLocaleString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function transferUnitCount(transfer: TransferRecord): number {
+  const items = transfer.items || []
+  if (items.length === 0) return Number(transfer.itemsCount) || 0
+  return items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0)
+}
+
+function transferUnitLabel(transfer: TransferRecord): string {
+  const units = transferUnitCount(transfer)
+  return `${units} unit${units === 1 ? '' : 's'}`
+}
+
+/** Dates, tracking and notes for the expanded panel; anything not recorded is left out. */
+function transferFacts(transfer: TransferRecord): Array<{ label: string; value: string }> {
+  const facts: Array<{ label: string; value: string }> = [
+    { label: 'Requested', value: formatTransferDate(transfer.createdAt) },
+  ]
+  if (transfer.approvedAt)
+    facts.push({ label: 'Approved', value: formatTransferDate(transfer.approvedAt) })
+  if (transfer.completedAt)
+    facts.push({ label: 'Completed', value: formatTransferDate(transfer.completedAt) })
+  if (transfer.carrier) facts.push({ label: 'Carrier', value: String(transfer.carrier) })
+  if (transfer.trackingNumber)
+    facts.push({ label: 'Tracking number', value: String(transfer.trackingNumber) })
+  if (transfer.notes) facts.push({ label: 'Notes', value: String(transfer.notes) })
+  return facts
+}
+
+/** Clicking anywhere on a row opens it, except on its own buttons. */
+function onTransferRowClick(event: MouseEvent, transferId: string) {
+  if ((event.target as HTMLElement | null)?.closest('button, a, input')) return
+  if (window.getSelection()?.toString()) return
+  toggleTransferItems(transferId)
 }
 
 const expandedTransferIds = ref<Set<string>>(new Set())
@@ -2105,17 +2212,20 @@ onMounted(async () => {
     }
   }
   if (!canAccess.value) return
+  // History only needs the signed-in user's branch, so it loads alongside the branch setup.
+  const history = loadTransferHistory()
   await prepareBranchAdminWorkspace()
   await loadStores()
   await ensureBranchAdminSourceStore()
-  await Promise.all([loadTransferHistory(), loadConsolidatedReports()])
+  await Promise.all([history, loadConsolidatedReports()])
 })
 
 /** Keeps workspaceMembers.admin in sync so cross-branch category reads pass rules. */
 async function prepareBranchAdminWorkspace() {
   if (!sourceStoreLocked.value) return
   const { fetchOwnerWorkspaceContext } = await import('~/utils/owner-workspace-context')
-  await fetchOwnerWorkspaceContext({ force: true })
+  // Sign-in already refreshed this; reuse it when it is under a minute old.
+  await fetchOwnerWorkspaceContext()
 }
 
 async function ensureBranchAdminSourceStore() {
@@ -2127,10 +2237,12 @@ async function ensureBranchAdminSourceStore() {
 
 async function reloadMultiStorePage() {
   if (!canAccess.value) return
+  // History only needs the signed-in user's branch, so it loads alongside the branch setup.
+  const history = loadTransferHistory()
   await prepareBranchAdminWorkspace()
   await loadStores()
   await ensureBranchAdminSourceStore()
-  await Promise.all([loadTransferHistory(), loadConsolidatedReports()])
+  await Promise.all([history, loadConsolidatedReports()])
 }
 
 watch(canAccess, (ok, wasOk) => {
