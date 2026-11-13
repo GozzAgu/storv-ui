@@ -31,17 +31,24 @@ import { isPublicPayPath } from '~/utils/pay-path'
 function initializeFirestorePersistence(app: FirebaseApp) {
   // Memory cache only: against the emulator the on-device cache denies queries made right after sign-in.
   if (firebaseEmulatorsEnabled()) {
-    withFirestoreEmulator(initializeFirestore(app, {}))
+    withFirestoreEmulator(initializeFirestore(app, { ignoreUndefinedProperties: true }))
     return
   }
   try {
     initializeFirestore(app, {
+      // Optional fields left blank in forms arrive as undefined; drop them instead of failing the write
+      ignoreUndefinedProperties: true,
       localCache: persistentLocalCache({
         tabManager: persistentMultipleTabManager(),
       }),
     })
   } catch (error) {
     console.warn('[Storvv cloud] Firestore persistence unavailable, using in-memory cache:', error)
+    try {
+      initializeFirestore(app, { ignoreUndefinedProperties: true })
+    } catch {
+      /* already initialised */
+    }
   }
 }
 

@@ -74,6 +74,7 @@ describe('StaffAdminAccess', () => {
       'Delete sales and settle commissions',
       'Export store data',
       'Transfer stock to other branches',
+      'Approve stock loans',
     ])
     expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
   })
@@ -86,6 +87,7 @@ describe('StaffAdminAccess', () => {
       storeSettings: false,
       dataExport: false,
       stockTransfers: false,
+      stockLoanApprovals: false,
     }
     setStaffAdminAccess.mockResolvedValue({ admin: true, adminGrants })
     const wrapper = mountSection({})
@@ -114,6 +116,7 @@ describe('StaffAdminAccess', () => {
         storeSettings: false,
         dataExport: false,
         stockTransfers: false,
+        stockLoanApprovals: false,
       },
     })
     const wrapper = mountSection({ admin: true, adminGrants: { deleteSales: true } })
@@ -131,6 +134,7 @@ describe('StaffAdminAccess', () => {
         storeSettings: false,
         dataExport: false,
         stockTransfers: false,
+        stockLoanApprovals: false,
       },
     })
   })

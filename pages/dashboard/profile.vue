@@ -817,7 +817,9 @@
             : undefined
         "
       />
-      <p v-if="passwordError" class="s-profile-error" role="alert">{{ passwordError }}</p>
+      <p v-if="passwordError" class="s-profile-error" role="alert">
+        {{ friendlyDisplayMessage(passwordError) }}
+      </p>
     </form>
     <template #footer>
       <SButton
@@ -1042,6 +1044,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import SDialog from '~/components/s/SDialog.vue'
 import { ref, reactive, watch, onMounted, computed } from 'vue'
 import type { Component } from 'vue'

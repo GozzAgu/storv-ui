@@ -66,6 +66,12 @@ export type NotificationType =
   | 'trade_paid'
   | 'trade_loan'
   | 'trade_loan_due'
+  | 'transfer_awaiting_receipt'
+  | 'transfer_received'
+  | 'transfer_rejected'
+  | 'stock_loan_awaiting_approval'
+  | 'stock_loan_approved'
+  | 'stock_loan_rejected'
 
 export interface Notification {
   id: string

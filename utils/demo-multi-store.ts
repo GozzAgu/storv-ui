@@ -108,12 +108,31 @@ export async function updateDemoTransferStatus(
   const transfer = demo.state.transfers.find((t) => t.id === transferId)
   if (!transfer) throw new Error('Transfer not found')
   transfer.status = status
+  const now = new Date().toISOString()
+  // The demo visitor is the owner and made every decision, so the record names them as "you".
+  if (status === 'in_transit' && !transfer.dispatchedAt) {
+    Object.assign(transfer, {
+      dispatchedAt: now,
+      dispatchedBy: DEMO_USER_UID,
+      dispatchedByName: 'you',
+    })
+  }
+  if (status === 'rejected') {
+    Object.assign(transfer, { rejectedAt: now, rejectedBy: DEMO_USER_UID, rejectedByName: 'you' })
+  }
+  if (status === 'cancelled') {
+    Object.assign(transfer, {
+      cancelledAt: now,
+      cancelledBy: DEMO_USER_UID,
+      cancelledByName: 'you',
+    })
+  }
   if (extra) Object.assign(transfer, extra)
   demo.persist()
   await syncDemoToPinia()
 }
 
-/** Move stock between demo stores when a transfer is completed. */
+/** Move stock between demo stores when the receiving branch approves a transfer. */
 export async function executeDemoTransfer(transfer: DemoTransfer) {
   const demo = useDemoAppStore()
   const source = demo.getStore(transfer.sourceStoreId)
@@ -147,6 +166,9 @@ export async function executeDemoTransfer(transfer: DemoTransfer) {
   }
 
   transfer.status = 'completed'
+  transfer.receivedAt = new Date().toISOString()
+  transfer.receivedBy = DEMO_USER_UID
+  transfer.receivedByName = 'you'
   demo.persist()
   await syncDemoToPinia()
 }

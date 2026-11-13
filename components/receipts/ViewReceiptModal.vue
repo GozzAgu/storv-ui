@@ -170,7 +170,9 @@
         <section v-if="receipt.isSwapIn" class="s-receipt-doc__section">
           <p class="s-receipt-doc__label">Trade-in received</p>
           <p v-if="swapInItemLoading" class="s-receipt-doc__muted">Loading trade-in details…</p>
-          <p v-else-if="swapInItemError" class="s-receipt-doc__note">{{ swapInItemError }}</p>
+          <p v-else-if="swapInItemError" class="s-receipt-doc__note">
+            {{ friendlyDisplayMessage(swapInItemError) }}
+          </p>
           <template v-else-if="swapInPrimaryLabel">
             <p class="s-receipt-doc__item-name">{{ swapInPrimaryLabel }}</p>
             <dl v-if="swapInSpecs.length" class="s-receipt-doc__specs">
@@ -321,6 +323,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
 import SButton from '~/components/s/SButton.vue'

@@ -35,8 +35,9 @@
           >
             <form class="s-form" @submit.prevent="requestTransfer">
               <p class="s-transfer__intro">
-                A transfer goes from requested, to approved and in transit, to complete. Stock only
-                moves when you complete it.
+                You request a transfer, the sending branch dispatches it, and an admin at the
+                receiving branch approves it on arrival. Stock only enters their inventory once they
+                approve.
               </p>
 
               <div class="s-transfer__grid">
@@ -237,7 +238,20 @@
               </SEmptyState>
             </SCard>
 
-            <section v-else class="s-table-card" aria-label="Transfer history">
+            <p v-if="transfersAwaitingMe.length" class="s-notice" role="status">
+              {{
+                transfersAwaitingMe.length === 1
+                  ? '1 transfer is waiting for you to check it in.'
+                  : `${transfersAwaitingMe.length} transfers are waiting for you to check them in.`
+              }}
+              Open its actions to approve it into your inventory or reject it.
+            </p>
+
+            <section
+              v-if="transferHistory.length"
+              class="s-table-card"
+              aria-label="Transfer history"
+            >
               <!-- Phone -->
               <SCard flush class="s-only-sm">
                 <ul class="s-list">
@@ -271,6 +285,9 @@
                           {{
                             transferItemNames(transfer) || formatTransferProductSummary(transfer)
                           }}
+                        </span>
+                        <span v-if="transferDecision(transfer)" class="s-list__secondary">
+                          {{ transferDecision(transfer) }}
                         </span>
                       </button>
                       <div class="s-list__end">
@@ -383,6 +400,9 @@
                           <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
                             {{ getTransferStatusLabel(transfer.status) }}
                           </SBadge>
+                          <span v-if="transferDecision(transfer)" class="s-table__secondary">
+                            {{ transferDecision(transfer) }}
+                          </span>
                           <span
                             v-if="transfer.carrier || transfer.trackingNumber"
                             class="s-table__secondary s-transfer__tracking"
@@ -536,27 +556,38 @@
         label="Transfer actions"
         @close="closeWebTransferMenu"
       >
-        <template v-if="transferForOpenMenu?.status === 'pending_approval'">
-          <SMenuItem
-            label="Approve"
-            :icon="CircleCheck"
-            @select="runTransferMenuAction(approveTransfer)"
-          />
-          <SMenuItem label="Cancel transfer" :icon="CircleX" danger @select="askCancelTransfer" />
-        </template>
-        <template v-else-if="transferForOpenMenu?.status === 'in_transit'">
-          <SMenuItem
-            label="Complete"
-            :icon="CircleCheck"
-            @select="runTransferMenuAction(completeTransfer)"
-          />
-          <SMenuItem
-            label="Add tracking"
-            :icon="Truck"
-            @select="runTransferMenuAction(openTrackingModal)"
-          />
-          <SMenuItem label="Cancel transfer" :icon="CircleX" danger @select="askCancelTransfer" />
-        </template>
+        <SMenuItem
+          v-if="openMenuActions.includes('receive')"
+          label="Approve into inventory"
+          :icon="PackageCheck"
+          @select="runTransferMenuAction(receiveTransfer)"
+        />
+        <SMenuItem
+          v-if="openMenuActions.includes('dispatch')"
+          label="Dispatch"
+          :icon="Send"
+          @select="runTransferMenuAction(dispatchTransfer)"
+        />
+        <SMenuItem
+          v-if="openMenuActions.includes('track')"
+          label="Add tracking"
+          :icon="Truck"
+          @select="runTransferMenuAction(openTrackingModal)"
+        />
+        <SMenuItem
+          v-if="openMenuActions.includes('reject')"
+          label="Reject"
+          :icon="CircleX"
+          danger
+          @select="askRejectTransfer"
+        />
+        <SMenuItem
+          v-if="openMenuActions.includes('cancel')"
+          label="Cancel transfer"
+          :icon="CircleX"
+          danger
+          @select="askCancelTransfer"
+        />
       </SMenu>
 
       <SDialog
@@ -602,6 +633,46 @@
           </SButton>
         </template>
       </SDialog>
+
+      <SDialog
+        :open="Boolean(transferToReject)"
+        role="alertdialog"
+        title="Reject this transfer?"
+        :description="
+          transferToReject
+            ? `${transferRoute(
+                transferToReject
+              )}. Nothing enters your inventory and the stock stays with the sending branch.`
+            : ''
+        "
+        @update:open="
+          (open) => {
+            if (!open) transferToReject = null
+          }
+        "
+      >
+        <form id="transfer-reject-form" class="s-form" @submit.prevent="confirmRejectTransfer">
+          <STextarea
+            v-model="rejectReason"
+            label="Reason"
+            required
+            :rows="3"
+            placeholder="For example, two units arrived damaged"
+          />
+        </form>
+        <template #footer>
+          <SButton variant="secondary" @click="transferToReject = null">Keep transfer</SButton>
+          <SButton
+            variant="danger"
+            type="submit"
+            form="transfer-reject-form"
+            :loading="isRejectingTransfer"
+            :disabled="!rejectReason.trim()"
+          >
+            Reject transfer
+          </SButton>
+        </template>
+      </SDialog>
     </template>
   </div>
 </template>
@@ -612,12 +683,13 @@ import {
   ArrowLeftRight,
   ArrowRight,
   BarChart3,
-  CircleCheck,
   ChevronRight,
   CircleX,
   Download,
   EllipsisVertical,
   Lock,
+  PackageCheck,
+  Send,
   Truck,
 } from '@lucide/vue'
 import SBadge from '~/components/s/SBadge.vue'
@@ -659,6 +731,20 @@ import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageR
 import { CLOUD_UNAVAILABLE_MESSAGE } from '~/utils/cloud-user-messages'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
+import { useTransfersApi } from '~/composables/useTransfersApi'
+import { getApiErrorMessage } from '~/utils/api-error-message'
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
+import { decidedByLine, decidedByName } from '~/utils/decided-by'
+import { availableTransferActions, type TransferActor } from '~/utils/transfer-policy'
+import {
+  OPEN_TRANSFER_STATUSES,
+  TRANSFER_MAX_LINES,
+  TRANSFER_STATUS_LABELS,
+  TRANSFER_STATUS_TONES,
+  normalizeTransferStatus,
+  type TransferAction,
+  type TransferApprovalFields,
+} from '~/types/transfers'
 
 definePageMeta({
   layout: 'dashboard',
@@ -701,8 +787,9 @@ const homeStoreId = computed(() => staffStore.getCurrentStaffMember?.storeId || 
 const sourceStoreLocked = computed(() => isAdmin.value && !userStore.isSuperAdmin)
 
 // State
+// Notifications link to ?tab=history so approvers land on the transfers waiting for them.
 const activeTab = ref<'transfer' | 'reports' | 'history'>(
-  canRequestTransfers.value ? 'transfer' : 'history'
+  useRoute().query.tab === 'history' || !canRequestTransfers.value ? 'history' : 'transfer'
 )
 // Permissions can arrive after the page: view-only admins never sit on the request form.
 watch(canRequestTransfers, (allowed) => {
@@ -762,26 +849,6 @@ const canTransfer = computed(() => {
   )
 })
 
-// Helper function to remove undefined values from object (Firestore doesn't allow undefined)
-const removeUndefined = (obj: any): any => {
-  if (obj === null || obj === undefined) {
-    return null
-  }
-  if (Array.isArray(obj)) {
-    return obj.map(removeUndefined)
-  }
-  if (typeof obj === 'object') {
-    const cleaned: any = {}
-    for (const [key, value] of Object.entries(obj)) {
-      if (value !== undefined) {
-        cleaned[key] = removeUndefined(value)
-      }
-    }
-    return cleaned
-  }
-  return obj
-}
-
 async function resolveOwnerUserId(): Promise<string> {
   const authStore = useAuthStore()
   const uid = (await getQueryUserId()) ?? authStore.currentUser?.uid
@@ -793,8 +860,7 @@ async function resolveOwnerUserId(): Promise<string> {
 const itemsLockedInOpenTransfers = computed(() => {
   const locked = new Set<string>()
   for (const transfer of transferHistory.value) {
-    const status = String(transfer.status || '').toLowerCase()
-    if (status !== 'pending_approval' && status !== 'in_transit') continue
+    if (!OPEN_TRANSFER_STATUSES.has(normalizeTransferStatus(transfer.status))) continue
     for (const line of transfer.items || []) {
       if (line?.itemId) locked.add(String(line.itemId))
     }
@@ -1067,6 +1133,12 @@ const requestTransfer = async () => {
       toast.error('No items to transfer')
       return
     }
+    if (transferredItems.length > TRANSFER_MAX_LINES) {
+      toast.error(
+        `A transfer can carry at most ${TRANSFER_MAX_LINES} items. Split it into smaller ones.`
+      )
+      return
+    }
 
     const transfersRef = collection(db, 'users', pathUserId, 'storeTransfers')
     const transferRef = createDoc(transfersRef)
@@ -1099,253 +1171,82 @@ const requestTransfer = async () => {
   }
 }
 
-// Execute the actual stock move (used when completing an in_transit transfer).
-const executeTransfer = async (transfer: any) => {
-  const { isDemoModeActive } = await import('~/utils/demo-mode')
-  if (isDemoModeActive()) {
-    const { executeDemoTransfer } = await import('~/utils/demo-multi-store')
-    await executeDemoTransfer(transfer)
-    toast.success(`Stock updated: transfer completed in demo.`)
-    await loadTransferHistory()
-    return
-  }
+/**
+ * Every change after a request goes through the server, which checks who may approve it and, on
+ * receive, moves the stock in one transaction. Demo mode keeps its in-browser equivalents.
+ */
+const transfersApi = useTransfersApi()
 
-  const authStore = useAuthStore()
-  const userId = authStore.currentUser?.uid
-  if (!userId) throw new Error('User not authenticated')
+function transferErrorMessage(error: unknown, fallback: string): string {
+  return friendlyDisplayMessage(getApiErrorMessage(error, ''), fallback)
+}
 
-  const db = useFirestore().getFirestoreInstance()
-  if (!db) throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
-
-  const { getDoc, setDoc, updateDoc, serverTimestamp, query, where, getDocs, doc } = await import(
-    'firebase/firestore'
-  )
-  const { deleteDoc } = await import('firebase/firestore')
-  const { getInventoryItemDocument, getInventoryItemsCollection } = await import(
-    '~/composables/useFirestorePaths'
-  )
-  const pathUserId = await resolveOwnerUserId()
-
-  const sourceStoreId = transfer.sourceStoreId
-  const destinationStoreId = transfer.destinationStoreId
-  const folderId = transfer.folderId
-  const destinationFolderId = transfer.destinationFolderId
-  const hasSerialNumbers = transfer.hasSerialNumbers || false
-  const itemsToTransfer = (transfer.items || []).map((i: any) => ({
-    itemId: i.itemId,
-    quantity: i.quantity || 1,
-  }))
-
-  const transferredItems: any[] = []
-  const errors: string[] = []
-
+async function runTransferChange(
+  work: () => Promise<unknown>,
+  messages: { success: string; failure: string }
+): Promise<boolean> {
   try {
-    for (const { itemId, quantity } of itemsToTransfer) {
-      try {
-        const sourceItemRef = getInventoryItemDocument(db, pathUserId, sourceStoreId, itemId)
-        const sourceItemSnap = await getDoc(sourceItemRef)
-
-        if (!sourceItemSnap.exists()) {
-          errors.push(`Item ${itemId} not found`)
-          continue
-        }
-
-        const sourceItem = sourceItemSnap.data()
-
-        // Check if item is sold
-        if (sourceItem.dateOut) {
-          errors.push(`Item ${itemId} has already been sold`)
-          continue
-        }
-
-        const rawLoanId = sourceItem.sellerLoanOutId
-        if (rawLoanId !== undefined && rawLoanId !== null && String(rawLoanId).trim() !== '') {
-          errors.push(`Item ${itemId} is on a stock loan; return or sell it before transferring`)
-          continue
-        }
-
-        if (hasSerialNumbers) {
-          // For serial numbers, transfer the item itself (move, not duplicate)
-          if (quantity !== 1) {
-            errors.push(`Serial number items can only be transferred one at a time`)
-            continue
-          }
-
-          // Create new item in destination store
-          // Use pathUserId to ensure Firestore rules allow access
-          const destItemsRef = getInventoryItemsCollection(db, pathUserId, destinationStoreId)
-          const newItemRef = doc(destItemsRef)
-          const {
-            createdBy: _createdBy,
-            dateOut: _dateOut,
-            id: _id,
-            isTransferred: _isTransferred,
-            transferredTo: _transferredTo,
-            transferredFrom: _transferredFrom,
-            transferredFromFolder: _transferredFromFolder,
-            transferredAt: _transferredAt,
-            ...itemDataWithoutSystemFields
-          } = sourceItem
-          const cleanedItemData = removeUndefined(itemDataWithoutSystemFields)
-          const originalDateIn = sourceItem.dateIn || sourceItem.DateIn || null
-          await setDoc(newItemRef, {
-            ...cleanedItemData,
-            id: newItemRef.id,
-            folderId: destinationFolderId,
-            storeId: destinationStoreId,
-            dateIn: originalDateIn,
-            createdBy: userId,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-            // Provenance only, do NOT mark destination stock as isTransferred
-            // (that flag previously blocked the item from ever transferring again)
-            transferredFrom: sourceStoreId,
-            transferredFromFolder: folderId,
-            transferredAt: serverTimestamp(),
-          })
-          await deleteDoc(sourceItemRef)
-          transferredItems.push({
-            itemId,
-            itemName: sourceItem.name || sourceItem.itemName || 'Unnamed Item',
-            quantity: 1,
-            serialNumber: sourceItem.serialNo || sourceItem.serialNumber || null,
-          })
-        } else {
-          const availableQty = sourceItem.quantity || sourceItem.Quantity || 0
-          if (availableQty < quantity) {
-            errors.push(
-              `Insufficient quantity for item ${itemId}. Available: ${availableQty}, Requested: ${quantity}`
-            )
-            continue
-          }
-          const newQty = availableQty - quantity
-          if (newQty <= 0) {
-            await deleteDoc(sourceItemRef)
-          } else {
-            await updateDoc(sourceItemRef, {
-              quantity: newQty,
-              Quantity: newQty,
-              updatedAt: serverTimestamp(),
-            })
-          }
-          const destItemsRef = getInventoryItemsCollection(db, pathUserId, destinationStoreId)
-          const existingItemsQuery = query(
-            destItemsRef,
-            where('folderId', '==', destinationFolderId),
-            where('name', '==', sourceItem.name || sourceItem.itemName || '')
-          )
-          const existingItemsSnap = await getDocs(existingItemsQuery)
-          if (existingItemsSnap.empty) {
-            const newItemRef = doc(destItemsRef)
-            const {
-              createdBy: _,
-              isTransferred: _isTransferred,
-              transferredTo: _transferredTo,
-              ...itemDataWithoutCreatedBy
-            } = sourceItem
-            const cleanedItemData = removeUndefined(itemDataWithoutCreatedBy)
-            const originalDateIn = sourceItem.dateIn || sourceItem.DateIn || null
-            await setDoc(newItemRef, {
-              ...cleanedItemData,
-              id: newItemRef.id,
-              folderId: destinationFolderId,
-              storeId: destinationStoreId,
-              dateIn: originalDateIn,
-              quantity,
-              Quantity: quantity,
-              createdBy: userId,
-              createdAt: serverTimestamp(),
-              updatedAt: serverTimestamp(),
-              transferredFrom: sourceStoreId,
-              transferredFromFolder: folderId,
-              transferredAt: serverTimestamp(),
-            })
-          } else {
-            const existingItem = existingItemsSnap.docs[0]
-            if (existingItem) {
-              const existingQty = existingItem.data().quantity || existingItem.data().Quantity || 0
-              const existingData = existingItem.data()
-              const originalDateIn =
-                existingData.dateIn ||
-                existingData.DateIn ||
-                sourceItem.dateIn ||
-                sourceItem.DateIn ||
-                null
-              await updateDoc(existingItem.ref, {
-                quantity: existingQty + quantity,
-                Quantity: existingQty + quantity,
-                dateIn: originalDateIn,
-                transferredAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
-              })
-            }
-          }
-          transferredItems.push({
-            itemId,
-            itemName: sourceItem.name || sourceItem.itemName || 'Unnamed Item',
-            quantity,
-          })
-        }
-      } catch (error: any) {
-        errors.push(`Error transferring item ${itemId}: ${error.message}`)
-      }
-    }
-
-    const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', transfer.id)
-    await updateDoc(transferRef, {
-      status: errors.length > 0 ? 'partial' : 'completed',
-      completedAt: serverTimestamp(),
-      completedBy: userId,
-      items: transferredItems.length ? transferredItems : transfer.items,
-      itemsCount: transferredItems.length || (transfer.items || []).length,
-    })
-
-    invalidateFolderItemCaches(folderId)
-    invalidateFolderItemCaches(destinationFolderId)
-
-    if (errors.length > 0) {
-      toast.warning(
-        `Transfer completed with ${errors.length} errors. ${transferredItems.length} items moved.`
-      )
-    } else {
-      toast.success(
-        `Stock updated: ${transferredItems.length} items moved to ${getStoreName(
-          destinationStoreId
-        )}.`
-      )
-    }
+    await work()
+    toast.success(messages.success)
+    return true
+  } catch (error) {
+    console.error('[Transfers] Action failed:', error)
+    toast.error(transferErrorMessage(error, messages.failure))
+    return false
+  } finally {
     await loadTransferHistory()
-  } catch (err: any) {
-    toast.error(err?.message || 'Failed to complete transfer')
-    throw err
   }
 }
 
-const approveTransfer = async (transfer: any) => {
+const receiveTransfer = async (transfer: any) => {
+  if (isTransferring.value) return
+  isTransferring.value = true
+  try {
+    const { isDemoModeActive } = await import('~/utils/demo-mode')
+    if (isDemoModeActive()) {
+      const { executeDemoTransfer } = await import('~/utils/demo-multi-store')
+      await executeDemoTransfer(transfer)
+      toast.success('Approved. The stock is now in your inventory.')
+      await loadTransferHistory()
+      return
+    }
+    try {
+      const result = await transfersApi.receive(transfer.id)
+      invalidateFolderItemCaches(transfer.folderId)
+      invalidateFolderItemCaches(transfer.destinationFolderId)
+      if (result.skipped.length) {
+        toast.warning(
+          `Approved ${result.moved} item(s) into your inventory. ${
+            result.skipped.length
+          } couldn’t move: ${result.skipped.join('; ')}.`,
+          10000
+        )
+      } else {
+        toast.success(`Approved. ${result.moved} item(s) are now in your inventory.`)
+      }
+    } catch (error) {
+      console.error('[Transfers] Receive failed:', error)
+      toast.error(transferErrorMessage(error, 'Couldn’t approve this transfer. Please try again.'))
+    }
+    await loadTransferHistory()
+  } finally {
+    isTransferring.value = false
+  }
+}
+
+const dispatchTransfer = async (transfer: any) => {
   const { isDemoModeActive } = await import('~/utils/demo-mode')
   if (isDemoModeActive()) {
     const { updateDemoTransferStatus } = await import('~/utils/demo-multi-store')
     await updateDemoTransferStatus(transfer.id, 'in_transit')
-    toast.success('Transfer approved. Stock is in transit.')
+    toast.success('Dispatched. The receiving branch will approve it on arrival.')
     await loadTransferHistory()
     return
   }
-
-  const authStore = useAuthStore()
-  const userId = authStore.currentUser?.uid
-  if (!userId) return
-  const db = useFirestore().getFirestoreInstance()
-  if (!db) return
-  const { updateDoc, serverTimestamp, doc } = await import('firebase/firestore')
-  const pathUserId = await resolveOwnerUserId()
-  const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', transfer.id)
-  await updateDoc(transferRef, {
-    status: 'in_transit',
-    approvedAt: serverTimestamp(),
-    approvedBy: userId,
+  await runTransferChange(() => transfersApi.dispatch(transfer.id), {
+    success: 'Dispatched. The receiving branch will approve it on arrival.',
+    failure: 'Couldn’t dispatch this transfer. Please try again.',
   })
-  toast.success('Transfer approved. Stock is in transit.')
-  await loadTransferHistory()
 }
 
 const cancelTransfer = async (transfer: any) => {
@@ -1355,20 +1256,27 @@ const cancelTransfer = async (transfer: any) => {
     await updateDemoTransferStatus(transfer.id, 'cancelled')
     toast.success('Transfer cancelled.')
     await loadTransferHistory()
-    return
+    return true
   }
+  return runTransferChange(() => transfersApi.cancel(transfer.id), {
+    success: 'Transfer cancelled.',
+    failure: 'Couldn’t cancel this transfer. Please try again.',
+  })
+}
 
-  const authStore = useAuthStore()
-  const userId = authStore.currentUser?.uid
-  if (!userId) return
-  const db = useFirestore().getFirestoreInstance()
-  if (!db) return
-  const { updateDoc, doc } = await import('firebase/firestore')
-  const pathUserId = await resolveOwnerUserId()
-  const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', transfer.id)
-  await updateDoc(transferRef, { status: 'cancelled' })
-  toast.success('Transfer cancelled.')
-  await loadTransferHistory()
+const rejectTransfer = async (transfer: any, reason: string) => {
+  const { isDemoModeActive } = await import('~/utils/demo-mode')
+  if (isDemoModeActive()) {
+    const { updateDemoTransferStatus } = await import('~/utils/demo-multi-store')
+    await updateDemoTransferStatus(transfer.id, 'rejected', { rejectionReason: reason })
+    toast.success('Transfer rejected. The stock stays with the sending branch.')
+    await loadTransferHistory()
+    return true
+  }
+  return runTransferChange(() => transfersApi.reject(transfer.id, reason), {
+    success: 'Transfer rejected. The stock stays with the sending branch.',
+    failure: 'Couldn’t reject this transfer. Please try again.',
+  })
 }
 
 const openTrackingModal = (t: any) => {
@@ -1380,50 +1288,29 @@ const openTrackingModal = (t: any) => {
 const saveTracking = async () => {
   const t = selectedTransferForTracking.value
   if (!t) return
+  const carrier = trackingForm.value.carrier.trim()
+  const trackingNumber = trackingForm.value.trackingNumber.trim()
 
   const { isDemoModeActive } = await import('~/utils/demo-mode')
+  let saved = true
   if (isDemoModeActive()) {
     const { updateDemoTransferStatus } = await import('~/utils/demo-multi-store')
     await updateDemoTransferStatus(t.id, t.status, {
-      carrier: trackingForm.value.carrier || undefined,
-      trackingNumber: trackingForm.value.trackingNumber || undefined,
+      carrier: carrier || undefined,
+      trackingNumber: trackingNumber || undefined,
     })
-    showTrackingModal.value = false
-    selectedTransferForTracking.value = null
-    trackingForm.value = { carrier: '', trackingNumber: '' }
     toast.success('Tracking info saved.')
     await loadTransferHistory()
-    return
+  } else {
+    saved = await runTransferChange(() => transfersApi.track(t.id, carrier, trackingNumber), {
+      success: 'Tracking info saved.',
+      failure: 'Couldn’t save the tracking info. Please try again.',
+    })
   }
-
-  const authStore = useAuthStore()
-  const userId = authStore.currentUser?.uid
-  if (!userId) return
-  const db = useFirestore().getFirestoreInstance()
-  if (!db) return
-  const { updateDoc, doc } = await import('firebase/firestore')
-  const pathUserId = await resolveOwnerUserId()
-  const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', t.id)
-  await updateDoc(transferRef, {
-    carrier: trackingForm.value.carrier || null,
-    trackingNumber: trackingForm.value.trackingNumber || null,
-  })
+  if (!saved) return
   showTrackingModal.value = false
   selectedTransferForTracking.value = null
   trackingForm.value = { carrier: '', trackingNumber: '' }
-  toast.success('Tracking info saved.')
-  await loadTransferHistory()
-}
-
-const completeTransfer = async (transfer: any) => {
-  isTransferring.value = true
-  try {
-    await executeTransfer(transfer)
-  } catch (e) {
-    // error already toasts in executeTransfer
-  } finally {
-    isTransferring.value = false
-  }
 }
 
 const loadTransferHistory = async () => {
@@ -1915,24 +1802,36 @@ const formatTransferProductSummary = (transfer: any) => {
   return `${totalUnits} units · ${items.length} product${items.length === 1 ? '' : 's'}`
 }
 
-const TRANSFER_STATUS_LABELS: Record<string, string> = {
-  pending_approval: 'Pending approval',
-  in_transit: 'In transit',
-  completed: 'Completed',
-  completed_partial: 'Completed (partial)',
-  partial: 'Completed (partial)',
-  cancelled: 'Cancelled',
+const getTransferStatusLabel = (status: string) =>
+  TRANSFER_STATUS_LABELS[normalizeTransferStatus(status)]
+
+/** The signed-in user, as the transfer policy sees them for this transfer. */
+function transferActorFor(transfer: TransferApprovalFields): TransferActor {
+  return {
+    uid: useAuthStore().currentUser?.uid ?? '',
+    isOwner: userStore.isSuperAdmin,
+    isDestinationAdmin:
+      isAdmin.value && !!homeStoreId.value && homeStoreId.value === transfer.destinationStoreId,
+    canManageTransfers: canChangeTransfers.value,
+  }
 }
 
-const getTransferStatusLabel = (status: string) => {
-  return TRANSFER_STATUS_LABELS[status] || status || 'Pending'
+function transferActions(transfer: any): TransferAction[] {
+  const fields: TransferApprovalFields = {
+    status: normalizeTransferStatus(transfer.status),
+    sourceStoreId: String(transfer.sourceStoreId ?? transfer.fromStoreId ?? ''),
+    destinationStoreId: String(transfer.destinationStoreId ?? transfer.toStoreId ?? ''),
+    createdBy: String(transfer.createdBy ?? ''),
+  }
+  return availableTransferActions(fields, transferActorFor(fields))
 }
 
-const isTransferActionable = (transfer: any) => {
-  if (!canChangeTransfers.value) return false
-  const s = (transfer.status || '').toLowerCase()
-  return s === 'pending_approval' || s === 'in_transit'
-}
+const isTransferActionable = (transfer: any) => transferActions(transfer).length > 0
+
+/** Transfers this user can check in right now. */
+const transfersAwaitingMe = computed(() =>
+  transferHistory.value.filter((t) => transferActions(t).includes('receive'))
+)
 
 const {
   openMenuId: openTransferMenuId,
@@ -2024,7 +1923,23 @@ interface TransferRecord {
   itemsCount?: number
   createdAt?: unknown
   approvedAt?: unknown
+  approvedBy?: string
+  dispatchedAt?: unknown
+  dispatchedBy?: string
+  dispatchedByName?: string
+  receivedAt?: unknown
+  receivedBy?: string
+  receivedByName?: string
   completedAt?: unknown
+  completedBy?: string
+  rejectedAt?: unknown
+  rejectedBy?: string
+  rejectedByName?: string
+  cancelledAt?: unknown
+  cancelledBy?: string
+  cancelledByName?: string
+  rejectionReason?: string
+  skippedItems?: string[]
   carrier?: string
   trackingNumber?: string
   notes?: string
@@ -2086,15 +2001,65 @@ function transferFacts(transfer: TransferRecord): Array<{ label: string; value: 
   const facts: Array<{ label: string; value: string }> = [
     { label: 'Requested', value: formatTransferDate(transfer.createdAt) },
   ]
-  if (transfer.approvedAt)
-    facts.push({ label: 'Approved', value: formatTransferDate(transfer.approvedAt) })
-  if (transfer.completedAt)
-    facts.push({ label: 'Completed', value: formatTransferDate(transfer.completedAt) })
+  const viewer = useAuthStore().currentUser?.uid
+  /** "13 Nov 2026, 10:02 · Ada" when we know who did it. */
+  const when = (at: unknown, name: unknown, uid: unknown) => {
+    const who = decidedByName(name, uid, viewer)
+    return who ? `${formatTransferDate(at)} · ${who}` : formatTransferDate(at)
+  }
+  const dispatchedAt = transfer.dispatchedAt ?? transfer.approvedAt
+  if (dispatchedAt) {
+    facts.push({
+      label: 'Dispatched',
+      value: when(
+        dispatchedAt,
+        transfer.dispatchedByName,
+        transfer.dispatchedBy ?? transfer.approvedBy
+      ),
+    })
+  }
+  const receivedAt = transfer.receivedAt ?? transfer.completedAt
+  if (receivedAt) {
+    facts.push({
+      label: 'Approved on arrival',
+      value: when(receivedAt, transfer.receivedByName, transfer.receivedBy ?? transfer.completedBy),
+    })
+  }
+  if (transfer.rejectedAt) {
+    facts.push({
+      label: 'Rejected',
+      value: when(transfer.rejectedAt, transfer.rejectedByName, transfer.rejectedBy),
+    })
+  }
+  if (transfer.cancelledAt) {
+    facts.push({
+      label: 'Cancelled',
+      value: when(transfer.cancelledAt, transfer.cancelledByName, transfer.cancelledBy),
+    })
+  }
+  if (transfer.rejectionReason)
+    facts.push({ label: 'Reason', value: String(transfer.rejectionReason) })
+  if (transfer.skippedItems?.length)
+    facts.push({ label: 'Not moved', value: transfer.skippedItems.join('; ') })
   if (transfer.carrier) facts.push({ label: 'Carrier', value: String(transfer.carrier) })
   if (transfer.trackingNumber)
     facts.push({ label: 'Tracking number', value: String(transfer.trackingNumber) })
   if (transfer.notes) facts.push({ label: 'Notes', value: String(transfer.notes) })
   return facts
+}
+
+/** The receiving branch's decision, shown on the row: "Approved by Ada", "Rejected by you". */
+function transferDecision(transfer: TransferRecord & { status?: string }): string | null {
+  const viewer = useAuthStore().currentUser?.uid
+  switch (normalizeTransferStatus(transfer.status)) {
+    case 'completed':
+    case 'partial':
+      return decidedByLine('Approved', transfer.receivedByName, transfer.receivedBy, viewer)
+    case 'rejected':
+      return decidedByLine('Rejected', transfer.rejectedByName, transfer.rejectedBy, viewer)
+    default:
+      return null
+  }
 }
 
 /** Clicking anywhere on a row opens it, except on its own buttons. */
@@ -2163,12 +2128,8 @@ function transferItemRows(transfer: TransferForItems): StockItemRow[] {
   })
 }
 
-function transferStatusTone(status: string): 'warning' | 'info' | 'success' | 'neutral' {
-  const s = (status || '').toLowerCase()
-  if (s === 'pending_approval') return 'warning'
-  if (s === 'in_transit') return 'info'
-  if (s === 'completed' || s === 'completed_partial' || s === 'partial') return 'success'
-  return 'neutral'
+function transferStatusTone(status: string) {
+  return TRANSFER_STATUS_TONES[normalizeTransferStatus(status)]
 }
 
 function closeWebTransferMenu() {
@@ -2183,6 +2144,31 @@ function runTransferMenuAction(action: (transfer: any) => unknown) {
   if (transfer) void action(transfer)
 }
 
+const openMenuActions = computed<TransferAction[]>(() =>
+  transferForOpenMenu.value ? transferActions(transferForOpenMenu.value) : []
+)
+
+const transferToReject = ref<any>(null)
+const rejectReason = ref('')
+const isRejectingTransfer = ref(false)
+
+function askRejectTransfer() {
+  transferToReject.value = transferForOpenMenu.value
+  rejectReason.value = ''
+  closeTransferMenu()
+}
+
+async function confirmRejectTransfer() {
+  const reason = rejectReason.value.trim()
+  if (!transferToReject.value || !reason || isRejectingTransfer.value) return
+  isRejectingTransfer.value = true
+  try {
+    if (await rejectTransfer(transferToReject.value, reason)) transferToReject.value = null
+  } finally {
+    isRejectingTransfer.value = false
+  }
+}
+
 const transferToCancel = ref<any>(null)
 const isCancellingTransfer = ref(false)
 
@@ -2195,8 +2181,7 @@ async function confirmCancelTransfer() {
   if (!transferToCancel.value || isCancellingTransfer.value) return
   isCancellingTransfer.value = true
   try {
-    await cancelTransfer(transferToCancel.value)
-    transferToCancel.value = null
+    if (await cancelTransfer(transferToCancel.value)) transferToCancel.value = null
   } finally {
     isCancellingTransfer.value = false
   }

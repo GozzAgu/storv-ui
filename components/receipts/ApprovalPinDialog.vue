@@ -6,7 +6,7 @@
     size="sm"
     :dismissible="!busy"
   >
-    <p v-if="loadError" class="s-form-meta" role="alert">{{ loadError }}</p>
+    <p v-if="loadError" class="s-form-meta" role="alert">{{ friendlyDisplayMessage(loadError) }}</p>
     <p v-else-if="!loading && approvers.length === 0" class="s-form-meta">
       No manager has set an approval PIN yet. The owner or a manager can set one in Profile →
       Approval PIN.
@@ -47,6 +47,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { computed, ref, watch } from 'vue'
 import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'

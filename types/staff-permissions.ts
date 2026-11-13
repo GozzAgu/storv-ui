@@ -67,6 +67,8 @@ export interface StaffAdminGrants {
   dataExport: boolean
   /** Request and complete stock transfers to other branches. */
   stockTransfers: boolean
+  /** Approve or reject stock loans before the goods go out. */
+  stockLoanApprovals: boolean
 }
 
 /** What saving admin access returns. `permissions` is set when admin was granted or removed. */
@@ -83,6 +85,7 @@ export const STAFF_ADMIN_GRANT_KEYS = [
   'storeSettings',
   'dataExport',
   'stockTransfers',
+  'stockLoanApprovals',
 ] as const satisfies ReadonlyArray<keyof StaffAdminGrants>
 
 /** Shared settings sections a branch admin with the "store settings" extra may save. */

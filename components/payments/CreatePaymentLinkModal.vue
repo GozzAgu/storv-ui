@@ -86,7 +86,9 @@
         </SField>
       </SFormSection>
 
-      <p v-if="errorMsg" class="s-field__error" role="alert">{{ errorMsg }}</p>
+      <p v-if="errorMsg" class="s-field__error" role="alert">
+        {{ friendlyDisplayMessage(errorMsg) }}
+      </p>
     </SForm>
 
     <template #leading>
@@ -109,6 +111,11 @@
 </template>
 
 <script setup lang="ts">
+import { useAppToast } from '~/composables/useAppToast'
+import { getApiErrorMessage } from '~/utils/api-error-message'
+import { friendlyDisplayMessage, friendlyErrorMessage } from '~/utils/friendly-error'
+
+const toast = useAppToast()
 import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
 import SField from '~/components/s/SField.vue'
@@ -232,7 +239,8 @@ const onFolderChange = async () => {
   try {
     await inventoryStore.fetchItems(selectedFolderId.value)
   } catch (e) {
-    errorMsg.value = (e as Error)?.message || 'Could not load items'
+    console.error('[CreatePaymentLinkModal] Load items failed:', e)
+    toast.error(friendlyErrorMessage(e, "Couldn't load items. Please try again."))
   } finally {
     itemsLoading.value = false
   }
@@ -261,10 +269,13 @@ const create = async () => {
     })
     emit('update:modelValue', false)
   } catch (e) {
-    errorMsg.value =
-      (e as { data?: { message?: string } })?.data?.message ||
-      (e as Error)?.message ||
-      'Could not create link'
+    console.error('[CreatePaymentLinkModal] Create failed:', e)
+    toast.error(
+      friendlyDisplayMessage(
+        getApiErrorMessage(e, ''),
+        "Couldn't create the payment link. Please try again."
+      )
+    )
   } finally {
     creating.value = false
   }

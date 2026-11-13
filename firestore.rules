@@ -531,8 +531,17 @@ service cloud.firestore {
                          canAccessMultiStore(userId, resource.data.toStoreId, 'view'))
                      );
         
+        // A request only: it starts awaiting dispatch with no approval recorded. Every later move
+        // (dispatch, receive, reject, cancel, tracking) goes through /api/transfers/{id}/{action},
+        // which checks who may approve it and moves the stock in one transaction.
         allow create: if planIsEnterprise(userId) &&
                        request.resource.data.createdBy == request.auth.uid &&
+                       request.resource.data.get('status', 'pending_approval') == 'pending_approval' &&
+                       !request.resource.data.keys().hasAny([
+                         'approvedBy', 'approvedAt', 'dispatchedBy', 'dispatchedAt',
+                         'receivedBy', 'receivedAt', 'completedBy', 'completedAt',
+                         'rejectedBy', 'rejectedAt', 'cancelledBy', 'cancelledAt'
+                       ]) &&
                        (
                          isStoreOwnerForPath(userId) ||
                          (request.resource.data.keys().hasAny(['sourceStoreId']) &&
@@ -541,17 +550,7 @@ service cloud.firestore {
                            canAccessMultiStore(userId, request.resource.data.fromStoreId, 'create'))
                        );
         
-        allow update, delete: if planIsEnterprise(userId) && (
-                       isStoreOwnerForPath(userId) ||
-                       (resource.data.keys().hasAny(['sourceStoreId']) &&
-                         canAccessMultiStore(userId, resource.data.sourceStoreId, 'edit')) ||
-                       (resource.data.keys().hasAny(['destinationStoreId']) &&
-                         canAccessMultiStore(userId, resource.data.destinationStoreId, 'edit')) ||
-                       (resource.data.keys().hasAny(['fromStoreId']) &&
-                         canAccessMultiStore(userId, resource.data.fromStoreId, 'edit')) ||
-                       (resource.data.keys().hasAny(['toStoreId']) &&
-                         canAccessMultiStore(userId, resource.data.toStoreId, 'edit'))
-                     );
+        allow update, delete: if false;
       }
       
       // Store syncs subcollection: users/{userId}/storeSyncs/{syncId}
@@ -720,35 +719,31 @@ service cloud.firestore {
           // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
           // 2. Store member, for products in categories open to them (see memberCanOpenCategory).
           //    Writes are not gated on the category so refunds and transfers of locked stock work.
-          // 3. Enterprise branch admin completing a transfer that touches another branch
+          // 3. Enterprise branch admin with the transfers extra, to see what a transfer carries.
+          //    Read only: stock moves between branches through POST /api/transfers/{id}/receive.
           allow read: if (isAuthenticated() && userId == request.auth.uid) ||
                        (isActiveStoreMember(userId, storeId) &&
                         memberCanOpenCategory(userId, storeId, resource.data.folderId)) ||
                        (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId));
           
           // Full create/delete: owner, or a member granted the matching products action.
-          // Trade-in items are created by the sale route (POST /api/sales/create), not clients.
-          // Enterprise branch admins may also create/update/delete items when completing a transfer.
-          allow create: if planAllowsStoreWrite(userId, storeId) && ((canManageProducts(userId, storeId, 'create') ||
-                          (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId))) &&
+          // Trade-in items are created by the sale route (POST /api/sales/create), and transferred
+          // stock by the transfer route once the receiving branch approves it, not by clients.
+          allow create: if planAllowsStoreWrite(userId, storeId) && canManageProducts(userId, storeId, 'create') &&
                          request.resource.data.storeId == storeId &&
-                         !onPartnerLoan(request.resource.data));
+                         !onPartnerLoan(request.resource.data);
 
-          // Update: owner or products.edit grant (and transfer admins). Selling, refunding, holding
-          // and lending stock are server routes (server/api/sales, server/api/stock-loans), so
-          // other members can no longer mark items sold or unsold without a sale behind it.
-          allow update: if planAllowsStoreWrite(userId, storeId) && (partnerLoanUntouched() && (
-                        (canManageProducts(userId, storeId, 'edit') &&
-                         resourceMatchesStore(storeId) &&
-                         requestMatchesStore(storeId)) ||
-                        (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId) &&
-                         resourceMatchesStore(storeId) &&
-                         requestMatchesStore(storeId))));
+          // Update: owner or products.edit grant on this branch. Selling, refunding, holding,
+          // lending and transferring stock are server routes (server/api/sales, stock-loans,
+          // transfers), so members can't mark items sold or move them without the matching record.
+          allow update: if planAllowsStoreWrite(userId, storeId) && partnerLoanUntouched() &&
+                        canManageProducts(userId, storeId, 'edit') &&
+                        resourceMatchesStore(storeId) &&
+                        requestMatchesStore(storeId);
 
-          allow delete: if planAllowsStoreWrite(userId, storeId) && ((canManageProducts(userId, storeId, 'delete') ||
-                          (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId))) &&
+          allow delete: if planAllowsStoreWrite(userId, storeId) && canManageProducts(userId, storeId, 'delete') &&
                          resourceMatchesStore(storeId) &&
-                         !onPartnerLoan(resource.data));
+                         !onPartnerLoan(resource.data);
         }
         
         // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}
@@ -915,7 +910,7 @@ service cloud.firestore {
           // Payments V2, trade and sale notifications are server-written; a client must not forge them.
           allow create: if planAllowsStoreWrite(userId, storeId) && (canCreateReceipt(userId, storeId)
             && !(request.resource.data.get('source', '') in ['payments_v2', 'trade', 'server'])
-            && !request.resource.data.get('type', '').matches('^(payment_|payout_|till_count_|trade_|swap_in_|offline_sale_).*')
+            && !request.resource.data.get('type', '').matches('^(payment_|payout_|till_count_|trade_|swap_in_|offline_sale_|transfer_|stock_loan_).*')
             && !(request.resource.data.get('type', '') in ['receipt_created', 'receipt_edited'])
             && !('recipientUids' in request.resource.data));
           allow update: if (planAllowsStoreWrite(userId, storeId) && canManageNonInventoryOps(userId, storeId))

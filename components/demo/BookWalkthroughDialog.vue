@@ -123,7 +123,9 @@
         <label>Website <input v-model="form.website" tabindex="-1" autocomplete="off" /></label>
       </div>
 
-      <p v-if="errors.form" class="s-walk__error" role="alert">{{ errors.form }}</p>
+      <p v-if="errors.form" class="s-walk__error" role="alert">
+        {{ friendlyDisplayMessage(errors.form) }}
+      </p>
       <p class="s-walk__privacy">
         We only use these details to arrange your walkthrough. See our
         <NuxtLink to="/privacy" target="_blank">privacy policy</NuxtLink>.
@@ -147,6 +149,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { computed, reactive, ref, useId, watch } from 'vue'
 import { CalendarDays, Check, CheckCircle2, MessageCircle } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'

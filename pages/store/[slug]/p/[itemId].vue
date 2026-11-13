@@ -152,7 +152,7 @@
                 placeholder="you@email.com"
               />
               <p v-if="checkoutError" class="s-sf-msg s-sf-msg--error" role="alert">
-                {{ checkoutError }}
+                {{ friendlyDisplayMessage(checkoutError) }}
               </p>
               <div class="s-sf-form__actions">
                 <SButton variant="ghost" @click="activePanel = null">Cancel</SButton>
@@ -221,7 +221,7 @@
                 "
               />
               <p v-if="inquiryError" class="s-sf-msg s-sf-msg--error" role="alert">
-                {{ inquiryError }}
+                {{ friendlyDisplayMessage(inquiryError) }}
               </p>
               <div class="s-sf-form__actions">
                 <SButton variant="ghost" @click="activePanel = null">Cancel</SButton>
@@ -314,6 +314,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import {
   ArrowLeft,
   Check,

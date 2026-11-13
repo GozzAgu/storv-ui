@@ -40,7 +40,9 @@
           </p>
           <p class="s-offline-sales__meta">
             Saved {{ when(sale.queuedAt)
-            }}<template v-if="sale.lastError"> · Last try: {{ sale.lastError }}</template>
+            }}<template v-if="sale.lastError">
+              · Last try: {{ friendlyDisplayMessage(sale.lastError) }}</template
+            >
           </p>
         </div>
       </li>
@@ -62,6 +64,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { WifiOff } from '@lucide/vue'
 import SBadge from '~/components/s/SBadge.vue'

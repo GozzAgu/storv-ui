@@ -37,7 +37,6 @@
       :disabled="!selected.includes(member.id) && selected.length >= access.maxStaff"
       @update:model-value="(checked: boolean) => toggle(member.id, checked)"
     />
-    <p v-if="errorMessage" class="s-field__error" role="alert">{{ errorMessage }}</p>
     <template #footer>
       <SDialogActions
         :primary-loading="saving"
@@ -50,6 +49,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { computed, ref, watch } from 'vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
@@ -78,7 +78,6 @@ const fullAccessIds = computed(() => access.value?.fullAccessIds ?? null)
 const chooserOpen = ref(false)
 const selected = ref<string[]>([])
 const saving = ref(false)
-const errorMessage = ref('')
 
 async function load() {
   if (!props.storeId) return
@@ -94,7 +93,6 @@ async function load() {
 
 function openChooser() {
   selected.value = [...(fullAccessIds.value ?? [])]
-  errorMessage.value = ''
   chooserOpen.value = true
 }
 
@@ -106,7 +104,6 @@ function toggle(id: string, checked: boolean) {
 
 async function save() {
   saving.value = true
-  errorMessage.value = ''
   try {
     await authFetch('/api/workspace/full-access-staff', {
       method: 'POST',
@@ -116,7 +113,12 @@ async function save() {
     chooserOpen.value = false
     toast.success('Saved. Staff see the change next time they open Storvv.')
   } catch (error) {
-    errorMessage.value = getApiErrorMessage(error, 'Could not save. Please try again.')
+    toast.error(
+      friendlyDisplayMessage(
+        getApiErrorMessage(error, ''),
+        "Couldn't save staff access. Please try again."
+      )
+    )
   } finally {
     saving.value = false
   }

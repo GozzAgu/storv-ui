@@ -71,6 +71,10 @@
     <template v-else>
       <dl class="s-metrics">
         <div class="s-metrics__item">
+          <dt class="s-metrics__label">Awaiting approval</dt>
+          <dd class="s-metrics__value">{{ loanCountByStatus.pending_approval }}</dd>
+        </div>
+        <div class="s-metrics__item">
           <dt class="s-metrics__label">On loan</dt>
           <dd class="s-metrics__value">{{ loanCountByStatus.active }}</dd>
         </div>
@@ -82,11 +86,16 @@
           <dt class="s-metrics__label">Sold by borrower</dt>
           <dd class="s-metrics__value">{{ loanCountByStatus.sold }}</dd>
         </div>
-        <div class="s-metrics__item">
-          <dt class="s-metrics__label">Returned</dt>
-          <dd class="s-metrics__value">{{ loanCountByStatus.returned }}</dd>
-        </div>
       </dl>
+
+      <p v-if="loansAwaitingMe.length" class="s-notice" role="status">
+        {{
+          loansAwaitingMe.length === 1
+            ? '1 stock loan is waiting for your approval.'
+            : `${loansAwaitingMe.length} stock loans are waiting for your approval.`
+        }}
+        The goods stay in stock until you approve.
+      </p>
 
       <section class="s-table-card" aria-label="Stock loans">
         <div class="s-table-card__head">
@@ -95,8 +104,8 @@
 
         <SCard v-if="filteredLoans.length === 0">
           <SEmptyState
-            :title="`No ${statusFilter === 'sold' ? 'sold' : statusFilter} loans`"
-            description="Loans move between these tabs as you mark them sold or returned."
+            :title="emptyTitle"
+            description="Loans move between these tabs as they are approved, sold or returned."
           >
             <template #icon><Handshake :size="24" :stroke-width="1.75" /></template>
             <template #actions>
@@ -123,6 +132,9 @@
                     <span class="s-list__secondary"
                       >{{ unitLabel(loan) }} · {{ formatDay(loan.createdAt) }}</span
                     >
+                    <span v-if="loanDecision(loan)" class="s-list__secondary">{{
+                      loanDecision(loan)
+                    }}</span>
                   </button>
                   <span class="s-list__end">
                     <SBadge :tone="loanTone(loan.status)" size="sm">{{
@@ -130,7 +142,7 @@
                     }}</SBadge>
                   </span>
                   <SIconButton
-                    v-if="loan.status === 'active'"
+                    v-if="loanActions(loan).length"
                     :label="`Actions for loan to ${loan.partyName}`"
                     size="sm"
                     :data-stock-loan-actions-anchor="loan.id"
@@ -148,6 +160,9 @@
                     :label="`Units lent to ${loan.partyName}`"
                     show-empty
                   />
+                  <p v-if="loan.rejectionReason" class="s-loan__note">
+                    Rejected: {{ loan.rejectionReason }}
+                  </p>
                 </div>
               </li>
             </ul>
@@ -220,10 +235,13 @@
                       <SBadge :tone="loanTone(loan.status)" dot>{{
                         formatSellerLoanStatusLabel(loan.status)
                       }}</SBadge>
+                      <span v-if="loanDecision(loan)" class="s-table__secondary">{{
+                        loanDecision(loan)
+                      }}</span>
                     </td>
                     <td class="s-table__actions">
                       <SIconButton
-                        v-if="loan.status === 'active'"
+                        v-if="loanActions(loan).length"
                         :label="`Actions for loan to ${loan.partyName}`"
                         size="sm"
                         :data-stock-loan-actions-anchor="loan.id"
@@ -244,6 +262,9 @@
                           :label="`Units lent to ${loan.partyName}`"
                           show-empty
                         />
+                        <p v-if="loan.rejectionReason" class="s-loan__note">
+                          Rejected: {{ loan.rejectionReason }}
+                        </p>
                       </div>
                     </td>
                   </tr>
@@ -271,11 +292,37 @@
       @close="closeLoanMenu"
     >
       <SMenuItem
+        v-if="openMenuActions.includes('approve')"
+        label="Approve loan"
+        :icon="CircleCheck"
+        @select="handleLoanMenuApprove"
+      />
+      <SMenuItem
+        v-if="openMenuActions.includes('mark_sold')"
         label="Mark sold by borrower"
         :icon="CircleCheck"
         @select="handleLoanMenuMarkSold"
       />
-      <SMenuItem label="Return to stock" :icon="Undo2" @select="handleLoanMenuReturnToStore" />
+      <SMenuItem
+        v-if="openMenuActions.includes('return')"
+        label="Return to stock"
+        :icon="Undo2"
+        @select="handleLoanMenuReturnToStore"
+      />
+      <SMenuItem
+        v-if="openMenuActions.includes('reject')"
+        label="Reject"
+        :icon="CircleX"
+        danger
+        @select="handleLoanMenuReject"
+      />
+      <SMenuItem
+        v-if="openMenuActions.includes('cancel')"
+        label="Cancel request"
+        :icon="CircleX"
+        danger
+        @select="handleLoanMenuCancel"
+      />
     </SMenu>
 
     <SDialog
@@ -327,6 +374,49 @@
         >
       </template>
     </SDialog>
+
+    <SDialog
+      :open="Boolean(loanPendingReject)"
+      role="alertdialog"
+      size="sm"
+      title="Reject this stock loan?"
+      :description="
+        loanPendingReject
+          ? `${unitLabel(loanPendingReject)} for ${
+              loanPendingReject.partyName
+            } go back on your shelf as available.`
+          : undefined
+      "
+      :dismissible="loanActionBusyId === null"
+      @update:open="
+        (open: boolean) => {
+          if (!open && loanActionBusyId === null) loanPendingReject = null
+        }
+      "
+    >
+      <form id="stock-loan-reject-form" class="s-form" @submit.prevent="confirmReject">
+        <STextarea
+          v-model="rejectReason"
+          label="Reason"
+          required
+          :rows="3"
+          placeholder="For example, this retailer still owes for the last loan"
+        />
+      </form>
+      <template #footer>
+        <SButton :disabled="loanActionBusyId !== null" @click="loanPendingReject = null"
+          >Keep request</SButton
+        >
+        <SButton
+          variant="danger"
+          type="submit"
+          form="stock-loan-reject-form"
+          :loading="loanActionBusyId === loanPendingReject?.id"
+          :disabled="!rejectReason.trim()"
+          >Reject loan</SButton
+        >
+      </template>
+    </SDialog>
   </div>
 </template>
 
@@ -335,6 +425,7 @@ import { computed, ref, watch, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import {
   ChevronDown,
   CircleCheck,
+  CircleX,
   EllipsisVertical,
   Handshake,
   Lock,
@@ -355,6 +446,7 @@ import SPageHeader from '~/components/s/SPageHeader.vue'
 import SPagination from '~/components/s/SPagination.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import STabs from '~/components/s/STabs.vue'
+import STextarea from '~/components/s/STextarea.vue'
 import PlanGate from '~/components/subscription/PlanGate.vue'
 import StockItemDetailsList from '~/components/inventory/StockItemDetailsList.vue'
 import { useStockItemDetailsLookup } from '~/composables/useStockItemDetailsLookup'
@@ -366,6 +458,17 @@ import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import { useAppToast } from '~/composables/useAppToast'
+import { useStockLoanActor } from '~/composables/useStockLoanActor'
+import { getApiErrorMessage } from '~/utils/api-error-message'
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
+import { availableStockLoanActions } from '~/utils/stock-loan-policy'
+import { decidedByLine } from '~/utils/decided-by'
+import {
+  STOCK_LOAN_STATUS_LABELS,
+  STOCK_LOAN_STATUS_TONES,
+  type StockLoanAction,
+  type StockLoanStatus,
+} from '~/types/stock-loans'
 import {
   getVisibleMenuAnchorElement,
   computeFixedAnchoredMenuStyle,
@@ -387,18 +490,48 @@ const toast = useAppToast()
 const canAccessByRole = computed(() => can('sellerLoans', 'view'))
 const canAccessSellerLoansPlan = computed(() => canUseSubscriptionFeature('seller_loans'))
 
-type LoanStatusFilter = 'active' | 'returned' | 'sold' | 'all'
+type LoanStatusFilter = 'pending_approval' | 'active' | 'returned' | 'sold' | 'all'
 
-const statusFilter = ref<LoanStatusFilter>('active')
+const LOAN_TABS: readonly LoanStatusFilter[] = [
+  'pending_approval',
+  'active',
+  'sold',
+  'returned',
+  'all',
+]
+
+const loanActor = useStockLoanActor()
+
+function loanActions(loan: SellerLoanOut): StockLoanAction[] {
+  return availableStockLoanActions(loan, loanActor.value)
+}
+
+/** Loans this user can approve right now. */
+const loansAwaitingMe = computed(() =>
+  sellerLoansStore.loans.filter((loan) => loanActions(loan).includes('approve'))
+)
+
+// Notifications link to ?tab=pending_approval so approvers land on what is waiting for them.
+const requestedTab = useRoute().query.tab
+const statusFilter = ref<LoanStatusFilter>(
+  LOAN_TABS.includes(requestedTab as LoanStatusFilter)
+    ? (requestedTab as LoanStatusFilter)
+    : 'active'
+)
 const expandedLoanIds = ref<Set<string>>(new Set())
 
 const loanCountByStatus = computed(() => {
   const rows = sellerLoansStore.loans
-  return {
-    active: rows.filter((l) => l.status === 'active').length,
-    sold: rows.filter((l) => l.status === 'sold').length,
-    returned: rows.filter((l) => l.status === 'returned').length,
+  const counts: Record<StockLoanStatus, number> = {
+    pending_approval: 0,
+    active: 0,
+    returned: 0,
+    sold: 0,
+    rejected: 0,
+    cancelled: 0,
   }
+  for (const loan of rows) counts[loan.status] += 1
+  return counts
 })
 
 function toggleLoanLines(loanId: string) {
@@ -425,15 +558,20 @@ const itemsPerPage = ref(100)
 
 const filteredLoans = computed(() => {
   const rows = sellerLoansStore.loans
-  if (statusFilter.value === 'all') return rows
-  if (statusFilter.value === 'active') return rows.filter((l) => l.status === 'active')
-  if (statusFilter.value === 'sold') return rows.filter((l) => l.status === 'sold')
-  return rows.filter((l) => l.status === 'returned')
+  const filter = statusFilter.value
+  return filter === 'all' ? rows : rows.filter((l) => l.status === filter)
 })
+
+const emptyTitle = computed(() =>
+  statusFilter.value === 'all'
+    ? 'No loans'
+    : `Nothing ${STOCK_LOAN_STATUS_LABELS[statusFilter.value].toLowerCase()}`
+)
 
 const webLoanTabs = computed(() => {
   const counts = loanCountByStatus.value
   return [
+    { value: 'pending_approval', label: 'Awaiting approval', count: counts.pending_approval },
     { value: 'active', label: 'On loan', count: counts.active },
     { value: 'sold', label: 'Sold by borrower', count: counts.sold },
     { value: 'returned', label: 'Returned', count: counts.returned },
@@ -474,15 +612,23 @@ function loanItemRows(loan: SellerLoanOut): StockItemRow[] {
   })
 }
 
-function loanTone(status: SellerLoanOut['status']): 'info' | 'success' | 'neutral' {
-  if (status === 'active') return 'info'
-  if (status === 'sold') return 'success'
-  return 'neutral'
+function loanTone(status: SellerLoanOut['status']) {
+  return STOCK_LOAN_STATUS_TONES[status]
+}
+
+/** Who approved or rejected it: "Approved by Ada", "Rejected by you". */
+function loanDecision(loan: SellerLoanOut): string | null {
+  const viewer = loanActor.value.uid
+  if (loan.status === 'rejected') {
+    return decidedByLine('Rejected', loan.rejectedByName, loan.rejectedBy, viewer)
+  }
+  return decidedByLine('Approved', loan.approvedByName, loan.approvedBy, viewer)
 }
 
 function loanClosedAt(loan: SellerLoanOut): Date | undefined {
   if (loan.status === 'sold') return loan.soldAt
   if (loan.status === 'returned') return loan.returnedAt
+  if (loan.status === 'rejected') return loan.rejectedAt
   return undefined
 }
 
@@ -560,7 +706,7 @@ const toggleLoanMenu = (loanId: string) => {
 const loanForOpenMenu = computed(() => {
   const id = openLoanMenuId.value
   if (!id) return null
-  return sellerLoansStore.loans.find((l) => l.id === id && l.status === 'active') ?? null
+  return sellerLoansStore.loans.find((l) => l.id === id && loanActions(l).length > 0) ?? null
 })
 
 const loanMenuFixedStyle = ref<Record<string, string> | null>(null)
@@ -666,7 +812,75 @@ function handleLoanMenuReturnToStore() {
 
 const returningLoanId = ref<string | null>(null)
 const markingSoldLoanId = ref<string | null>(null)
-const loanActionBusyId = computed(() => returningLoanId.value ?? markingSoldLoanId.value)
+const decidingLoanId = ref<string | null>(null)
+const loanActionBusyId = computed(
+  () => returningLoanId.value ?? markingSoldLoanId.value ?? decidingLoanId.value
+)
+
+const openMenuActions = computed<StockLoanAction[]>(() =>
+  loanForOpenMenu.value ? loanActions(loanForOpenMenu.value) : []
+)
+
+function takeMenuLoan(): SellerLoanOut | null {
+  const loan = loanForOpenMenu.value
+  openLoanMenuId.value = null
+  return loan ?? null
+}
+
+function loanErrorMessage(error: unknown, fallback: string): string {
+  return friendlyDisplayMessage(getApiErrorMessage(error, ''), fallback)
+}
+
+/** Approve, reject or cancel; the server re-checks who may and refuses stale or self approvals. */
+async function decideLoan(
+  loan: SellerLoanOut,
+  action: 'approve' | 'reject' | 'cancel',
+  reason?: string
+): Promise<boolean> {
+  decidingLoanId.value = loan.id
+  try {
+    await sellerLoansStore.runLoanAction(loan.id, action, reason)
+    toast.success(
+      {
+        approve: `Approved. You can hand the goods to ${loan.partyName}.`,
+        reject: 'Loan rejected. The items are available again.',
+        cancel: 'Request cancelled. The items are available again.',
+      }[action]
+    )
+    return true
+  } catch (error: unknown) {
+    console.error('[StockLoans] Action failed:', error)
+    toast.error(loanErrorMessage(error, 'Couldn’t update this loan. Please try again.'))
+    return false
+  } finally {
+    decidingLoanId.value = null
+  }
+}
+
+function handleLoanMenuApprove() {
+  const loan = takeMenuLoan()
+  if (loan) void decideLoan(loan, 'approve')
+}
+
+function handleLoanMenuCancel() {
+  const loan = takeMenuLoan()
+  if (loan) void decideLoan(loan, 'cancel')
+}
+
+const loanPendingReject = ref<SellerLoanOut | null>(null)
+const rejectReason = ref('')
+
+function handleLoanMenuReject() {
+  loanPendingReject.value = takeMenuLoan()
+  rejectReason.value = ''
+}
+
+async function confirmReject() {
+  const loan = loanPendingReject.value
+  const reason = rejectReason.value.trim()
+  if (!loan || !reason || loanActionBusyId.value) return
+  if (await decideLoan(loan, 'reject', reason)) loanPendingReject.value = null
+}
 
 const showReturnModal = ref(false)
 const loanPendingReturn = ref<SellerLoanOut | null>(null)
@@ -711,7 +925,7 @@ async function confirmReturn() {
     showReturnModal.value = false
     loanPendingReturn.value = null
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Return failed')
+    toast.error(loanErrorMessage(e, 'Couldn’t return this stock. Please try again.'))
   } finally {
     confirmReturnLoading.value = false
     returningLoanId.value = null
@@ -741,7 +955,7 @@ async function confirmMarkSold() {
     showSoldModal.value = false
     loanPendingSold.value = null
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Could not mark sold')
+    toast.error(loanErrorMessage(e, 'Couldn’t mark these items sold. Please try again.'))
   } finally {
     confirmSoldLoading.value = false
     markingSoldLoanId.value = null

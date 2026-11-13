@@ -42,6 +42,10 @@
 </template>
 
 <script setup lang="ts">
+import { useAppToast } from '~/composables/useAppToast'
+import { friendlyErrorMessage } from '~/utils/friendly-error'
+
+const toast = useAppToast()
 import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
 import SField from '~/components/s/SField.vue'
@@ -103,7 +107,8 @@ async function save() {
     emit('saved')
     emit('update:modelValue', false)
   } catch (e: unknown) {
-    errorMessage.value = e instanceof Error ? e.message : 'Could not save lead'
+    console.error('[EditLeadModal] Save failed:', e)
+    toast.error(friendlyErrorMessage(e, "Couldn't save this lead. Please try again."))
   } finally {
     isSaving.value = false
   }

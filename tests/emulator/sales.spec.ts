@@ -14,7 +14,11 @@ import {
 import { recordRefusedOfflineSale } from '~/server/utils/sales/offline-refusal'
 import { cancelBalanceDue, recordBalancePayment, refundSale } from '~/server/utils/sales/balance'
 import { applyLedgerEntry } from '~/server/utils/sales/customer-ledger'
-import { closeStockLoan, createStockLoan } from '~/server/utils/sales/stock-loans'
+import {
+  closeStockLoan,
+  createStockLoan,
+  runStockLoanAction,
+} from '~/server/utils/sales/stock-loans'
 
 const OWNER = 'owner1'
 const STORE = 's1'
@@ -58,6 +62,9 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
     await member('manager', {
       permissions: { products: NO_PRODUCTS, receipts: { ...RECEIPTS, edit: true, refund: true } },
     })
+    // Branch admins: one the owner let approve stock loans, one they didn't.
+    await member('loanAdmin', { admin: true, adminGrants: { stockLoanApprovals: true } })
+    await member('plainAdmin', { admin: true, adminGrants: {} })
     await member('refunder', {
       permissions: { products: NO_PRODUCTS, receipts: { ...RECEIPTS, refund: true } },
     })
@@ -583,17 +590,52 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
   })
 
   describe('stock loans', () => {
-    it('lends free items and only lets managers mark loaned stock as sold', async () => {
+    const loanDoc = (id: string) => store().collection('sellerLoanOuts').doc(id)
+
+    it('holds a staff loan for approval, then only lets managers mark it sold', async () => {
       const cashier = await actor('cashier')
-      const { loanId } = await createStockLoan(db, cashier, {
+      const { loanId, status } = await createStockLoan(db, cashier, {
         partyName: 'Reseller',
         itemIds: ['iphone'],
       })
+      expect(status).toBe('pending_approval')
+      // Reserved while it waits: nobody can lend it twice.
+      expect((await item('iphone').get()).data()).toMatchObject({
+        sellerLoanOutId: loanId,
+        sellerLoanPending: true,
+      })
       await expect(
         createStockLoan(db, cashier, { partyName: 'Other', itemIds: ['iphone'] })
-      ).rejects.toMatchObject({
-        statusCode: 409,
+      ).rejects.toMatchObject({ statusCode: 409 })
+
+      // Approvers were told; the requester was not.
+      const feed = await store()
+        .collection('notifications')
+        .where('type', '==', 'stock_loan_awaiting_approval')
+        .get()
+      expect(feed.docs[0]?.data().recipientUids).toEqual([OWNER, 'loanAdmin'])
+
+      // Not out yet, so it cannot be sold or returned, and only an approver can release it.
+      await expect(
+        closeStockLoan(db, await actor('manager'), { loanId }, 'sold')
+      ).rejects.toMatchObject({ statusCode: 409 })
+      for (const uid of ['cashier', 'manager', 'plainAdmin']) {
+        await expect(
+          runStockLoanAction(db, await actor(uid), { loanId }, 'approve')
+        ).rejects.toMatchObject({ statusCode: 403 })
+      }
+      await runStockLoanAction(db, await actor('loanAdmin'), { loanId }, 'approve')
+      expect((await loanDoc(loanId).get()).data()).toMatchObject({
+        status: 'active',
+        approvedBy: 'loanAdmin',
+        approvedByName: expect.any(String),
       })
+      expect((await item('iphone').get()).data()?.sellerLoanPending).toBeUndefined()
+      // A second approval of the same loan is refused, not repeated.
+      await expect(
+        runStockLoanAction(db, await actor('owner1'), { loanId }, 'approve')
+      ).rejects.toMatchObject({ statusCode: 409 })
+
       await expect(closeStockLoan(db, cashier, { loanId }, 'sold')).rejects.toMatchObject({
         statusCode: 403,
       })
@@ -601,6 +643,35 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
       const iphone = (await item('iphone').get()).data()
       expect(iphone?.dateOut).toBeTruthy()
       expect(iphone?.sellerLoanOutId).toBeUndefined()
+    })
+
+    it('lets an approver lend straight away, and rejecting a request frees the stock', async () => {
+      const own = await createStockLoan(db, await actor('loanAdmin'), {
+        partyName: 'Trusted reseller',
+        itemIds: ['iphone'],
+      })
+      expect(own.status).toBe('active')
+      expect((await loanDoc(own.loanId).get()).data()).toMatchObject({ autoApproved: true })
+      await closeStockLoan(db, await actor('loanAdmin'), { loanId: own.loanId }, 'returned')
+
+      const { loanId } = await createStockLoan(db, await actor('cashier'), {
+        partyName: 'New reseller',
+        itemIds: ['iphone'],
+      })
+      const owner = await actor(OWNER)
+      await expect(runStockLoanAction(db, owner, { loanId }, 'reject')).rejects.toMatchObject({
+        statusCode: 400,
+      })
+      await runStockLoanAction(db, owner, { loanId, reason: 'Owes for the last loan' }, 'reject')
+      expect((await loanDoc(loanId).get()).data()).toMatchObject({
+        status: 'rejected',
+        rejectionReason: 'Owes for the last loan',
+        rejectedBy: OWNER,
+        rejectedByName: 'Ada Owner',
+      })
+      const iphone = (await item('iphone').get()).data()
+      expect(iphone?.sellerLoanOutId).toBeUndefined()
+      expect(iphone?.sellerLoanPending).toBeUndefined()
     })
   })
 })

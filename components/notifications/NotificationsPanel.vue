@@ -120,7 +120,9 @@ import {
   Bell,
   Building2,
   CheckCheck,
+  ArrowLeftRight,
   FileDown,
+  HandCoins,
   Network,
   Package,
   Receipt,
@@ -186,6 +188,8 @@ function getIcon(notification: Notification): Component {
   if (type.startsWith('lead')) return Target
   if (type === 'storefront_inquiry') return Store
   if (type.startsWith('trade_')) return Network
+  if (type.startsWith('transfer_')) return ArrowLeftRight
+  if (type.startsWith('stock_loan_')) return HandCoins
   if (type === 'swap_in_completed') return Repeat
   if (type === 'swap_in_needs_price') return Tag
   if (type === 'offline_sale_refused') return WifiOff
@@ -203,10 +207,18 @@ function getTone(notification: Notification): Tone {
     type === 'payout_changed' ||
     type === 'trade_loan_due' ||
     type === 'swap_in_needs_price' ||
-    type === 'offline_sale_refused'
+    type === 'offline_sale_refused' ||
+    type === 'transfer_rejected' ||
+    type === 'stock_loan_rejected'
   )
     return 'warning'
-  if (type === 'payment_awaiting_confirmation') return 'accent'
+  if (
+    type === 'payment_awaiting_confirmation' ||
+    type === 'transfer_awaiting_receipt' ||
+    type === 'stock_loan_awaiting_approval'
+  )
+    return 'accent'
+  if (type === 'transfer_received' || type === 'stock_loan_approved') return 'success'
   if (
     type === 'payment_received' ||
     type === 'trade_accepted' ||
@@ -268,7 +280,15 @@ async function handleNotificationClick(notification: Notification) {
 
   const meta = notification.metadata
   if (meta) {
-    if (notification.type === 'swap_in_needs_price') {
+    if (notification.type.startsWith('transfer_')) {
+      router.push('/dashboard/multi-store-sync?tab=history')
+    } else if (notification.type.startsWith('stock_loan_')) {
+      router.push(
+        notification.type === 'stock_loan_awaiting_approval'
+          ? '/dashboard/seller-loans?tab=pending_approval'
+          : '/dashboard/seller-loans'
+      )
+    } else if (notification.type === 'swap_in_needs_price') {
       router.push('/dashboard/inventory?tab=swap-ins&status=no-price')
     } else if (notification.type === 'offline_sale_refused') {
       router.push('/dashboard/receipts')

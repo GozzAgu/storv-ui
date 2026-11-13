@@ -37,7 +37,7 @@
 
     <p v-if="loadError" class="s-storefront__error" role="alert">
       <TriangleAlert :size="16" :stroke-width="1.75" aria-hidden="true" />
-      {{ loadError }}
+      {{ friendlyDisplayMessage(loadError) }}
     </p>
 
     <section class="s-table-card" aria-label="Inquiries">
@@ -325,6 +325,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { getDocs, limit, query } from 'firebase/firestore'
 import {

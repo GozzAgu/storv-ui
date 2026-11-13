@@ -1,7 +1,11 @@
 import { createError } from 'h3'
 import type { DocumentReference, Firestore } from 'firebase-admin/firestore'
 import { resolveEffectiveSubscriptionPlan, type SubscriptionPlan } from '~/types/subscription'
-import type { StaffPermissions } from '~/types/staff-permissions'
+import {
+  STAFF_ADMIN_GRANT_KEYS,
+  type StaffAdminGrants,
+  type StaffPermissions,
+} from '~/types/staff-permissions'
 import { canStaffAccessCategory, type CategoryAccessFields } from '~/utils/category-access'
 import {
   FULL_STAFF_PERMISSIONS,
@@ -23,12 +27,18 @@ export interface StoreActor {
   /** Branch admin (member doc `admin: true`). */
   isAdmin: boolean
   permissions: StaffPermissions
+  /** Branch admin extras the owner turned on. All on for the owner, all off for non-admins. */
+  adminGrants: StaffAdminGrants
   /** Branch admin extras (delete sales / settle commissions, ...). */
   canManageCommissions: boolean
   departmentId: string | null
   displayName: string
   plan: SubscriptionPlan
 }
+
+const ALL_STAFF_ADMIN_GRANTS: StaffAdminGrants = Object.fromEntries(
+  STAFF_ADMIN_GRANT_KEYS.map((key) => [key, true])
+) as unknown as StaffAdminGrants
 
 const ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/
 
@@ -102,6 +112,7 @@ export async function resolveStoreActor(
       isOwner: true,
       isAdmin: true,
       permissions: FULL_STAFF_PERMISSIONS,
+      adminGrants: ALL_STAFF_ADMIN_GRANTS,
       canManageCommissions: true,
       departmentId: null,
       displayName: String(owner.name || owner.email || 'Owner').slice(0, 80),
@@ -141,6 +152,10 @@ export async function resolveStoreActor(
   }
 
   const isAdmin = member.admin === true
+  // Extras only count while the member is an admin; a demoted admin keeps none of them.
+  const adminGrants = isAdmin
+    ? normalizeStaffAdminGrants(member.adminGrants)
+    : normalizeStaffAdminGrants(null)
   return {
     uid,
     ownerId,
@@ -149,7 +164,8 @@ export async function resolveStoreActor(
     isOwner: false,
     isAdmin,
     permissions: resolveStaffPermissions(member),
-    canManageCommissions: isAdmin && normalizeStaffAdminGrants(member.adminGrants).deleteSales,
+    adminGrants,
+    canManageCommissions: adminGrants.deleteSales,
     departmentId: member.departmentId ? String(member.departmentId) : null,
     displayName: name ?? 'Staff',
     plan,

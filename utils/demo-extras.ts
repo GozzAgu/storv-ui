@@ -29,12 +29,20 @@ type IsoBuyback = Omit<CustomerBuyback, 'createdAt' | 'updatedAt'> & {
   updatedAt: string
 }
 
-type IsoLoan = Omit<SellerLoanOut, 'createdAt' | 'updatedAt' | 'returnedAt' | 'soldAt'> & {
+type IsoLoan = Omit<
+  SellerLoanOut,
+  'createdAt' | 'updatedAt' | 'returnedAt' | 'soldAt' | 'approvedAt' | 'rejectedAt'
+> & {
   createdAt: string
   updatedAt: string
   returnedAt?: string
   soldAt?: string
+  approvedAt?: string
+  rejectedAt?: string
 }
+
+const isoOrUndefined = (d: unknown) => (d ? new Date(d as Date).toISOString() : undefined)
+const dateOrUndefined = (s?: string) => (s ? new Date(s) : undefined)
 
 type IsoSalesLead = Omit<SalesLead, 'createdAt' | 'updatedAt'> & {
   createdAt: string
@@ -645,8 +653,10 @@ export function getDemoExtrasLoans(storeId: string): SellerLoanOut[] {
       ...l,
       createdAt: new Date(l.createdAt),
       updatedAt: new Date(l.updatedAt),
-      returnedAt: l.returnedAt ? new Date(l.returnedAt) : undefined,
-      soldAt: l.soldAt ? new Date(l.soldAt) : undefined,
+      returnedAt: dateOrUndefined(l.returnedAt),
+      soldAt: dateOrUndefined(l.soldAt),
+      approvedAt: dateOrUndefined(l.approvedAt),
+      rejectedAt: dateOrUndefined(l.rejectedAt),
     }))
 }
 
@@ -658,8 +668,10 @@ export function setDemoExtrasLoansForStore(storeId: string, loans: SellerLoanOut
       ...l,
       createdAt: new Date(l.createdAt as Date).toISOString(),
       updatedAt: new Date(l.updatedAt as Date).toISOString(),
-      returnedAt: l.returnedAt ? new Date(l.returnedAt as Date).toISOString() : undefined,
-      soldAt: l.soldAt ? new Date(l.soldAt as Date).toISOString() : undefined,
+      returnedAt: isoOrUndefined(l.returnedAt),
+      soldAt: isoOrUndefined(l.soldAt),
+      approvedAt: isoOrUndefined(l.approvedAt),
+      rejectedAt: isoOrUndefined(l.rejectedAt),
     })),
   ]
   saveDemoExtras(extras)

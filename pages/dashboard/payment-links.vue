@@ -84,7 +84,9 @@
             <BadgeCheck :size="16" :stroke-width="2" aria-hidden="true" />
             {{ resolvedName }}
           </p>
-          <p v-if="connectError" class="s-paylinks__error" role="alert">{{ connectError }}</p>
+          <p v-if="connectError" class="s-paylinks__error" role="alert">
+            {{ friendlyDisplayMessage(connectError) }}
+          </p>
         </div>
 
         <template #footer>
@@ -360,6 +362,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { ref, computed, onMounted, watch, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import {

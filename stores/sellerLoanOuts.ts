@@ -8,6 +8,13 @@ import { getQueryUserId, getSellerLoanOutsCollection } from '~/composables/useFi
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
 import type { StockItemDetails } from '~/utils/stock-item-details'
+import {
+  OPEN_STOCK_LOAN_STATUSES,
+  normalizeStockLoanStatus,
+  type StockLoanAction,
+  type StockLoanStatus,
+} from '~/types/stock-loans'
+import { decideStockLoanAction } from '~/utils/stock-loan-policy'
 
 /** Max writes per Firestore batch (loan doc + item updates stay in one batch). */
 export const SELLER_LOAN_OUT_BATCH_CAP = 450
@@ -23,7 +30,7 @@ export interface SellerLoanLineSnapshot {
 export interface SellerLoanOut {
   id: string
   storeId: string
-  status: 'active' | 'returned' | 'sold'
+  status: StockLoanStatus
   partyName: string
   partyPhone: string
   partyNotes: string
@@ -33,6 +40,16 @@ export interface SellerLoanOut {
   returnedAt?: Date
   /** When all units were recorded as sold (e.g. borrower sold off-site). */
   soldAt?: Date
+  approvedAt?: Date
+  approvedBy?: string
+  /** Name saved when they approved, so the loan says who approved it. */
+  approvedByName?: string
+  /** The creator could approve loans, so it went out without waiting. */
+  autoApproved?: boolean
+  rejectedAt?: Date
+  rejectedBy?: string
+  rejectedByName?: string
+  rejectionReason?: string
   createdBy: string
 }
 
@@ -49,14 +66,13 @@ function snapshotToDate(v: unknown): Date | undefined {
   return undefined
 }
 
+const optionalString = (v: unknown) => (typeof v === 'string' && v ? v : undefined)
+
 function mapLoanDoc(id: string, data: Record<string, unknown>): SellerLoanOut {
-  const rawStatus = typeof data.status === 'string' ? data.status : 'active'
-  const status: SellerLoanOut['status'] =
-    rawStatus === 'returned' ? 'returned' : rawStatus === 'sold' ? 'sold' : 'active'
   return {
     id,
     storeId: (data.storeId as string) || '',
-    status,
+    status: normalizeStockLoanStatus(data.status),
     partyName: (data.partyName as string) || '',
     partyPhone: (data.partyPhone as string) ?? '',
     partyNotes: (data.partyNotes as string) || '',
@@ -65,6 +81,14 @@ function mapLoanDoc(id: string, data: Record<string, unknown>): SellerLoanOut {
     updatedAt: snapshotToDate(data.updatedAt),
     returnedAt: snapshotToDate(data.returnedAt),
     soldAt: snapshotToDate(data.soldAt),
+    approvedAt: snapshotToDate(data.approvedAt),
+    approvedBy: optionalString(data.approvedBy),
+    approvedByName: optionalString(data.approvedByName),
+    rejectedBy: optionalString(data.rejectedBy),
+    rejectedByName: optionalString(data.rejectedByName),
+    autoApproved: data.autoApproved === true,
+    rejectedAt: snapshotToDate(data.rejectedAt),
+    rejectionReason: typeof data.rejectionReason === 'string' ? data.rejectionReason : undefined,
     createdBy: (data.createdBy as string) || '',
   }
 }
@@ -132,9 +156,9 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
       }
     },
 
-    /** A sale can only change a loan that is still active, so skip the re-read when none are */
+    /** A sale can only change a loan that is still open, so skip the re-read when none are */
     async refreshAfterSale() {
-      if (!this.loans.some((loan) => loan.status === 'active')) return
+      if (!this.loans.some((loan) => OPEN_STOCK_LOAN_STATUSES.has(loan.status))) return
       await this.fetchSellerLoanOuts(true)
     },
 
@@ -167,7 +191,8 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
         })
         const { setDemoExtrasLoansForStore } = await import('~/utils/demo-extras')
         setDemoExtrasLoansForStore(demoStoreId, this.loans)
-        return loanId
+        // The demo user is the owner, whose loans go out without waiting.
+        return { loanId, status: 'active' as StockLoanStatus }
       }
 
       const name = params.partyName.trim()
@@ -182,7 +207,7 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
 
       // The server checks each item is in stock and free, and writes the loan and items together.
       const { useSalesApi } = await import('~/composables/useSalesApi')
-      const { loanId } = await useSalesApi().createStockLoan({
+      const created = await useSalesApi().createStockLoan({
         partyName: name,
         partyPhone: params.partyPhone.trim(),
         partyNotes: (params.partyNotes || '').trim(),
@@ -190,57 +215,71 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
       })
       new Set(lines.map((l) => l.folderId)).forEach((fid) => invalidateFolderItemCaches(fid))
       await this.fetchSellerLoanOuts(true)
-      return loanId
+      return created
     },
 
-    async returnSellerLoanOut(loanId: string) {
+    /**
+     * Approve, reject, cancel, return or mark sold. The server decides (utils/stock-loan-policy.ts);
+     * demo mode applies the same transition locally as the owner.
+     */
+    async runLoanAction(loanId: string, action: StockLoanAction, reason?: string) {
+      assertPlanWritable()
+      const loan = this.loans.find((l) => l.id === loanId)
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
-        const loan = this.loans.find((l) => l.id === loanId)
         if (!loan) throw new Error('Loan not found')
-        if (loan.status === 'returned') throw new Error('This loan was already marked as returned')
-        if (loan.status === 'sold') throw new Error('This loan was already marked as sold')
-        loan.status = 'returned'
-        loan.returnedAt = new Date()
-        loan.updatedAt = new Date()
+        const decision = decideStockLoanAction(
+          loan,
+          action,
+          {
+            uid: loan.createdBy,
+            isOwner: true,
+            canApprove: true,
+            canEdit: true,
+            canMarkSold: true,
+          },
+          reason
+        )
+        if (!decision.ok) throw new Error(decision.message)
+        const now = new Date()
+        loan.status = decision.to
+        loan.updatedAt = now
+        // The demo visitor is the owner and made the decision, so the loan names them as "you".
+        if (action === 'approve') Object.assign(loan, { approvedAt: now, approvedByName: 'you' })
+        if (action === 'reject') {
+          Object.assign(loan, { rejectedAt: now, rejectedByName: 'you', rejectionReason: reason })
+        }
+        if (action === 'return') loan.returnedAt = now
+        if (action === 'mark_sold') loan.soldAt = now
         const { setDemoExtrasLoansForStore } = await import('~/utils/demo-extras')
         setDemoExtrasLoansForStore(loan.storeId, this.loans)
         return
       }
 
-      const loan = this.loans.find((l) => l.id === loanId)
       const { useSalesApi } = await import('~/composables/useSalesApi')
-      await useSalesApi().returnStockLoan(loanId)
+      const api = useSalesApi()
+      const calls: Record<StockLoanAction, () => Promise<unknown>> = {
+        approve: () => api.approveStockLoan(loanId),
+        reject: () => api.rejectStockLoan(loanId, reason ?? ''),
+        cancel: () => api.cancelStockLoan(loanId),
+        return: () => api.returnStockLoan(loanId),
+        mark_sold: () => api.markStockLoanSold(loanId),
+      }
+      await calls[action]()
+      // Approving keeps the items reserved; every other move frees or removes them.
       new Set(loan?.lines.map((l) => l.folderId) ?? []).forEach((fid) =>
         invalidateFolderItemCaches(fid)
       )
       await this.fetchSellerLoanOuts(true)
     },
 
-    /** Borrower sold all units off‑POS: mark inventory sold (dateOut), clear loan fields, close loan as sold. */
-    async markSellerLoanOutSold(loanId: string) {
-      const { isDemoModeActive } = await import('~/utils/demo-mode')
-      if (isDemoModeActive()) {
-        const loan = this.loans.find((l) => l.id === loanId)
-        if (!loan) throw new Error('Loan not found')
-        if (loan.status === 'returned') throw new Error('This loan was already marked as returned')
-        if (loan.status === 'sold') throw new Error('This loan was already marked as sold')
-        loan.status = 'sold'
-        loan.soldAt = new Date()
-        loan.updatedAt = new Date()
-        const { setDemoExtrasLoansForStore } = await import('~/utils/demo-extras')
-        setDemoExtrasLoansForStore(loan.storeId, this.loans)
-        return
-      }
+    returnSellerLoanOut(loanId: string) {
+      return this.runLoanAction(loanId, 'return')
+    },
 
-      // Owner or managers only: the items leave stock with no sale recorded here.
-      const loan = this.loans.find((l) => l.id === loanId)
-      const { useSalesApi } = await import('~/composables/useSalesApi')
-      await useSalesApi().markStockLoanSold(loanId)
-      new Set(loan?.lines.map((l) => l.folderId) ?? []).forEach((fid) =>
-        invalidateFolderItemCaches(fid)
-      )
-      await this.fetchSellerLoanOuts(true)
+    /** Borrower sold all units off the till: they leave stock with no sale recorded here. */
+    markSellerLoanOutSold(loanId: string) {
+      return this.runLoanAction(loanId, 'mark_sold')
     },
   },
 })

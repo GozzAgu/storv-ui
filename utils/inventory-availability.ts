@@ -66,10 +66,15 @@ export function availabilityBadgeForAvailable(): InventoryAvailabilityBadge {
   }
 }
 
-export function availabilityBadgeForStockLoan(): InventoryAvailabilityBadge {
+/** Set aside for a stock loan that an admin has not approved yet: don't hand it over. */
+export function isItemStockLoanPending(item: InventoryItem): boolean {
+  return isItemOnStockLoan(item) && item.sellerLoanPending === true
+}
+
+export function availabilityBadgeForStockLoan(pending = false): InventoryAvailabilityBadge {
   return {
     status: 'with_seller',
-    label: 'On stock loan',
+    label: pending ? 'Loan awaiting approval' : 'On stock loan',
   }
 }
 

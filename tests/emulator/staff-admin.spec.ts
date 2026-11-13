@@ -351,6 +351,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)(
         storeSettings: false,
         dataExport: false,
         stockTransfers: false,
+        stockLoanApprovals: false,
       })
       const member = (await s1.collection('members').doc('staff1').get()).data()!
       expect(member.admin).toBe(true)

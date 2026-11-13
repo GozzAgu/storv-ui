@@ -189,6 +189,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import SDialog from '~/components/s/SDialog.vue'
 import SCheckbox from '~/components/s/SCheckbox.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
@@ -626,9 +627,13 @@ const handleSubmit = async () => {
     emit('success')
     emit('update:modelValue', false)
   } catch (error: any) {
-    errorMessage.value =
-      error?.data?.message || error?.message || 'Failed to save staff member. Please try again.'
-    emit('error', errorMessage.value)
+    console.error('[StaffModal] Save failed:', error)
+    const message = friendlyDisplayMessage(
+      getApiErrorMessage(error, ''),
+      "Couldn't save this staff member. Please try again."
+    )
+    toast.error(message)
+    emit('error', message)
   } finally {
     isSubmitting.value = false
   }

@@ -25,11 +25,14 @@
         </ul>
       </li>
     </ol>
-    <p v-if="error" class="s-field__hint s-receipt-edits__note">{{ error }}</p>
+    <p v-if="error" class="s-field__hint s-receipt-edits__note">
+      {{ friendlyDisplayMessage(error) }}
+    </p>
   </section>
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { computed } from 'vue'
 import type { Receipt } from '~/stores/receipts'
 import { useReceiptEdits } from '~/composables/useReceiptEdits'
