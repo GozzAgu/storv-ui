@@ -108,12 +108,15 @@ export async function updateDemoTransferStatus(
   const transfer = demo.state.transfers.find((t) => t.id === transferId)
   if (!transfer) throw new Error('Transfer not found')
   transfer.status = status
+  const now = new Date().toISOString()
+  if (status === 'in_transit' && !transfer.dispatchedAt) transfer.dispatchedAt = now
+  if (status === 'rejected') transfer.rejectedAt = now
   if (extra) Object.assign(transfer, extra)
   demo.persist()
   await syncDemoToPinia()
 }
 
-/** Move stock between demo stores when a transfer is completed. */
+/** Move stock between demo stores when the receiving branch approves a transfer. */
 export async function executeDemoTransfer(transfer: DemoTransfer) {
   const demo = useDemoAppStore()
   const source = demo.getStore(transfer.sourceStoreId)
@@ -147,6 +150,7 @@ export async function executeDemoTransfer(transfer: DemoTransfer) {
   }
 
   transfer.status = 'completed'
+  transfer.receivedAt = new Date().toISOString()
   demo.persist()
   await syncDemoToPinia()
 }

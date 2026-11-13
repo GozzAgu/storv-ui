@@ -30,8 +30,6 @@
           />
         </SField>
       </SFormSection>
-
-      <p v-if="errorMessage" class="s-field__error" role="alert">{{ errorMessage }}</p>
     </SForm>
 
     <template #footer>
@@ -59,6 +57,8 @@ import { ref, watch, computed } from 'vue'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { CORE_DEPARTMENTS } from '~/composables/useDepartments'
+import { useAppToast } from '~/composables/useAppToast'
+import { friendlyErrorMessage } from '~/utils/friendly-error'
 import type { Department } from '~/composables/useDepartments'
 
 interface Props {
@@ -90,7 +90,7 @@ const formData = ref({
 })
 
 const isSubmitting = ref(false)
-const errorMessage = ref('')
+const toast = useAppToast()
 
 const isEdit = computed(() => !!props.department)
 
@@ -118,7 +118,6 @@ const resetForm = () => {
     description: '',
     departmentType: '',
   }
-  errorMessage.value = ''
   isSubmitting.value = false
 }
 
@@ -128,18 +127,17 @@ const handleClose = () => {
 
 const handleSubmit = async () => {
   if (!formData.value.name || !formData.value.departmentType) {
-    errorMessage.value = 'Please fill in all required fields'
+    toast.warning('Choose a department type and enter a name.')
     return
   }
 
   isSubmitting.value = true
-  errorMessage.value = ''
 
   try {
     if (isEdit.value && props.department) {
       await departmentsStore.updateDepartment(props.department.id, {
         name: formData.value.name,
-        description: formData.value.description || undefined,
+        description: formData.value.description.trim(),
         departmentType: formData.value.departmentType,
       })
       emit('success', 'update')
@@ -160,7 +158,7 @@ const handleSubmit = async () => {
       try {
         await departmentsStore.createDepartment({
           name: formData.value.name,
-          description: formData.value.description || undefined,
+          description: formData.value.description.trim(),
           departmentType: formData.value.departmentType,
         })
         emit('success', 'create')
@@ -176,9 +174,15 @@ const handleSubmit = async () => {
       }
     }
   } catch (error: unknown) {
-    errorMessage.value =
-      error instanceof Error ? error.message : 'Failed to save department. Please try again.'
-    emit('error', errorMessage.value)
+    console.error('[DepartmentModal] Save failed:', error)
+    const message = friendlyErrorMessage(
+      error,
+      isEdit.value
+        ? "Couldn't update the department. Please try again."
+        : "Couldn't create the department. Please try again."
+    )
+    toast.error(message)
+    emit('error', message)
   } finally {
     isSubmitting.value = false
   }

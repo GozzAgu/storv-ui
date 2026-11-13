@@ -42,6 +42,7 @@ import {
 } from './actor'
 import { verifyApprovalPin } from './approval-pin'
 import { logSaleActivity } from './records'
+import { OPEN_STOCK_LOAN_STATUSES, normalizeStockLoanStatus } from '~/types/stock-loans'
 
 /** Most lines one sale may carry (each line is up to two writes in one transaction). */
 export const MAX_SALE_LINES = 150
@@ -643,6 +644,7 @@ export async function createSale(
       sellerLoanPartyName: FieldValue.delete(),
       sellerLoanPartyPhone: FieldValue.delete(),
       sellerLoanOutAt: FieldValue.delete(),
+      sellerLoanPending: FieldValue.delete(),
     }
     for (const line of lines) {
       if (isBalanceDue) {
@@ -683,7 +685,8 @@ export async function createSale(
     }
     for (const snap of loanSnaps) {
       const data = snap.data()
-      if (!snap.exists || !data || data.status === 'returned' || data.status === 'sold') continue
+      const loanStatus = normalizeStockLoanStatus(data?.status)
+      if (!snap.exists || !data || !OPEN_STOCK_LOAN_STATUSES.has(loanStatus)) continue
       const sold = soldByLoan.get(snap.id)
       if (!sold) continue
       const rawLines = Array.isArray(data.lines)
@@ -694,7 +697,11 @@ export async function createSale(
       tx.update(snap.ref, {
         lines: kept,
         updatedAt: FieldValue.serverTimestamp(),
-        ...(kept.length === 0 && { status: 'returned', returnedAt: FieldValue.serverTimestamp() }),
+        // Everything on the loan sold here: a loan that never went out is simply withdrawn.
+        ...(kept.length === 0 &&
+          (loanStatus === 'pending_approval'
+            ? { status: 'cancelled', cancelledAt: FieldValue.serverTimestamp() }
+            : { status: 'returned', returnedAt: FieldValue.serverTimestamp() })),
       })
     }
 

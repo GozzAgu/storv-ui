@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info'
 
@@ -32,7 +33,8 @@ export const useAppToast = () => {
     const id = `toast-${++toastIdCounter}-${Date.now()}`
     const toast: Toast = {
       id,
-      message,
+      // Raw cloud SDK text (paths, setDoc() validation, error codes) never reaches a toast
+      message: friendlyDisplayMessage(message),
       type,
       duration,
     }
@@ -89,7 +91,7 @@ export const useAppToast = () => {
     const id = `toast-${++toastIdCounter}-${Date.now()}`
     const toast: Toast = {
       id,
-      message,
+      message: friendlyDisplayMessage(message),
       type: 'info',
       duration: options.duration ?? 5000,
       action: options.action,

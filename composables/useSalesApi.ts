@@ -1,3 +1,4 @@
+import type { StockLoanStatus } from '~/types/stock-loans'
 import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
@@ -215,7 +216,13 @@ export function useSalesApi() {
       partyPhone: string
       partyNotes?: string
       itemIds: string[]
-    }) => post<{ loanId: string }>('/api/stock-loans/create', input),
+    }) => post<{ loanId: string; status: StockLoanStatus }>('/api/stock-loans/create', input),
+    approveStockLoan: (loanId: string) =>
+      post<{ status: StockLoanStatus }>('/api/stock-loans/approve', { loanId }),
+    rejectStockLoan: (loanId: string, reason: string) =>
+      post<{ status: StockLoanStatus }>('/api/stock-loans/reject', { loanId, reason }),
+    cancelStockLoan: (loanId: string) =>
+      post<{ status: StockLoanStatus }>('/api/stock-loans/cancel', { loanId }),
     returnStockLoan: (loanId: string) => post<{ ok: true }>('/api/stock-loans/return', { loanId }),
     markStockLoanSold: (loanId: string) =>
       post<{ ok: true }>('/api/stock-loans/mark-sold', { loanId }),

@@ -4,7 +4,7 @@
     description="Customers with a phone number or email on their sales earn points on what they pay. Top spenders move up tiers and earn faster."
   >
     <SSkeleton v-if="loading" :lines="4" />
-    <p v-else-if="loadError" class="s-form-meta">{{ loadError }}</p>
+    <p v-else-if="loadError" class="s-form-meta">{{ friendlyDisplayMessage(loadError) }}</p>
     <form v-else id="loyalty-settings-form" class="s-settings__rows" @submit.prevent="save">
       <div class="s-settings__row">
         <SCheckbox
@@ -100,6 +100,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { computed, onMounted, ref } from 'vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'

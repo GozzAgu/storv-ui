@@ -7,7 +7,7 @@
       </div>
 
       <div v-else-if="error" class="s-receipt-public__error" role="alert">
-        {{ error }}
+        {{ friendlyDisplayMessage(error) }}
       </div>
 
       <article v-else-if="receipt" class="s-receipt-doc">
@@ -67,6 +67,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import SSpinner from '~/components/s/SSpinner.vue'
 
 definePageMeta({ layout: false })

@@ -114,7 +114,9 @@
           @input="formatCode"
         />
 
-        <p v-if="errorMessage" class="s-profile-error" role="alert">{{ errorMessage }}</p>
+        <p v-if="errorMessage" class="s-profile-error" role="alert">
+          {{ friendlyDisplayMessage(errorMessage) }}
+        </p>
       </template>
 
       <template v-if="step === 4">
@@ -189,6 +191,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import SDialog from '~/components/s/SDialog.vue'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { CircleCheck, Copy, Download, ShieldCheck, Smartphone } from '@lucide/vue'

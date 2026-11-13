@@ -89,7 +89,13 @@ const ADMIN_EXTRAS: Array<{ key: keyof StaffAdminGrants; label: string; descript
     key: 'stockTransfers',
     label: 'Transfer stock to other branches',
     description:
-      'Admins can always see transfers to and from their branch. This also lets them request, approve and complete them. Fine-tune it under Multi-store sync below.',
+      'Admins can always see transfers to and from their branch, and approve stock arriving here. This also lets them request and dispatch transfers. Fine-tune it under Multi-store sync below.',
+  },
+  {
+    key: 'stockLoanApprovals',
+    label: 'Approve stock loans',
+    description:
+      'Staff loans to smaller retailers wait for approval before the goods go out. Loans this admin creates go out straight away.',
   },
 ]
 

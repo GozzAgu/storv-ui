@@ -2,7 +2,9 @@
   <section v-if="visible" class="s-form-section s-pay-links">
     <h3 class="s-form-section__title">Payment links</h3>
 
-    <p v-if="loadError" class="s-form-meta s-pay-links__error">{{ loadError }}</p>
+    <p v-if="loadError" class="s-form-meta s-pay-links__error">
+      {{ friendlyDisplayMessage(loadError) }}
+    </p>
     <p v-else-if="!loading && links.length === 0" class="s-form-meta">
       No payment links for this sale yet.
     </p>
@@ -106,6 +108,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { computed, ref, watch } from 'vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'

@@ -1,3 +1,4 @@
+import type { TransferStatus } from '~/types/transfers'
 export interface DemoFolder {
   id: string
   name: string
@@ -92,11 +93,15 @@ export interface DemoTransfer {
   itemsCount: number
   hasSerialNumbers: boolean
   notes: string
-  status: 'pending_approval' | 'approved' | 'in_transit' | 'completed' | 'rejected' | 'cancelled'
+  status: TransferStatus
   createdBy: string
   createdAt: string
   carrier?: string
   trackingNumber?: string
+  dispatchedAt?: string
+  receivedAt?: string
+  rejectedAt?: string
+  rejectionReason?: string
 }
 
 export interface DemoState {

@@ -64,7 +64,9 @@
       >
         {{ processing ? 'Redirecting…' : `Pay ${formatNaira(koboToNaira(view.amountKobo))}` }}
       </SButton>
-      <p v-if="payError" class="s-pay__error" role="alert">{{ payError }}</p>
+      <p v-if="payError" class="s-pay__error" role="alert">
+        {{ friendlyDisplayMessage(payError) }}
+      </p>
     </form>
 
     <p class="s-pay__foot">
@@ -75,6 +77,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { computed, onMounted, ref } from 'vue'
 import { Check, Lock, TriangleAlert } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'

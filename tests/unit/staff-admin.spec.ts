@@ -134,6 +134,7 @@ describe('normalizeStaffAdminGrants', () => {
       storeSettings: false,
       dataExport: false,
       stockTransfers: false,
+      stockLoanApprovals: false,
     })
     const g = normalizeStaffAdminGrants({ deleteSales: true, branches: 'true', owner: true })
     expect(g.deleteSales).toBe(true)

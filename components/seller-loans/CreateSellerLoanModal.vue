@@ -13,6 +13,10 @@
           Selected serial items are marked as on a stock loan to the borrower below. Selling on a
           receipt or choosing Mark sold on Stock loans marks units sold and updates this loan.
         </p>
+        <p v-if="!loanActor.canApprove" class="s-notice">
+          This loan needs an admin’s approval. The items are set aside now, but don’t hand them over
+          until it’s approved.
+        </p>
       </SFormSection>
 
       <SFormSection>
@@ -77,6 +81,7 @@ import type { InventoryItem } from '~/stores/inventory'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { useAppToast } from '~/composables/useAppToast'
+import { useStockLoanActor } from '~/composables/useStockLoanActor'
 
 const props = defineProps<{
   modelValue: boolean
@@ -91,6 +96,7 @@ const emit = defineEmits<{
 
 const sellerLoansStore = useSellerLoanOutsStore()
 const toast = useAppToast()
+const loanActor = useStockLoanActor()
 const { pickListClass, pickListScrollClass, pickRowClass, pickRowTitleClass } =
   useDashboardDrawerChrome()
 
@@ -121,13 +127,17 @@ async function submit() {
       folderId: props.folderId,
       itemSummary: getInventoryItemDisplayName(it),
     }))
-    await sellerLoansStore.createSellerLoanOut({
+    const { status } = await sellerLoansStore.createSellerLoanOut({
       partyName: partyNameTrimmed.value,
       partyPhone: partyPhone.value.trim(),
       partyNotes: partyNotes.value,
       lines,
     })
-    toast.success('Stock loan recorded. Items stay on loan until sold or returned to the store.')
+    toast.success(
+      status === 'pending_approval'
+        ? 'Sent for approval. Hold on to the goods until an admin approves the loan.'
+        : 'Stock loan recorded. Items stay on loan until sold or returned to the store.'
+    )
     emit('update:modelValue', false)
     emit('success')
   } catch (e: unknown) {

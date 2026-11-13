@@ -5,8 +5,19 @@ import { planHasFeature } from '~/types/subscription'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import { folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
 import { snapshotStockItemDetails } from '~/utils/stock-item-details'
+import { normalizeStockLoanStatus, type StockLoanAction } from '~/types/stock-loans'
+import { normalizeReason } from '~/utils/approval-decision'
+import {
+  canApproveStockLoans,
+  decideStockLoanAction,
+  initialStockLoanStatus,
+  isStockLoanAction,
+  type StockLoanActor,
+} from '~/utils/stock-loan-policy'
+import { enforce } from '~/server/utils/approvals/enforce'
 import { actorCanApproveDiscounts, actorCanUseCategory, assertId, forbid, type StoreActor } from './actor'
 import { logSaleActivity } from './records'
+import { notifyStockLoanChange } from './stock-loan-notify'
 
 /** Loan doc plus one write per item must fit in one transaction. */
 export const STOCK_LOAN_MAX_LINES = 450
@@ -27,9 +38,25 @@ const clearLoan = {
   sellerLoanPartyName: FieldValue.delete(),
   sellerLoanPartyPhone: FieldValue.delete(),
   sellerLoanOutAt: FieldValue.delete(),
+  sellerLoanPending: FieldValue.delete(),
 }
 
-/** Lends items to a seller or reseller. Items must be in stock, unheld and not already lent. */
+/** The store actor in the stock-loan policy's terms. */
+export function toStockLoanActor(actor: StoreActor): StockLoanActor {
+  return {
+    uid: actor.uid,
+    isOwner: actor.isOwner,
+    canApprove: canApproveStockLoans(actor),
+    canEdit: actor.permissions.sellerLoans.edit === true,
+    canMarkSold: actorCanApproveDiscounts(actor),
+  }
+}
+
+/**
+ * Lends items to a seller or reseller. Items must be in stock, unheld and not already lent. A loan
+ * from someone who can't approve loans waits for approval: its items are reserved straight away
+ * (so they can't be sold or lent twice) but marked pending until an approver releases them.
+ */
 export async function createStockLoan(db: Firestore, actor: StoreActor, input: Record<string, unknown>) {
   requireEnterprise(actor)
   if (!actor.isOwner && !actor.permissions.sellerLoans.create) forbid('You can’t create stock loans.')
@@ -43,10 +70,12 @@ export async function createStockLoan(db: Firestore, actor: StoreActor, input: R
     bad(`A stock loan can include at most ${STOCK_LOAN_MAX_LINES} items at once. Split into multiple loans.`)
   }
 
+  const status = initialStockLoanStatus(toStockLoanActor(actor))
+  const pending = status === 'pending_approval'
   const loanRef = actor.store.collection('sellerLoanOuts').doc()
   // Big loans keep fewer details per unit so the loan stays well inside one document.
   const detailBudget = itemIds.length > 150 ? 6 : 16
-  return db.runTransaction(async (tx) => {
+  const result = await db.runTransaction(async (tx) => {
     const snaps = await tx.getAll(...itemIds.map((id) => actor.store.collection('inventoryItems').doc(id)))
     const folderIds = [...new Set(snaps.map((s) => String(s.data()?.folderId || '')).filter(Boolean))]
     const folderSnaps = folderIds.length
@@ -74,7 +103,7 @@ export async function createStockLoan(db: Firestore, actor: StoreActor, input: R
 
     tx.create(loanRef, {
       storeId: actor.storeId,
-      status: 'active',
+      status,
       partyName,
       partyPhone,
       partyNotes,
@@ -82,6 +111,12 @@ export async function createStockLoan(db: Firestore, actor: StoreActor, input: R
       createdBy: actor.uid,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
+      // An approver's own loan is approved by creating it; say so rather than leave it blank.
+      ...(!pending && {
+        approvedBy: actor.uid,
+        approvedAt: FieldValue.serverTimestamp(),
+        autoApproved: true,
+      }),
     })
     for (const snap of snaps) {
       tx.update(snap.ref, {
@@ -89,6 +124,7 @@ export async function createStockLoan(db: Firestore, actor: StoreActor, input: R
         sellerLoanPartyName: partyName,
         sellerLoanPartyPhone: partyPhone,
         sellerLoanOutAt: FieldValue.serverTimestamp(),
+        ...(pending && { sellerLoanPending: true }),
         updatedAt: FieldValue.serverTimestamp(),
       })
     }
@@ -97,67 +133,130 @@ export async function createStockLoan(db: Firestore, actor: StoreActor, input: R
         action: 'created',
         entityType: 'items_batch',
         entityId: loanRef.id,
-        entityName: `Loaned ${lines.length} item(s) to ${partyName}`,
+        entityName: pending
+          ? `Requested a stock loan of ${lines.length} item(s) to ${partyName}`
+          : `Loaned ${lines.length} item(s) to ${partyName}`,
       })
     }
-    return { loanId: loanRef.id }
+    return { loanId: loanRef.id, status, itemCount: lines.length }
   })
+
+  if (pending) {
+    await notifyStockLoanChange(db, actor, {
+      loanId: result.loanId,
+      event: 'requested',
+      partyName,
+      itemCount: result.itemCount,
+      createdBy: actor.uid,
+    })
+  }
+  return { loanId: result.loanId, status: result.status }
+}
+
+const ACTIVITY_TEXT: Record<StockLoanAction, (party: string, n: number) => string> = {
+  approve: (party, n) => `Approved stock loan to ${party} (${n} item(s))`,
+  reject: (party, n) => `Rejected stock loan to ${party} (${n} item(s))`,
+  cancel: (party, n) => `Cancelled stock loan request to ${party} (${n} item(s))`,
+  return: (party, n) => `Returned stock loan from ${party} (${n} item(s))`,
+  mark_sold: (party, n) => `Stock loan (${party}): marked ${n} item(s) sold`,
 }
 
 /**
- * Closes an active loan. `returned`: the items come back to stock. `sold`: the borrower sold them
- * off the till, so they leave stock with no sale here; only managers may do that.
+ * Moves a loan through its workflow (see utils/stock-loan-policy.ts):
+ *  - approve: the reserved items go out to the borrower.
+ *  - reject / cancel: the reservation is released and the items are back in stock.
+ *  - return: the borrower brought the items back.
+ *  - mark_sold: the borrower sold them off the till, so they leave stock with no sale here.
+ * The decision is taken on the loan as read inside the transaction, so concurrent approvers
+ * cannot both succeed.
  */
-export async function closeStockLoan(
+export async function runStockLoanAction(
   db: Firestore,
   actor: StoreActor,
   input: Record<string, unknown>,
-  outcome: 'returned' | 'sold'
+  actionRaw: unknown
 ) {
   requireEnterprise(actor)
-  if (!actor.isOwner && !actor.permissions.sellerLoans.edit) forbid('You can’t update stock loans.')
-  if (outcome === 'sold' && !actorCanApproveDiscounts(actor)) {
-    forbid('Only the owner or a manager can mark loaned stock as sold.')
-  }
+  if (!isStockLoanAction(actionRaw)) bad('Unknown stock loan action')
+  const action: StockLoanAction = actionRaw
   const loanId = assertId(input.loanId, 'loanId')
+  const reason = normalizeReason(input.reason)
   const loanRef = actor.store.collection('sellerLoanOuts').doc(loanId)
 
-  await db.runTransaction(async (tx) => {
+  const outcome = await db.runTransaction(async (tx) => {
     const loanSnap = await tx.get(loanRef)
     const loan = loanSnap.data()
     if (!loan) throw createError({ statusCode: 404, message: 'Loan not found' })
-    if (loan.status === 'returned') conflict('This loan was already marked as returned')
-    if (loan.status === 'sold') conflict('This loan was already marked as sold')
-    const lines = (Array.isArray(loan.lines) ? loan.lines : []) as Array<{ inventoryItemId: string }>
-    if (outcome === 'sold' && lines.length === 0) conflict('This loan has no items to mark sold')
-    const ids = lines.map((l) => l.inventoryItemId).filter((id) => /^[\w-]{1,128}$/.test(id))
-    const snaps = ids.length ? await tx.getAll(...ids.map((id) => actor.store.collection('inventoryItems').doc(id))) : []
+    const createdBy = String(loan.createdBy || '')
+    const decision = decideStockLoanAction(
+      { status: normalizeStockLoanStatus(loan.status), createdBy },
+      action,
+      toStockLoanActor(actor),
+      reason
+    )
+    enforce(decision)
 
-    tx.update(loanRef, {
-      status: outcome,
-      ...(outcome === 'returned' ? { returnedAt: FieldValue.serverTimestamp() } : { soldAt: FieldValue.serverTimestamp() }),
-      closedBy: actor.uid,
-      updatedAt: FieldValue.serverTimestamp(),
-    })
+    const lines = (Array.isArray(loan.lines) ? loan.lines : []) as Array<{ inventoryItemId: string }>
+    if (action === 'mark_sold' && lines.length === 0) conflict('This loan has no items to mark sold')
+    const ids = lines.map((l) => l.inventoryItemId).filter((id) => /^[\w-]{1,128}$/.test(id))
+    const snaps = ids.length
+      ? await tx.getAll(...ids.map((id) => actor.store.collection('inventoryItems').doc(id)))
+      : []
+
+    const now = FieldValue.serverTimestamp()
+    const stamp: Record<StockLoanAction, Record<string, unknown>> = {
+      approve: { approvedAt: now, approvedBy: actor.uid },
+      reject: { rejectedAt: now, rejectedBy: actor.uid, rejectionReason: reason },
+      cancel: { cancelledAt: now, closedBy: actor.uid },
+      return: { returnedAt: now, closedBy: actor.uid },
+      mark_sold: { soldAt: now, closedBy: actor.uid },
+    }
+    tx.update(loanRef, { status: decision.to, ...stamp[action], updatedAt: now })
+
     for (const snap of snaps) {
       // Only rows still on this loan: a row sold at the till already left it.
       if (!snap.exists || snap.data()?.sellerLoanOutId !== loanId) continue
-      tx.update(snap.ref, {
-        ...clearLoan,
-        ...(outcome === 'sold' && { dateOut: FieldValue.serverTimestamp() }),
-        updatedAt: FieldValue.serverTimestamp(),
-      })
+      const itemUpdate =
+        action === 'approve'
+          ? { sellerLoanPending: FieldValue.delete(), sellerLoanOutAt: now }
+          : { ...clearLoan, ...(action === 'mark_sold' && { dateOut: now }) }
+      tx.update(snap.ref, { ...itemUpdate, updatedAt: now })
     }
     if (planHasFeature(actor.plan, 'activity_logs')) {
       logSaleActivity(tx, actor, {
         action: 'updated',
         entityType: 'items_batch',
         entityId: loanId,
-        entityName:
-          outcome === 'returned'
-            ? `Returned stock loan from ${loan.partyName || 'borrower'} (${lines.length} item(s))`
-            : `Stock loan (${loan.partyName || 'borrower'}): marked ${lines.length} item(s) sold`,
+        entityName: ACTIVITY_TEXT[action](String(loan.partyName || 'borrower'), lines.length),
       })
     }
+    return {
+      status: decision.to,
+      partyName: String(loan.partyName || 'the borrower'),
+      itemCount: lines.length,
+      createdBy,
+    }
   })
+
+  if (action === 'approve' || action === 'reject') {
+    await notifyStockLoanChange(db, actor, {
+      loanId,
+      event: action === 'approve' ? 'approved' : 'rejected',
+      partyName: outcome.partyName,
+      itemCount: outcome.itemCount,
+      createdBy: outcome.createdBy,
+      reason,
+    })
+  }
+  return { status: outcome.status }
+}
+
+/** Closes an active loan; kept for the return and mark-sold routes. */
+export async function closeStockLoan(
+  db: Firestore,
+  actor: StoreActor,
+  input: Record<string, unknown>,
+  outcome: 'returned' | 'sold'
+) {
+  await runStockLoanAction(db, actor, input, outcome === 'returned' ? 'return' : 'mark_sold')
 }

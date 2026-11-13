@@ -342,6 +342,57 @@ describe('firestore.rules', () => {
     )
   })
 
+  it('only lets a client request a transfer; approvals and stock moves go through the server', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_enterprise')
+      await seedStore(context, 'u1', 's1')
+      await setDoc(doc(context.firestore(), 'users/u1/storeTransfers/t0'), {
+        createdBy: 'u1',
+        sourceStoreId: 's1',
+        destinationStoreId: 's2',
+        status: 'in_transit',
+      })
+    })
+    const db = testEnv.authenticatedContext('u1').firestore()
+    const request = { createdBy: 'u1', sourceStoreId: 's1', destinationStoreId: 's2' }
+    await assertSucceeds(
+      setDoc(doc(db, 'users/u1/storeTransfers/t1'), { ...request, status: 'pending_approval' })
+    )
+    // A new transfer cannot skip the receiving branch's approval or claim it was given.
+    await assertFails(
+      setDoc(doc(db, 'users/u1/storeTransfers/t2'), { ...request, status: 'completed' })
+    )
+    await assertFails(
+      setDoc(doc(db, 'users/u1/storeTransfers/t3'), {
+        ...request,
+        status: 'pending_approval',
+        receivedBy: 'u1',
+      })
+    )
+    // Not even the owner changes a transfer directly.
+    await assertFails(updateDoc(doc(db, 'users/u1/storeTransfers/t0'), { status: 'completed' }))
+    await assertFails(deleteDoc(doc(db, 'users/u1/storeTransfers/t0')))
+  })
+
+  it('stops clients from forging approval notifications', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_enterprise')
+      await seedStore(context, 'u1', 's1')
+    })
+    const db = testEnv.authenticatedContext('u1').firestore()
+    for (const type of ['transfer_awaiting_receipt', 'stock_loan_approved']) {
+      await assertFails(
+        setDoc(doc(db, `users/u1/stores/s1/notifications/${type}`), {
+          type,
+          title: 'Forged',
+          message: 'Forged',
+          userId: 'u1',
+          read: false,
+        })
+      )
+    }
+  })
+
   it('allows manager with canManageInventory to create inventory folder', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await seedOwner(context, 'u1', 'storvv_medium')
@@ -1423,6 +1474,30 @@ describe('firestore.rules', () => {
           status: 'pending_approval',
           items: [],
         })
+      )
+    })
+
+    it('sees another branch’s stock for transfers but cannot change it', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await seedBranches(context, {
+          adminGrants: { stockTransfers: true },
+          multiStoreSync: FULL_PRODUCTS,
+        })
+        await setDoc(doc(context.firestore(), 'users/u1/stores/s2/inventoryItems/i1'), {
+          name: 'iPhone 13',
+          folderId: 'f1',
+          storeId: 's2',
+          quantity: 3,
+        })
+      })
+      const db = testEnv.authenticatedContext('admin1').firestore()
+      const other = 'users/u1/stores/s2/inventoryItems'
+      await assertSucceeds(getDoc(doc(db, `${other}/i1`)))
+      // Stock only moves between branches when the receiving branch approves, on the server.
+      await assertFails(updateDoc(doc(db, `${other}/i1`), { quantity: 99 }))
+      await assertFails(deleteDoc(doc(db, `${other}/i1`)))
+      await assertFails(
+        setDoc(doc(db, `${other}/i2`), { name: 'Planted', folderId: 'f1', storeId: 's2' })
       )
     })
 

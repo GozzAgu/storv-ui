@@ -81,7 +81,7 @@
           <ExclamationTriangleIcon :size="24" :stroke-width="1.75" aria-hidden="true" />
         </span>
         <h1 class="s-auth-status__title">{{ errorTitle }}</h1>
-        <p class="s-auth-status__body">{{ errorMessage }}</p>
+        <p class="s-auth-status__body">{{ friendlyDisplayMessage(errorMessage) }}</p>
         <div class="s-auth-status__actions">
           <SButton
             v-if="primaryErrorAction"
@@ -112,6 +112,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { applyActionCode, confirmPasswordReset, verifyPasswordResetCode } from 'firebase/auth'
 import { ArrowRightIcon, CheckCircleIcon, ExclamationTriangleIcon } from '~/utils/app-icons'

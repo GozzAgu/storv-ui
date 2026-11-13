@@ -1344,6 +1344,7 @@ import {
   availabilityBadgeForReturned,
   availabilityBadgeForSold,
   availabilityBadgeForStockLoan,
+  isItemStockLoanPending,
   formatAvailabilityLabel,
   isItemAwaitingPayment,
   type InventoryAvailabilityStatus,
@@ -2881,7 +2882,7 @@ const getItemAvailability = (item: InventoryItem) => {
   }
 
   if (isItemOutOnSellerLoan(item)) {
-    return availabilityBadgeForStockLoan()
+    return availabilityBadgeForStockLoan(isItemStockLoanPending(item))
   }
 
   if (isItemAwaitingPayment(item)) {

@@ -178,7 +178,9 @@
             </div>
           </SFormSection>
 
-          <p v-if="error" class="s-storefront-settings__error" role="alert">{{ error }}</p>
+          <p v-if="error" class="s-storefront-settings__error" role="alert">
+            {{ friendlyDisplayMessage(error) }}
+          </p>
           <p v-if="success" class="s-storefront-settings__success" role="status">{{ success }}</p>
 
           <p v-if="!draft.enabled && draft.slug" class="s-notice">
@@ -259,7 +261,7 @@
                 {{ pendingInquiryCount }} pending
               </SBadge>
               <p v-else-if="!analyticsSummary && analyticsError" class="s-form-meta">
-                {{ analyticsError }}
+                {{ friendlyDisplayMessage(analyticsError) }}
               </p>
             </div>
           </section>
@@ -339,6 +341,7 @@
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { storeToRefs } from 'pinia'
 import QRCode from 'qrcode'
 import { Check, Copy, ExternalLink, MessageCircle } from '@lucide/vue'

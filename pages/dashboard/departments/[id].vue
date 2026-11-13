@@ -506,15 +506,23 @@ function isSignedInStaff(member: Staff): boolean {
   return !!uid && !!member.authUid && member.authUid === uid
 }
 
-function staffStatusTone(member: Staff): 'success' | 'warning' | 'error' {
+/** Invited but hasn't signed in and replaced the temporary password yet. */
+function isStaffPendingSetup(member: Staff): boolean {
+  return member.status === 'active' && member.mustChangePassword === true
+}
+
+function staffStatusTone(member: Staff): 'success' | 'warning' | 'error' | 'neutral' {
   if (rosterTab.value === 'removed') return 'error'
+  if (isStaffPendingSetup(member)) return 'neutral'
   if (member.status === 'active') return 'success'
   if (member.status === 'on_leave') return 'warning'
   return 'error'
 }
 
 function staffStatusLabel(member: Staff): string {
-  return rosterTab.value === 'removed' ? 'Removed' : formatStaffStatusLabel(member.status)
+  if (rosterTab.value === 'removed') return 'Removed'
+  if (isStaffPendingSetup(member)) return 'Invite pending'
+  return formatStaffStatusLabel(member.status)
 }
 
 const filteredStaffRoster = computed(() =>
@@ -910,7 +918,7 @@ const totalFullAccessStaff = computed(() => {
 })
 
 const activeStaff = computed(() => {
-  return staff.value.filter((m) => m.status === 'active').length
+  return staff.value.filter((m) => m.status === 'active' && !isStaffPendingSetup(m)).length
 })
 
 // Load department and staff data

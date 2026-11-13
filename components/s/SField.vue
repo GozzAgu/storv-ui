@@ -17,12 +17,15 @@
       :described-by="describedBy"
       :invalid="invalid"
     />
-    <p v-if="error" :id="errorId" class="s-field__error" role="alert">{{ error }}</p>
+    <p v-if="error" :id="errorId" class="s-field__error" role="alert">
+      {{ friendlyDisplayMessage(error) }}
+    </p>
     <p v-else-if="hint && !isOptionalHint" :id="hintId" class="s-field__hint">{{ hint }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
+import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { computed, inject, provide, useId } from 'vue'
 import { S_FIELD_KEY } from '~/components/s/field-context'
 
