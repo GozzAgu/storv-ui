@@ -125,6 +125,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('stock transfers (emulator
     expect((await transferDoc('t1').get()).data()).toMatchObject({
       status: 'completed',
       receivedBy: 'phAdmin',
+      receivedByName: expect.any(String),
     })
 
     // Approving twice does nothing.
@@ -160,6 +161,8 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('stock transfers (emulator
     expect((await transferDoc('t3').get()).data()).toMatchObject({
       status: 'rejected',
       rejectionReason: 'Box arrived crushed',
+      rejectedBy: 'phAdmin',
+      rejectedByName: expect.any(String),
     })
     expect((await items(LAGOS).doc('cable').get()).data()?.quantity).toBe(10)
     expect((await items(PH).doc('cable-ph').get()).data()?.quantity).toBe(2)

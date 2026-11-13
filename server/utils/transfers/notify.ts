@@ -14,6 +14,7 @@ export async function notifyTransferChange(
     ownerId: string
     transferId: string
     actorUid: string
+    actorName: string
     action: TransferAction
     transfer: TransferApprovalFields & { sourceStoreName?: string; destinationStoreName?: string }
     reason: string
@@ -49,9 +50,9 @@ export async function notifyTransferChange(
       title: received ? 'Transfer received' : 'Transfer rejected',
       message: received
         ? input.result.skipped.length
-          ? `${to} received ${input.result.moved} item(s) from ${ref}; ${input.result.skipped.length} could not move.`
-          : `${to} received ${ref} into its inventory.`
-        : `${to} rejected ${ref}: ${input.reason}. The stock stays with you.`,
+          ? `${input.actorName} at ${to} approved ${input.result.moved} item(s) from ${ref}; ${input.result.skipped.length} could not move.`
+          : `${input.actorName} at ${to} approved ${ref} into its inventory.`
+        : `${input.actorName} at ${to} rejected ${ref}: ${input.reason}. The stock stays with you.`,
     })
   }
 }

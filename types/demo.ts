@@ -99,8 +99,17 @@ export interface DemoTransfer {
   carrier?: string
   trackingNumber?: string
   dispatchedAt?: string
+  dispatchedBy?: string
+  dispatchedByName?: string
   receivedAt?: string
+  receivedBy?: string
+  receivedByName?: string
   rejectedAt?: string
+  rejectedBy?: string
+  rejectedByName?: string
+  cancelledAt?: string
+  cancelledBy?: string
+  cancelledByName?: string
   rejectionReason?: string
 }
 

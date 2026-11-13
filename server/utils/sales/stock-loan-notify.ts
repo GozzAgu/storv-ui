@@ -47,7 +47,7 @@ export async function notifyStockLoanChange(
     type: approved ? 'stock_loan_approved' : 'stock_loan_rejected',
     title: approved ? 'Stock loan approved' : 'Stock loan rejected',
     message: approved
-      ? `Your loan of ${items} to ${input.partyName} was approved. You can hand the goods over.`
-      : `Your loan of ${items} to ${input.partyName} was rejected: ${input.reason}. The items are back in stock.`,
+      ? `${actor.displayName} approved your loan of ${items} to ${input.partyName}. You can hand the goods over.`
+      : `${actor.displayName} rejected your loan of ${items} to ${input.partyName}: ${input.reason}. The items are back in stock.`,
   })
 }

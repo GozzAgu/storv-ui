@@ -132,6 +132,9 @@
                     <span class="s-list__secondary"
                       >{{ unitLabel(loan) }} · {{ formatDay(loan.createdAt) }}</span
                     >
+                    <span v-if="loanDecision(loan)" class="s-list__secondary">{{
+                      loanDecision(loan)
+                    }}</span>
                   </button>
                   <span class="s-list__end">
                     <SBadge :tone="loanTone(loan.status)" size="sm">{{
@@ -232,6 +235,9 @@
                       <SBadge :tone="loanTone(loan.status)" dot>{{
                         formatSellerLoanStatusLabel(loan.status)
                       }}</SBadge>
+                      <span v-if="loanDecision(loan)" class="s-table__secondary">{{
+                        loanDecision(loan)
+                      }}</span>
                     </td>
                     <td class="s-table__actions">
                       <SIconButton
@@ -456,6 +462,7 @@ import { useStockLoanActor } from '~/composables/useStockLoanActor'
 import { getApiErrorMessage } from '~/utils/api-error-message'
 import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { availableStockLoanActions } from '~/utils/stock-loan-policy'
+import { decidedByLine } from '~/utils/decided-by'
 import {
   STOCK_LOAN_STATUS_LABELS,
   STOCK_LOAN_STATUS_TONES,
@@ -607,6 +614,15 @@ function loanItemRows(loan: SellerLoanOut): StockItemRow[] {
 
 function loanTone(status: SellerLoanOut['status']) {
   return STOCK_LOAN_STATUS_TONES[status]
+}
+
+/** Who approved or rejected it: "Approved by Ada", "Rejected by you". */
+function loanDecision(loan: SellerLoanOut): string | null {
+  const viewer = loanActor.value.uid
+  if (loan.status === 'rejected') {
+    return decidedByLine('Rejected', loan.rejectedByName, loan.rejectedBy, viewer)
+  }
+  return decidedByLine('Approved', loan.approvedByName, loan.approvedBy, viewer)
 }
 
 function loanClosedAt(loan: SellerLoanOut): Date | undefined {

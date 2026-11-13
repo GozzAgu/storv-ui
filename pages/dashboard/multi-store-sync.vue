@@ -286,6 +286,9 @@
                             transferItemNames(transfer) || formatTransferProductSummary(transfer)
                           }}
                         </span>
+                        <span v-if="transferDecision(transfer)" class="s-list__secondary">
+                          {{ transferDecision(transfer) }}
+                        </span>
                       </button>
                       <div class="s-list__end">
                         <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
@@ -397,6 +400,9 @@
                           <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
                             {{ getTransferStatusLabel(transfer.status) }}
                           </SBadge>
+                          <span v-if="transferDecision(transfer)" class="s-table__secondary">
+                            {{ transferDecision(transfer) }}
+                          </span>
                           <span
                             v-if="transfer.carrier || transfer.trackingNumber"
                             class="s-table__secondary s-transfer__tracking"
@@ -728,6 +734,7 @@ import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
 import { useTransfersApi } from '~/composables/useTransfersApi'
 import { getApiErrorMessage } from '~/utils/api-error-message'
 import { friendlyDisplayMessage } from '~/utils/friendly-error'
+import { decidedByLine, decidedByName } from '~/utils/decided-by'
 import { availableTransferActions, type TransferActor } from '~/utils/transfer-policy'
 import {
   OPEN_TRANSFER_STATUSES,
@@ -1916,10 +1923,21 @@ interface TransferRecord {
   itemsCount?: number
   createdAt?: unknown
   approvedAt?: unknown
+  approvedBy?: string
   dispatchedAt?: unknown
+  dispatchedBy?: string
+  dispatchedByName?: string
   receivedAt?: unknown
+  receivedBy?: string
+  receivedByName?: string
   completedAt?: unknown
+  completedBy?: string
   rejectedAt?: unknown
+  rejectedBy?: string
+  rejectedByName?: string
+  cancelledAt?: unknown
+  cancelledBy?: string
+  cancelledByName?: string
   rejectionReason?: string
   skippedItems?: string[]
   carrier?: string
@@ -1983,13 +2001,42 @@ function transferFacts(transfer: TransferRecord): Array<{ label: string; value: 
   const facts: Array<{ label: string; value: string }> = [
     { label: 'Requested', value: formatTransferDate(transfer.createdAt) },
   ]
+  const viewer = useAuthStore().currentUser?.uid
+  /** "13 Nov 2026, 10:02 · Ada" when we know who did it. */
+  const when = (at: unknown, name: unknown, uid: unknown) => {
+    const who = decidedByName(name, uid, viewer)
+    return who ? `${formatTransferDate(at)} · ${who}` : formatTransferDate(at)
+  }
   const dispatchedAt = transfer.dispatchedAt ?? transfer.approvedAt
-  if (dispatchedAt) facts.push({ label: 'Dispatched', value: formatTransferDate(dispatchedAt) })
+  if (dispatchedAt) {
+    facts.push({
+      label: 'Dispatched',
+      value: when(
+        dispatchedAt,
+        transfer.dispatchedByName,
+        transfer.dispatchedBy ?? transfer.approvedBy
+      ),
+    })
+  }
   const receivedAt = transfer.receivedAt ?? transfer.completedAt
-  if (receivedAt)
-    facts.push({ label: 'Approved on arrival', value: formatTransferDate(receivedAt) })
-  if (transfer.rejectedAt)
-    facts.push({ label: 'Rejected', value: formatTransferDate(transfer.rejectedAt) })
+  if (receivedAt) {
+    facts.push({
+      label: 'Approved on arrival',
+      value: when(receivedAt, transfer.receivedByName, transfer.receivedBy ?? transfer.completedBy),
+    })
+  }
+  if (transfer.rejectedAt) {
+    facts.push({
+      label: 'Rejected',
+      value: when(transfer.rejectedAt, transfer.rejectedByName, transfer.rejectedBy),
+    })
+  }
+  if (transfer.cancelledAt) {
+    facts.push({
+      label: 'Cancelled',
+      value: when(transfer.cancelledAt, transfer.cancelledByName, transfer.cancelledBy),
+    })
+  }
   if (transfer.rejectionReason)
     facts.push({ label: 'Reason', value: String(transfer.rejectionReason) })
   if (transfer.skippedItems?.length)
@@ -1999,6 +2046,20 @@ function transferFacts(transfer: TransferRecord): Array<{ label: string; value: 
     facts.push({ label: 'Tracking number', value: String(transfer.trackingNumber) })
   if (transfer.notes) facts.push({ label: 'Notes', value: String(transfer.notes) })
   return facts
+}
+
+/** The receiving branch's decision, shown on the row: "Approved by Ada", "Rejected by you". */
+function transferDecision(transfer: TransferRecord & { status?: string }): string | null {
+  const viewer = useAuthStore().currentUser?.uid
+  switch (normalizeTransferStatus(transfer.status)) {
+    case 'completed':
+    case 'partial':
+      return decidedByLine('Approved', transfer.receivedByName, transfer.receivedBy, viewer)
+    case 'rejected':
+      return decidedByLine('Rejected', transfer.rejectedByName, transfer.rejectedBy, viewer)
+    default:
+      return null
+  }
 }
 
 /** Clicking anywhere on a row opens it, except on its own buttons. */

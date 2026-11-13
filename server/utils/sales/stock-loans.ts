@@ -15,7 +15,13 @@ import {
   type StockLoanActor,
 } from '~/utils/stock-loan-policy'
 import { enforce } from '~/server/utils/approvals/enforce'
-import { actorCanApproveDiscounts, actorCanUseCategory, assertId, forbid, type StoreActor } from './actor'
+import {
+  actorCanApproveDiscounts,
+  actorCanUseCategory,
+  assertId,
+  forbid,
+  type StoreActor,
+} from './actor'
 import { logSaleActivity } from './records'
 import { notifyStockLoanChange } from './stock-loan-notify'
 
@@ -57,17 +63,34 @@ export function toStockLoanActor(actor: StoreActor): StockLoanActor {
  * from someone who can't approve loans waits for approval: its items are reserved straight away
  * (so they can't be sold or lent twice) but marked pending until an approver releases them.
  */
-export async function createStockLoan(db: Firestore, actor: StoreActor, input: Record<string, unknown>) {
+export async function createStockLoan(
+  db: Firestore,
+  actor: StoreActor,
+  input: Record<string, unknown>
+) {
   requireEnterprise(actor)
-  if (!actor.isOwner && !actor.permissions.sellerLoans.create) forbid('You can’t create stock loans.')
-  const partyName = String(input.partyName ?? '').trim().slice(0, 120)
-  const partyPhone = String(input.partyPhone ?? '').trim().slice(0, 40)
-  const partyNotes = String(input.partyNotes ?? '').trim().slice(0, 500)
+  if (!actor.isOwner && !actor.permissions.sellerLoans.create)
+    forbid('You can’t create stock loans.')
+  const partyName = String(input.partyName ?? '')
+    .trim()
+    .slice(0, 120)
+  const partyPhone = String(input.partyPhone ?? '')
+    .trim()
+    .slice(0, 40)
+  const partyNotes = String(input.partyNotes ?? '')
+    .trim()
+    .slice(0, 500)
   if (!partyName) bad('Seller or reseller name is required')
-  const itemIds = [...new Set((Array.isArray(input.itemIds) ? input.itemIds : []).map((id) => assertId(id, 'itemId')))]
+  const itemIds = [
+    ...new Set(
+      (Array.isArray(input.itemIds) ? input.itemIds : []).map((id) => assertId(id, 'itemId'))
+    ),
+  ]
   if (itemIds.length === 0) bad('Select at least one product')
   if (itemIds.length > STOCK_LOAN_MAX_LINES) {
-    bad(`A stock loan can include at most ${STOCK_LOAN_MAX_LINES} items at once. Split into multiple loans.`)
+    bad(
+      `A stock loan can include at most ${STOCK_LOAN_MAX_LINES} items at once. Split into multiple loans.`
+    )
   }
 
   const status = initialStockLoanStatus(toStockLoanActor(actor))
@@ -76,10 +99,16 @@ export async function createStockLoan(db: Firestore, actor: StoreActor, input: R
   // Big loans keep fewer details per unit so the loan stays well inside one document.
   const detailBudget = itemIds.length > 150 ? 6 : 16
   const result = await db.runTransaction(async (tx) => {
-    const snaps = await tx.getAll(...itemIds.map((id) => actor.store.collection('inventoryItems').doc(id)))
-    const folderIds = [...new Set(snaps.map((s) => String(s.data()?.folderId || '')).filter(Boolean))]
+    const snaps = await tx.getAll(
+      ...itemIds.map((id) => actor.store.collection('inventoryItems').doc(id))
+    )
+    const folderIds = [
+      ...new Set(snaps.map((s) => String(s.data()?.folderId || '')).filter(Boolean)),
+    ]
     const folderSnaps = folderIds.length
-      ? await tx.getAll(...folderIds.map((id) => actor.store.collection('inventoryFolders').doc(id)))
+      ? await tx.getAll(
+          ...folderIds.map((id) => actor.store.collection('inventoryFolders').doc(id))
+        )
       : []
     const folders = new Map(folderSnaps.map((s) => [s.id, s.data() as InventoryFolder | undefined]))
 
@@ -88,7 +117,8 @@ export async function createStockLoan(db: Firestore, actor: StoreActor, input: R
       const item = { id: snap.id, ...(snap.data() as Record<string, unknown>) } as InventoryItem
       const name = getInventoryItemDisplayName(item) || 'A product'
       const folder = folders.get(String(item.folderId || ''))
-      if (!actorCanUseCategory(actor, folder)) forbid(`You can’t lend from ${folder?.name || 'that category'}.`)
+      if (!actorCanUseCategory(actor, folder))
+        forbid(`You can’t lend from ${folder?.name || 'that category'}.`)
       if (item.sellerLoanOutId) conflict(`${name} is already out on a loan.`)
       if (item.pendingSaleReceiptId) conflict(`${name} is held on an outstanding order.`)
       if (folderHasSerialNumbers(folder) && item.dateOut) conflict(`${name} has already been sold.`)
@@ -114,6 +144,7 @@ export async function createStockLoan(db: Firestore, actor: StoreActor, input: R
       // An approver's own loan is approved by creating it; say so rather than leave it blank.
       ...(!pending && {
         approvedBy: actor.uid,
+        approvedByName: actor.displayName,
         approvedAt: FieldValue.serverTimestamp(),
         autoApproved: true,
       }),
@@ -196,8 +227,11 @@ export async function runStockLoanAction(
     )
     enforce(decision)
 
-    const lines = (Array.isArray(loan.lines) ? loan.lines : []) as Array<{ inventoryItemId: string }>
-    if (action === 'mark_sold' && lines.length === 0) conflict('This loan has no items to mark sold')
+    const lines = (Array.isArray(loan.lines) ? loan.lines : []) as Array<{
+      inventoryItemId: string
+    }>
+    if (action === 'mark_sold' && lines.length === 0)
+      conflict('This loan has no items to mark sold')
     const ids = lines.map((l) => l.inventoryItemId).filter((id) => /^[\w-]{1,128}$/.test(id))
     const snaps = ids.length
       ? await tx.getAll(...ids.map((id) => actor.store.collection('inventoryItems').doc(id)))
@@ -205,8 +239,14 @@ export async function runStockLoanAction(
 
     const now = FieldValue.serverTimestamp()
     const stamp: Record<StockLoanAction, Record<string, unknown>> = {
-      approve: { approvedAt: now, approvedBy: actor.uid },
-      reject: { rejectedAt: now, rejectedBy: actor.uid, rejectionReason: reason },
+      // Names are saved with each decision so the loan says who approved it, even after renames.
+      approve: { approvedAt: now, approvedBy: actor.uid, approvedByName: actor.displayName },
+      reject: {
+        rejectedAt: now,
+        rejectedBy: actor.uid,
+        rejectedByName: actor.displayName,
+        rejectionReason: reason,
+      },
       cancel: { cancelledAt: now, closedBy: actor.uid },
       return: { returnedAt: now, closedBy: actor.uid },
       mark_sold: { soldAt: now, closedBy: actor.uid },

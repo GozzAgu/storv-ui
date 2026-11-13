@@ -89,7 +89,7 @@ async function resolveTransferActor(
   uid: string,
   ownerId: string,
   transfer: StoredTransfer
-): Promise<{ actor: TransferActor; plan: StoreActor['plan'] }> {
+): Promise<{ actor: TransferActor; plan: StoreActor['plan']; displayName: string }> {
   const [source, destination] = await Promise.all([
     actorIn(db, uid, ownerId, transfer.sourceStoreId),
     actorIn(db, uid, ownerId, transfer.destinationStoreId),
@@ -98,6 +98,7 @@ async function resolveTransferActor(
   if (!any) throw createError({ statusCode: 404, message: 'Not found' })
   return {
     plan: any.plan,
+    displayName: any.displayName,
     actor: {
       uid,
       isOwner: any.isOwner,
@@ -147,6 +148,7 @@ async function receiveStock(
     transferRef: DocumentReference
     transfer: StoredTransfer
     actorUid: string
+    actorName: string
   }
 ): Promise<TransferActionResult> {
   const { owner, transfer } = ctx
@@ -295,6 +297,7 @@ async function receiveStock(
     ...(skipped.length && { skippedItems: skipped.slice(0, 50) }),
     receivedAt: now,
     receivedBy: ctx.actorUid,
+    receivedByName: ctx.actorName,
     // Older screens read these names.
     completedAt: now,
     completedBy: ctx.actorUid,
@@ -322,7 +325,8 @@ export async function runTransferAction(
   const owner = db.collection('users').doc(ownerId)
   const transferRef = owner.collection('storeTransfers').doc(transferId)
   const before = readTransfer(await transferRef.get())
-  const { actor, plan } = await resolveTransferActor(db, uid, ownerId, before)
+  // Names are saved with each decision so the record says who approved it, even after renames.
+  const { actor, plan, displayName } = await resolveTransferActor(db, uid, ownerId, before)
   if (!planHasFeature(plan, 'multi_store_sync')) {
     throw createError({ statusCode: 403, message: 'Transfers need the Enterprise plan.' })
   }
@@ -341,13 +345,20 @@ export async function runTransferAction(
     const now = FieldValue.serverTimestamp()
     switch (action) {
       case 'receive':
-        return receiveStock(tx, { owner, transferRef, transfer, actorUid: uid })
+        return receiveStock(tx, {
+          owner,
+          transferRef,
+          transfer,
+          actorUid: uid,
+          actorName: displayName,
+        })
       case 'dispatch':
         tx.update(transferRef, {
           status: decision.to,
           // `approved*` kept for screens and reports that predate the receiving step.
           dispatchedAt: now,
           dispatchedBy: uid,
+          dispatchedByName: displayName,
           approvedAt: now,
           approvedBy: uid,
         })
@@ -357,11 +368,17 @@ export async function runTransferAction(
           status: decision.to,
           rejectedAt: now,
           rejectedBy: uid,
+          rejectedByName: displayName,
           rejectionReason: reason,
         })
         break
       case 'cancel':
-        tx.update(transferRef, { status: decision.to, cancelledAt: now, cancelledBy: uid })
+        tx.update(transferRef, {
+          status: decision.to,
+          cancelledAt: now,
+          cancelledBy: uid,
+          cancelledByName: displayName,
+        })
         break
       case 'track':
         tx.update(transferRef, {
@@ -383,6 +400,7 @@ export async function runTransferAction(
     ownerId,
     transferId,
     actorUid: uid,
+    actorName: displayName,
     action,
     transfer: before,
     reason,

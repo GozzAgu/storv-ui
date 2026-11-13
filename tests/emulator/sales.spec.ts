@@ -628,6 +628,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
       expect((await loanDoc(loanId).get()).data()).toMatchObject({
         status: 'active',
         approvedBy: 'loanAdmin',
+        approvedByName: expect.any(String),
       })
       expect((await item('iphone').get()).data()?.sellerLoanPending).toBeUndefined()
       // A second approval of the same loan is refused, not repeated.
@@ -665,6 +666,8 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
       expect((await loanDoc(loanId).get()).data()).toMatchObject({
         status: 'rejected',
         rejectionReason: 'Owes for the last loan',
+        rejectedBy: OWNER,
+        rejectedByName: 'Ada Owner',
       })
       const iphone = (await item('iphone').get()).data()
       expect(iphone?.sellerLoanOutId).toBeUndefined()

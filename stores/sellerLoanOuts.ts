@@ -42,9 +42,13 @@ export interface SellerLoanOut {
   soldAt?: Date
   approvedAt?: Date
   approvedBy?: string
+  /** Name saved when they approved, so the loan says who approved it. */
+  approvedByName?: string
   /** The creator could approve loans, so it went out without waiting. */
   autoApproved?: boolean
   rejectedAt?: Date
+  rejectedBy?: string
+  rejectedByName?: string
   rejectionReason?: string
   createdBy: string
 }
@@ -62,6 +66,8 @@ function snapshotToDate(v: unknown): Date | undefined {
   return undefined
 }
 
+const optionalString = (v: unknown) => (typeof v === 'string' && v ? v : undefined)
+
 function mapLoanDoc(id: string, data: Record<string, unknown>): SellerLoanOut {
   return {
     id,
@@ -76,7 +82,10 @@ function mapLoanDoc(id: string, data: Record<string, unknown>): SellerLoanOut {
     returnedAt: snapshotToDate(data.returnedAt),
     soldAt: snapshotToDate(data.soldAt),
     approvedAt: snapshotToDate(data.approvedAt),
-    approvedBy: typeof data.approvedBy === 'string' ? data.approvedBy : undefined,
+    approvedBy: optionalString(data.approvedBy),
+    approvedByName: optionalString(data.approvedByName),
+    rejectedBy: optionalString(data.rejectedBy),
+    rejectedByName: optionalString(data.rejectedByName),
     autoApproved: data.autoApproved === true,
     rejectedAt: snapshotToDate(data.rejectedAt),
     rejectionReason: typeof data.rejectionReason === 'string' ? data.rejectionReason : undefined,
@@ -235,8 +244,11 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
         const now = new Date()
         loan.status = decision.to
         loan.updatedAt = now
-        if (action === 'approve') loan.approvedAt = now
-        if (action === 'reject') Object.assign(loan, { rejectedAt: now, rejectionReason: reason })
+        // The demo visitor is the owner and made the decision, so the loan names them as "you".
+        if (action === 'approve') Object.assign(loan, { approvedAt: now, approvedByName: 'you' })
+        if (action === 'reject') {
+          Object.assign(loan, { rejectedAt: now, rejectedByName: 'you', rejectionReason: reason })
+        }
         if (action === 'return') loan.returnedAt = now
         if (action === 'mark_sold') loan.soldAt = now
         const { setDemoExtrasLoansForStore } = await import('~/utils/demo-extras')
