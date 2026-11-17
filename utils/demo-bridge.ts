@@ -483,6 +483,7 @@ export async function applyDemoInventoryItemUpdate(
     item.name = normalizeEntityName(String(updates.name)) || String(updates.name).trim()
   }
   if (updates.price !== undefined) item.price = Number(updates.price)
+  if (typeof updates.unitCost === 'number') item.unitCost = updates.unitCost
   if (updates.quantity !== undefined) {
     const available = Number(updates.quantity)
     item.quantity = item.sold + Math.max(0, available)

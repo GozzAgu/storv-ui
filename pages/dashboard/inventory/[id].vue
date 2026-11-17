@@ -253,6 +253,15 @@
             /></template>
             Export
           </SButton>
+          <SButton
+            :disabled="isImporting || isExporting || (folder?.itemCount ?? 0) === 0"
+            @click="openBulkPriceModal"
+          >
+            <template #leading
+              ><Tags :size="16" :stroke-width="1.75" aria-hidden="true"
+            /></template>
+            Update prices
+          </SButton>
           <SButton variant="primary" @click="openAddItemModal">
             <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
             Add product
@@ -288,6 +297,12 @@
                 Stock loan
               </SButton>
               <template v-if="canManageInventoryItems">
+                <SButton size="sm" @click="openBulkPriceModal">
+                  <template #leading
+                    ><Tags :size="14" :stroke-width="2" aria-hidden="true"
+                  /></template>
+                  Price
+                </SButton>
                 <SButton size="sm" @click="openBulkDiscountModal">
                   <template #leading
                     ><Tag :size="14" :stroke-width="2" aria-hidden="true"
@@ -1055,6 +1070,27 @@
       @discount-applied="handleDiscountApplied"
     />
 
+    <BulkPriceModal
+      v-if="canManageInventoryItems"
+      v-model="showBulkPriceModal"
+      :folder-id="folderId"
+      :selected-items="selectedItemsEligibleForSellerLoan"
+      :can-edit-cost="canViewProfitAndCost"
+      @applied="handleBulkPriceApplied"
+    />
+
+    <ImportPriceUpdatesDialog
+      v-if="importPricePrompt"
+      :open="true"
+      :updates="importPricePrompt.match.updates"
+      :locked-count="importPricePrompt.match.lockedCount"
+      :matched-row-count="importPricePrompt.match.matchedRows.size"
+      :has-serial-numbers="!!folder?.hasSerialNumbers"
+      :can-see-cost="canViewProfitAndCost"
+      @confirm="answerImportPricePrompt(true)"
+      @skip="answerImportPricePrompt(false)"
+    />
+
     <!-- Bulk Discount Modal -->
     <BulkDiscountModal
       v-model="showBulkDiscountModal"
@@ -1366,6 +1402,13 @@ import {
 import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
+import BulkPriceModal from '~/components/inventory/BulkPriceModal.vue'
+import ImportPriceUpdatesDialog from '~/components/inventory/ImportPriceUpdatesDialog.vue'
+import { friendlyErrorMessage } from '~/utils/friendly-error'
+import {
+  matchImportPriceUpdates,
+  type ImportPriceMatch,
+} from '~/utils/inventory-import-price-match'
 import DeleteItemModal from '~/components/inventory/DeleteItemModal.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import ItemTimelineModal from '~/components/inventory/ItemTimelineModal.vue'
@@ -1387,6 +1430,7 @@ import {
   Plus,
   SearchX,
   Tag,
+  Tags,
   Trash2,
   Upload,
 } from '@lucide/vue'
@@ -3959,6 +4003,30 @@ const handleDiscountApplied = async () => {
   selectedItemForDiscount.value = null
 }
 
+/** Open while the import waits for the owner to accept or decline price updates. */
+const importPricePrompt = ref<{
+  match: ImportPriceMatch
+  resolve: (accepted: boolean) => void
+} | null>(null)
+const askImportPriceUpdates = (match: ImportPriceMatch) =>
+  new Promise<boolean>((resolve) => {
+    importPricePrompt.value = { match, resolve }
+  })
+const answerImportPricePrompt = (accepted: boolean) => {
+  const prompt = importPricePrompt.value
+  importPricePrompt.value = null
+  prompt?.resolve(accepted)
+}
+
+const showBulkPriceModal = ref(false)
+const openBulkPriceModal = () => {
+  showBulkPriceModal.value = true
+}
+const handleBulkPriceApplied = async () => {
+  selectedItemsForBulk.value = []
+  await refreshCurrentItemsPage()
+}
+
 const handleBulkDiscountApplied = async () => {
   // Reload items to refresh the display
   await refreshCurrentItemsPage()
@@ -4381,6 +4449,53 @@ const handleFileImport = async (event: Event) => {
       }
     }
 
+    // Rows for products already in this category: offer to update their prices from the file,
+    // rather than only skipping them (an exported sheet edited and imported back).
+    let priceUpdatedCount = 0
+    if (itemsToImport.length > 0) {
+      let match: ImportPriceMatch | null = null
+      try {
+        const existing = (
+          await inventoryStore.fetchItemsAllChunked(folderId.value, { force: true })
+        ).filter((item) => item.folderId === folderId.value)
+        const serialField = templateFields.find((f) =>
+          ['serialno', 'serialnumber', 'serial_no', 'serial_number'].includes(f.name.toLowerCase())
+        )?.name
+        match = matchImportPriceUpdates(
+          itemsToImport,
+          existing as unknown as Array<Record<string, unknown> & { id: string }>,
+          { hasSerialNumbers: !!folder.value?.hasSerialNumbers, serialField }
+        )
+      } catch (err) {
+        console.warn('[Import] Could not check existing prices', err)
+      }
+      if (match && match.updates.length > 0 && (await askImportPriceUpdates(match))) {
+        try {
+          const result = await inventoryStore.applyBulkPriceChange(folderId.value, {
+            updates: match.updates.map((u) => ({
+              itemId: u.itemId,
+              unitPrice: u.unitPrice,
+              costPrice: u.costPrice,
+            })),
+          })
+          priceUpdatedCount = result.updated
+          // Bulk folders: matched rows are existing products, so don't add them again.
+          if (!folder.value?.hasSerialNumbers) {
+            const keep = itemsToImport.filter((entry) => !match!.matchedRows.has(entry.rowNumber))
+            itemsToImport.length = 0
+            itemsToImport.push(...keep)
+          }
+        } catch (err) {
+          toast.error(
+            friendlyErrorMessage(
+              err,
+              'Could not update prices from this file. New products will still be imported.'
+            )
+          )
+        }
+      }
+    }
+
     // Check for duplicate serial numbers - always check if items have serial numbers
     let skippedDuplicates = 0
     const duplicateSerialNumbers: string[] = []
@@ -4570,6 +4685,20 @@ const handleFileImport = async (event: Event) => {
     // Only show this if ALL items were duplicates or had errors
     if (itemsToImport.length === 0) {
       const reasons: string[] = []
+      if (priceUpdatedCount > 0) {
+        toast.success(
+          `Updated prices for ${priceUpdatedCount} product${
+            priceUpdatedCount === 1 ? '' : 's'
+          }. No new products to add.`,
+          5000
+        )
+        await loadItems()
+        if (fileInputRef.value) {
+          fileInputRef.value.value = ''
+        }
+        isImporting.value = false
+        return
+      }
 
       if (skippedDuplicates > 0) {
         reasons.push(`${skippedDuplicates} duplicate(s)`)
@@ -4578,7 +4707,12 @@ const handleFileImport = async (event: Event) => {
         reasons.push(`${errors.length} error(s)`)
       }
 
-      if (reasons.length > 0) {
+      if (skippedDuplicates > 0 && errors.length === 0) {
+        toast.warning(
+          `No new items to import: all ${skippedDuplicates} are already in this category. Import only adds new products. To change prices, use Update prices.`,
+          7000
+        )
+      } else if (reasons.length > 0) {
         toast.warning(
           `No new items to import. All items were skipped: ${reasons.join(', ')}.`,
           5000
@@ -4660,6 +4794,10 @@ const handleFileImport = async (event: Event) => {
       resultParts.push(`Successfully imported: ${successCount} item(s)`)
     }
 
+    if (priceUpdatedCount > 0) {
+      resultParts.push(`Updated prices: ${priceUpdatedCount} item(s)`)
+    }
+
     if (failCount > 0) {
       resultParts.push(`Failed: ${failCount} item(s)`)
     }
@@ -4672,7 +4810,7 @@ const handleFileImport = async (event: Event) => {
       resultParts.push(`Skipped errors: ${errors.length} row(s)`)
     }
 
-    if (successCount > 0) {
+    if (successCount > 0 || priceUpdatedCount > 0) {
       toast.success(resultParts.join('. '), 5000)
     } else if (failCount > 0 || skippedDuplicates > 0 || errors.length > 0) {
       toast.warning(resultParts.join('. '), 5000)

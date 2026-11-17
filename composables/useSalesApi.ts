@@ -217,6 +217,25 @@ export function useSalesApi() {
       partyNotes?: string
       itemIds: string[]
     }) => post<{ loanId: string; status: StockLoanStatus }>('/api/stock-loans/create', input),
+    /** One change for many items (`itemIds`), or a set price per item (`updates`, Excel import). */
+    bulkUpdatePrices: (
+      input:
+        | {
+            folderId: string
+            itemIds: string[]
+            unitPrice?: { mode: 'set' | 'percent'; value: number }
+            costPrice?: { mode: 'set' | 'percent'; value: number }
+          }
+        | {
+            folderId: string
+            updates: Array<{ itemId: string; unitPrice?: number; costPrice?: number }>
+          }
+    ) =>
+      post<{
+        updated: number
+        skipped: Record<string, number>
+        items: Array<{ id: string; patch: Record<string, number> }>
+      }>('/api/inventory/bulk-price', input),
     approveStockLoan: (loanId: string) =>
       post<{ status: StockLoanStatus }>('/api/stock-loans/approve', { loanId }),
     rejectStockLoan: (loanId: string, reason: string) =>

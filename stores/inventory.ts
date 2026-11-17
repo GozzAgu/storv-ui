@@ -3645,6 +3645,96 @@ export const useInventoryStore = defineStore('inventory', {
       }
     },
 
+    /**
+     * Sets or adjusts the unit/cost price of many items. The server (POST
+     * /api/inventory/bulk-price) checks access, skips sold/loaned/held items and writes each
+     * batch in one transaction; larger selections go in batches of BULK_PRICE_MAX_ITEMS.
+     */
+    async applyBulkPriceChange(
+      folderId: string,
+      target:
+        | { itemIds: string[]; change: import('~/utils/inventory-bulk-price').BulkPriceChange }
+        | { updates: Array<{ itemId: string; unitPrice?: number; costPrice?: number }> }
+    ): Promise<{ updated: number; skipped: Record<string, number> }> {
+      noteInventoryChanged()
+      assertPlanWritable()
+      const { BULK_PRICE_MAX_ITEMS, planBulkPriceChange } = await import(
+        '~/utils/inventory-bulk-price'
+      )
+      type Change = import('~/utils/inventory-bulk-price').BulkPriceChange
+      const perItem = 'updates' in target
+      const itemIds = perItem ? target.updates.map((u) => u.itemId) : target.itemIds
+      const perItemChange = new Map<string, Change>(
+        perItem
+          ? target.updates.map((u) => [
+              u.itemId,
+              {
+                ...(u.unitPrice !== undefined && {
+                  unitPrice: { mode: 'set' as const, value: u.unitPrice },
+                }),
+                ...(u.costPrice !== undefined && {
+                  costPrice: { mode: 'set' as const, value: u.costPrice },
+                }),
+              },
+            ])
+          : []
+      )
+      const folderItems = this.items[folderId] || []
+      const patchLocal = (id: string, patch: Record<string, number>) => {
+        const index = folderItems.findIndex((i) => i.id === id)
+        if (index > -1 && folderItems[index]) {
+          folderItems[index] = { ...folderItems[index], ...patch, updatedAt: new Date() }
+        }
+      }
+
+      const { isDemoModeActive } = await import('~/utils/demo-mode')
+      if (isDemoModeActive()) {
+        const wanted = new Set(itemIds)
+        const all = await this.fetchItemsAllChunked(folderId)
+        const summary = planBulkPriceChange(
+          all.filter((i) => wanted.has(i.id)) as Array<
+            Record<string, unknown> & { id: string }
+          >,
+          perItem ? (id) => perItemChange.get(id) ?? {} : target.change
+        )
+        const { applyDemoInventoryItemUpdate } = await import('~/utils/demo-bridge')
+        for (const plan of summary.toUpdate) {
+          patchLocal(plan.id, plan.patch)
+          await applyDemoInventoryItemUpdate(plan.id, plan.patch as Partial<InventoryItem>)
+        }
+        return { updated: summary.toUpdate.length, skipped: summary.skippedByReason }
+      }
+
+      const { useSalesApi } = await import('~/composables/useSalesApi')
+      const api = useSalesApi()
+      let updated = 0
+      const skipped: Record<string, number> = {}
+      for (let i = 0; i < itemIds.length; i += BULK_PRICE_MAX_ITEMS) {
+        const result = await api.bulkUpdatePrices(
+          perItem
+            ? { folderId, updates: target.updates.slice(i, i + BULK_PRICE_MAX_ITEMS) }
+            : { folderId, itemIds: itemIds.slice(i, i + BULK_PRICE_MAX_ITEMS), ...target.change }
+        )
+        updated += result.updated
+        for (const [reason, n] of Object.entries(result.skipped || {})) {
+          skipped[reason] = (skipped[reason] ?? 0) + n
+        }
+        for (const item of result.items || []) patchLocal(item.id, item.patch)
+      }
+
+      try {
+        const { useStorefrontStore } = await import('~/stores/storefront')
+        const sf = useStorefrontStore()
+        for (const id of itemIds) {
+          const local = folderItems.find((i) => i.id === id)
+          if (local) sf.queueItemSync(local, id, folderId)
+        }
+      } catch {
+        /* optional */
+      }
+      return { updated, skipped }
+    },
+
     // Remove discount from a single item
     async removeDiscount(folderId: string, itemId: string) {
       const db = useFirestore().getFirestoreInstance()
