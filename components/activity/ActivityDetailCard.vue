@@ -1,12 +1,20 @@
 <template>
-  <div class="s-c s-act-card">
+  <div class="s-c s-act-card" :class="{ 's-act-card--compact': compact }">
+    <!-- Hover card heading: what happened, in one line -->
+    <header v-if="compact" class="s-act-card__head">
+      <p class="s-act-card__headline">{{ headline }}</p>
+      <span class="s-act-card__badge" :class="`s-act-card__badge--${log.action}`">
+        {{ actionLabel }} · {{ typeLabel }}
+      </span>
+    </header>
+
     <!-- Who, what, when: always shown, even for entries saved before details existed -->
     <dl class="s-act-card__meta">
       <div>
         <dt>Done by</dt>
         <dd>{{ log.userDisplayName || 'Unknown' }}</dd>
       </div>
-      <div>
+      <div v-if="!compact">
         <dt>Action</dt>
         <dd>{{ actionLabel }} · {{ typeLabel }}</dd>
       </div>
@@ -121,7 +129,16 @@ import { usePreferences } from '~/composables/usePreferences'
 import type { ActivityValue } from '~/utils/activity-details'
 
 /** Everything recorded about one Activity entry, opened from its row. */
-const props = defineProps<{ log: ActivityLog }>()
+const props = defineProps<{
+  log: ActivityLog
+  /** Hover-card layout: headline, no outer frame, tighter spacing. */
+  compact?: boolean
+}>()
+
+const headline = computed(() => {
+  const name = String(props.log.entityName || '').trim()
+  return name && name !== '-' ? name : `${actionLabel.value} ${typeLabel.value.toLowerCase()}`
+})
 
 const { formatCurrency } = usePreferences()
 const { dashPath } = useDashboardPaths()
@@ -417,6 +434,106 @@ function show(value: ActivityValue | undefined, money?: boolean): string {
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* ── Hover card layout ───────────────────────────────────── */
+.s-act-card--compact {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.s-act-card__head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--s-space-2) var(--s-space-2) 0;
+}
+
+.s-act-card__headline {
+  margin: 0;
+  color: var(--s-text);
+  font: var(--s-text-small);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.s-act-card__badge {
+  align-self: flex-start;
+  padding: 1px 8px;
+  border-radius: var(--s-radius-full);
+  background: var(--s-overlay-tint);
+  color: var(--s-text-2);
+  font: var(--s-text-caption);
+  font-weight: 500;
+}
+
+.s-act-card__badge--created {
+  background: var(--s-success-soft);
+  color: var(--s-success);
+}
+
+.s-act-card__badge--deleted {
+  background: var(--s-error-soft);
+  color: var(--s-error);
+}
+
+.s-act-card--compact .s-act-card__meta {
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-space-1) var(--s-space-2);
+  padding: var(--s-space-1-5) var(--s-space-2);
+}
+
+.s-act-card--compact .s-act-card__section {
+  gap: 6px;
+  padding: var(--s-space-1-5) var(--s-space-2);
+}
+
+.s-act-card--compact .s-act-card__facts {
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-space-1) var(--s-space-2);
+}
+
+.s-act-card--compact .s-act-card__route {
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.s-act-card--compact .s-act-card__arrow {
+  display: none;
+}
+
+.s-act-card--compact .s-act-card__end {
+  padding: var(--s-space-1);
+}
+
+.s-act-card--compact .s-act-card__changes {
+  grid-template-columns: minmax(80px, 0.9fr) minmax(0, 1fr) 12px minmax(0, 1fr);
+  gap: var(--s-space-1);
+}
+
+.s-act-card--compact .s-act-card__lines {
+  grid-template-columns: minmax(0, 1fr) 32px 120px;
+  gap: var(--s-space-1);
+}
+
+.s-act-card--compact .s-act-card__thead,
+.s-act-card--compact .s-act-card__row {
+  padding-left: var(--s-space-1);
+  padding-right: var(--s-space-1);
+}
+
+.s-act-card--compact .s-act-card__row {
+  min-height: 34px;
+}
+
+.s-act-card--compact .s-act-card__older {
+  padding: 0 var(--s-space-2) var(--s-space-1-5);
+}
+
+.s-act-card--compact .s-act-card__link {
+  margin: var(--s-space-half) var(--s-space-2) var(--s-space-2);
 }
 
 @media (max-width: 640px) {

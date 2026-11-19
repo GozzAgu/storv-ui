@@ -2,8 +2,8 @@
   <div class="ds-root s-c s-page">
     <SPageHeader title="Activity">
       <template #description>
-        Everything that happens in this branch: who did it, when, and exactly what changed. Open
-        any row for the full details.
+        Everything that happens in this branch: who did it, when, and exactly what changed. Point
+        at an entry (or tap it) for the full details.
       </template>
     </SPageHeader>
 
@@ -97,44 +97,38 @@
         </SCard>
 
         <template v-else>
-          <!-- Phone -->
+          <!-- Phone: tap a row to pin its details card -->
           <SCard flush class="s-only-sm">
             <ul class="s-list">
               <li v-for="log in paginatedLogs" :key="log.id">
-                <button
-                  type="button"
-                  class="s-list__item s-list__hit s-activity__row"
-                  :aria-expanded="expandedIds.has(log.id)"
-                  @click="toggleLog(log.id)"
-                >
-                  <SAvatar :name="log.userDisplayName" size="sm" />
-                  <span class="s-list__main">
-                    <span class="s-list__primary">{{ displayEntityName(log) }}</span>
-                    <span class="s-list__secondary">
-                      {{ log.userDisplayName }} · {{ relativeTime(log.createdAt) }}
+                <SHoverCard :label="`Details: ${displayEntityName(log)}`" :width="440">
+                  <template #trigger>
+                    <span class="s-list__item s-activity__row">
+                      <SAvatar :name="log.userDisplayName" size="sm" />
+                      <span class="s-list__main">
+                        <span class="s-list__primary">{{ displayEntityName(log) }}</span>
+                        <span class="s-list__secondary">
+                          {{ log.userDisplayName }} · {{ relativeTime(log.createdAt) }}
+                        </span>
+                      </span>
+                      <span class="s-list__end">
+                        <SBadge :tone="activityActionTone(log.action)" size="sm">
+                          {{ activityActionLabel(log.action) }}
+                        </SBadge>
+                      </span>
                     </span>
-                  </span>
-                  <span class="s-list__end">
-                    <SBadge :tone="activityActionTone(log.action)" size="sm">
-                      {{ activityActionLabel(log.action) }}
-                    </SBadge>
-                  </span>
-                </button>
-                <div v-if="expandedIds.has(log.id)" class="s-activity__expand">
-                  <ActivityDetailCard :log="log" />
-                </div>
+                  </template>
+                  <ActivityDetailCard :log="log" compact />
+                </SHoverCard>
               </li>
             </ul>
           </SCard>
 
-          <!-- Tablet and desktop -->
+          <!-- Tablet and desktop: point at "What changed" for the details card -->
           <div class="s-table-wrap s-hide-sm">
             <table class="s-table">
               <thead>
                 <tr>
-                  <th scope="col" class="s-activity__toggle">
-                    <span class="ds-sr-only">Details</span>
-                  </th>
                   <th scope="col">Person</th>
                   <th scope="col">Action</th>
                   <th scope="col">What changed</th>
@@ -142,27 +136,7 @@
                 </tr>
               </thead>
               <tbody>
-                <template v-for="log in paginatedLogs" :key="log.id">
-                <tr
-                  class="s-activity__row"
-                  :class="{ 's-table__row--expanded': expandedIds.has(log.id) }"
-                  @click="onRowClick($event, log.id)"
-                >
-                  <td class="s-activity__toggle">
-                    <SIconButton
-                      :label="`${expandedIds.has(log.id) ? 'Hide' : 'Show'} details`"
-                      size="sm"
-                      :aria-expanded="expandedIds.has(log.id)"
-                      @click="toggleLog(log.id)"
-                    >
-                      <ChevronRight
-                        :size="16"
-                        :stroke-width="2"
-                        class="s-activity__chevron"
-                        :class="{ 's-activity__chevron--open': expandedIds.has(log.id) }"
-                      />
-                    </SIconButton>
-                  </td>
+                <tr v-for="log in paginatedLogs" :key="log.id">
                   <td>
                     <span class="s-table__inline">
                       <SAvatar :name="log.userDisplayName" size="sm" />
@@ -175,19 +149,27 @@
                     </SBadge>
                   </td>
                   <td>
-                    <span class="s-table__primary">{{ displayEntityName(log) }}</span>
-                    <span class="s-table__secondary s-activity__meta">
-                      <component
-                        :is="entityTypeIcon(log.entityType)"
-                        :size="14"
-                        :stroke-width="2"
-                        aria-hidden="true"
-                      />
-                      {{ activityEntityTypeLabel(log.entityType) }}
-                      <template v-if="logDetailSubtitle(log)">
-                        · {{ logDetailSubtitle(log) }}</template
-                      >
-                    </span>
+                    <SHoverCard :label="`Details: ${displayEntityName(log)}`">
+                      <template #trigger>
+                        <span class="s-table__primary s-activity__what">
+                          {{ displayEntityName(log) }}
+                        </span>
+                        <span class="s-table__secondary s-activity__meta">
+                          <component
+                            :is="entityTypeIcon(log.entityType)"
+                            :size="14"
+                            :stroke-width="2"
+                            aria-hidden="true"
+                          />
+                          {{ activityEntityTypeLabel(log.entityType) }}
+                          <template v-if="logDetailSubtitle(log)">
+                            · {{ logDetailSubtitle(log) }}</template
+                          >
+                          <span v-if="hasDetails(log)" class="s-activity__more">· Details</span>
+                        </span>
+                      </template>
+                      <ActivityDetailCard :log="log" compact />
+                    </SHoverCard>
                   </td>
                   <td class="s-table__nowrap">
                     <span class="s-table__primary">{{ relativeTime(log.createdAt) }}</span>
@@ -199,12 +181,6 @@
                     </span>
                   </td>
                 </tr>
-                <tr v-if="expandedIds.has(log.id)">
-                  <td colspan="5" class="s-activity__nested">
-                    <ActivityDetailCard :log="log" />
-                  </td>
-                </tr>
-                </template>
               </tbody>
             </table>
           </div>
@@ -228,7 +204,6 @@ definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 import {
   ArrowLeftRight,
   Box,
-  ChevronRight,
   FolderClosed,
   HandCoins,
   Receipt,
@@ -252,7 +227,7 @@ import SSearch from '~/components/s/SSearch.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import STabs from '~/components/s/STabs.vue'
 import PlanGate from '~/components/subscription/PlanGate.vue'
-import SIconButton from '~/components/s/SIconButton.vue'
+import SHoverCard from '~/components/s/SHoverCard.vue'
 import ActivityDetailCard from '~/components/activity/ActivityDetailCard.vue'
 import type { ActivityAction, ActivityEntityType, ActivityLog } from '~/composables/useActivityLog'
 import {
@@ -399,21 +374,10 @@ function entityTypeIcon(type: ActivityEntityType) {
   return Box
 }
 
-/** Rows open to show everything recorded about the entry. */
-const expandedIds = ref<Set<string>>(new Set())
-
-function toggleLog(id: string) {
-  const next = new Set(expandedIds.value)
-  if (next.has(id)) next.delete(id)
-  else next.add(id)
-  expandedIds.value = next
-}
-
-/** Clicking anywhere on a row opens it, except on its own buttons or while selecting text. */
-function onRowClick(event: MouseEvent, id: string) {
-  if ((event.target as HTMLElement | null)?.closest('button, a, input')) return
-  if (window.getSelection()?.toString()) return
-  toggleLog(id)
+/** Entries written with structured details (newer ones); older entries only have a summary. */
+function hasDetails(log: ActivityLog): boolean {
+  const d = log.details
+  return Boolean(d && (d.facts?.length || d.changes?.length || d.lines?.length || d.route))
 }
 
 function formatDate(d: Date | unknown): string {
