@@ -311,6 +311,8 @@
                       <TransferDetailsPanel
                         :rows="transferItemRows(transfer)"
                         :facts="transferFacts(transfer)"
+                        :route="transferRouteEnds(transfer)"
+                        :steps="transferSteps(transfer)"
                         :label="`Items in transfer ${transferRef(transfer)}`"
                       />
                     </div>
@@ -390,7 +392,7 @@
                             transferSourceName(transfer)
                           }}</span>
                           <span class="s-table__secondary s-transfer-table__clip">{{
-                            transferFolderLabel(transfer.sourceFolderPath)
+                            transferFolderLabel(transferSourcePath(transfer))
                           }}</span>
                         </td>
                         <td class="s-transfer-table__arrow" aria-hidden="true">
@@ -401,7 +403,7 @@
                             transferDestinationName(transfer)
                           }}</span>
                           <span class="s-table__secondary s-transfer-table__clip">{{
-                            transferFolderLabel(transfer.destinationFolderPath)
+                            transferFolderLabel(transferDestinationPath(transfer))
                           }}</span>
                         </td>
                         <td>
@@ -440,6 +442,8 @@
                           <TransferDetailsPanel
                             :rows="transferItemRows(transfer)"
                             :facts="transferFacts(transfer)"
+                            :route="transferRouteEnds(transfer)"
+                            :steps="transferSteps(transfer)"
                             :label="`Items in transfer ${transferRef(transfer)}`"
                           />
                         </td>
@@ -1943,6 +1947,9 @@ interface TransferRecord {
   /** Category names, top level first, at each end of the route. */
   sourceFolderPath?: string[]
   destinationFolderPath?: string[]
+  /** The categories themselves; used to rebuild the paths for transfers saved without them. */
+  folderId?: string
+  destinationFolderId?: string
   items?: Array<{ quantity?: number | string }>
   itemsCount?: number
   createdAt?: unknown
@@ -1977,14 +1984,73 @@ function transferDestinationName(transfer: TransferRecord): string {
   return getStoreName(transfer.destinationStoreId || '', transfer.destinationStoreName)
 }
 
+/**
+ * Category trees per branch, loaded only for transfers saved before the route was recorded on
+ * the transfer itself, so their "Cars › Sedan" can be rebuilt from the category IDs.
+ */
+type BranchFolder = { id: string; name?: string; parentId?: string | null }
+const branchFolders = ref<Record<string, BranchFolder[]>>({})
+const branchFoldersRequested = new Set<string>()
+
+async function loadFoldersForOlderTransfers(transfers: TransferRecord[]) {
+  const needed = new Set<string>()
+  for (const t of transfers) {
+    if (!t.sourceFolderPath?.length && t.folderId && t.sourceStoreId) needed.add(t.sourceStoreId)
+    if (!t.destinationFolderPath?.length && t.destinationFolderId && t.destinationStoreId) {
+      needed.add(t.destinationStoreId)
+    }
+  }
+  const toLoad = [...needed].filter((id) => !branchFoldersRequested.has(id))
+  if (!toLoad.length) return
+  toLoad.forEach((id) => branchFoldersRequested.add(id))
+  const loaded = await Promise.all(
+    toLoad.map(async (storeId) => {
+      try {
+        return [storeId, await inventoryStore.fetchFolderTemplatesForStore(storeId)] as const
+      } catch {
+        // No access to that branch's categories (or not Enterprise): the route shows the branch.
+        return [storeId, []] as const
+      }
+    })
+  )
+  branchFolders.value = { ...branchFolders.value, ...Object.fromEntries(loaded) }
+}
+
+watch(transferHistory, (list) => void loadFoldersForOlderTransfers(list as TransferRecord[]), {
+  immediate: true,
+})
+
+/** Category names at the sending end: as saved on the transfer, else rebuilt from its ID. */
+function transferSourcePath(transfer: TransferRecord): string[] {
+  if (transfer.sourceFolderPath?.length) return transfer.sourceFolderPath
+  return folderPathNames(branchFolders.value[transfer.sourceStoreId || ''] ?? [], transfer.folderId)
+}
+
+/** Category names at the receiving end. */
+function transferDestinationPath(transfer: TransferRecord): string[] {
+  if (transfer.destinationFolderPath?.length) return transfer.destinationFolderPath
+  return folderPathNames(
+    branchFolders.value[transfer.destinationStoreId || ''] ?? [],
+    transfer.destinationFolderId
+  )
+}
+
 /** "Lagos › Cars › Sedan": the branch plus the category (and subcategory) stock left from. */
 function transferSourceEndpoint(transfer: TransferRecord): string {
-  return formatTransferEndpoint(transferSourceName(transfer), transfer.sourceFolderPath)
+  return formatTransferEndpoint(transferSourceName(transfer), transferSourcePath(transfer))
 }
 
 /** "Port Harcourt › Cars › Sedan": where the stock entered. */
 function transferDestinationEndpoint(transfer: TransferRecord): string {
-  return formatTransferEndpoint(transferDestinationName(transfer), transfer.destinationFolderPath)
+  return formatTransferEndpoint(transferDestinationName(transfer), transferDestinationPath(transfer))
+}
+
+/** Both ends for the details panel's route. */
+function transferRouteEnds(transfer: TransferRecord) {
+  return {
+    from: { branch: transferSourceName(transfer), path: transferSourcePath(transfer) },
+    to: { branch: transferDestinationName(transfer), path: transferDestinationPath(transfer) },
+  }
 }
 
 /** "Cars › Sedan" under a branch name; older transfers saved no category path. */
@@ -2036,46 +2102,64 @@ function transferUnitLabel(transfer: TransferRecord): string {
 }
 
 /** Dates, tracking and notes for the expanded panel; anything not recorded is left out. */
-function transferFacts(transfer: TransferRecord): Array<{ label: string; value: string }> {
-  const facts: Array<{ label: string; value: string }> = [
-    { label: 'Requested', value: formatTransferDate(transfer.createdAt) },
-  ]
+type TransferStepState = 'done' | 'current' | 'upcoming' | 'failed'
+
+/** Requested → Dispatched → Received (or Rejected / Cancelled), for the details timeline. */
+function transferSteps(
+  transfer: TransferRecord & { status?: string }
+): Array<{ label: string; at?: string; by?: string; state: TransferStepState }> {
   const viewer = useAuthStore().currentUser?.uid
-  /** "13 Nov 2026, 10:02 · Ada" when we know who did it. */
-  const when = (at: unknown, name: unknown, uid: unknown) => {
-    const who = decidedByName(name, uid, viewer)
-    return who ? `${formatTransferDate(at)} · ${who}` : formatTransferDate(at)
-  }
+  const status = normalizeTransferStatus(transfer.status)
+  const who = (name: unknown, uid: unknown) => decidedByName(name, uid, viewer) || undefined
+  const steps: Array<{ label: string; at?: string; by?: string; state: TransferStepState }> = [
+    { label: 'Requested', at: formatTransferDate(transfer.createdAt), state: 'done' },
+  ]
+
+  // States come from the status; dates and names fill in when the transfer recorded them.
+  const received = status === 'completed' || status === 'partial'
   const dispatchedAt = transfer.dispatchedAt ?? transfer.approvedAt
-  if (dispatchedAt) {
-    facts.push({
+  if (dispatchedAt || status === 'in_transit' || received) {
+    steps.push({
       label: 'Dispatched',
-      value: when(
-        dispatchedAt,
-        transfer.dispatchedByName,
-        transfer.dispatchedBy ?? transfer.approvedBy
-      ),
+      at: dispatchedAt ? formatTransferDate(dispatchedAt) : undefined,
+      by: who(transfer.dispatchedByName, transfer.dispatchedBy ?? transfer.approvedBy),
+      state: 'done',
     })
+  } else if (status === 'pending_approval') {
+    steps.push({ label: 'Dispatched', state: 'current' })
   }
+
   const receivedAt = transfer.receivedAt ?? transfer.completedAt
-  if (receivedAt) {
-    facts.push({
-      label: 'Approved on arrival',
-      value: when(receivedAt, transfer.receivedByName, transfer.receivedBy ?? transfer.completedBy),
-    })
-  }
-  if (transfer.rejectedAt) {
-    facts.push({
+  if (status === 'rejected') {
+    steps.push({
       label: 'Rejected',
-      value: when(transfer.rejectedAt, transfer.rejectedByName, transfer.rejectedBy),
+      at: transfer.rejectedAt ? formatTransferDate(transfer.rejectedAt) : undefined,
+      by: who(transfer.rejectedByName, transfer.rejectedBy),
+      state: 'failed',
     })
-  }
-  if (transfer.cancelledAt) {
-    facts.push({
+  } else if (status === 'cancelled') {
+    steps.push({
       label: 'Cancelled',
-      value: when(transfer.cancelledAt, transfer.cancelledByName, transfer.cancelledBy),
+      at: transfer.cancelledAt ? formatTransferDate(transfer.cancelledAt) : undefined,
+      by: who(transfer.cancelledByName, transfer.cancelledBy),
+      state: 'failed',
     })
+  } else if (received) {
+    steps.push({
+      label: status === 'partial' ? 'Partly received' : 'Received',
+      at: receivedAt ? formatTransferDate(receivedAt) : undefined,
+      by: who(transfer.receivedByName, transfer.receivedBy ?? transfer.completedBy),
+      state: 'done',
+    })
+  } else {
+    steps.push({ label: 'Received', state: status === 'in_transit' ? 'current' : 'upcoming' })
   }
+  return steps
+}
+
+/** Notes, tracking and reasons shown under the timeline; empty values are left out. */
+function transferFacts(transfer: TransferRecord): Array<{ label: string; value: string }> {
+  const facts: Array<{ label: string; value: string }> = []
   if (transfer.rejectionReason)
     facts.push({ label: 'Reason', value: String(transfer.rejectionReason) })
   if (transfer.skippedItems?.length)

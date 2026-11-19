@@ -220,7 +220,10 @@ const BRANCH_LABELS: Record<string, string> = {
   '10+': 'More than 10 branches',
 }
 
-/** Emails the team about a new request. Never throws: the request is already saved. */
+/**
+ * Emails the team about a new request. Never throws; returns false when the email couldn't be
+ * sent (no Resend key, or Resend refused it), since this email is now the only copy.
+ */
 export async function notifyDemoLead(
   lead: DemoLeadInput,
   activity: DemoSessionSummary | null

@@ -87,50 +87,18 @@ function scheduleFlush() {
   }, FLUSH_MS)
 }
 
-/** Sends what is queued. `beacon` survives the tab closing. */
-export function flushDemoActivity(beacon = false) {
-  const who = getDemoInsightIds()
-  if (!who) {
-    queue = []
-    return
-  }
-  // Count time up to now without ending the visit.
+/**
+ * Demo activity is no longer sent anywhere or stored: the demo and website don't write to
+ * Firestore. Time and actions are still counted in the page (see `demoEngagement`), which the
+ * signup nudge uses, and the queue is simply dropped. `beacon` is kept so callers needn't change.
+ */
+export function flushDemoActivity(_beacon = false) {
+  // Count time up to now without ending the visit, so engagement stays current.
   if (currentPath && visibleSince !== null && document.visibilityState === 'visible') {
     closePage()
     visibleSince = Date.now()
   }
-  if (!queue.length) return
-  const events = queue.splice(0, 40)
-  const params = new URLSearchParams(window.location.search)
-  let referrerHost = ''
-  try {
-    const ref = document.referrer ? new URL(document.referrer) : null
-    if (ref && ref.host !== window.location.host) referrerHost = ref.hostname
-  } catch {
-    /* ignore */
-  }
-  const body = JSON.stringify({
-    ...who,
-    referrerHost,
-    utmSource: params.get('utm_source') || '',
-    utmCampaign: params.get('utm_campaign') || '',
-    events,
-  })
-  try {
-    if (beacon && navigator.sendBeacon) {
-      navigator.sendBeacon('/api/demo/track', new Blob([body], { type: 'application/json' }))
-    } else {
-      void fetch('/api/demo/track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body,
-        keepalive: true,
-      }).catch(() => undefined)
-    }
-  } catch {
-    /* tracking must never break the demo */
-  }
-  if (queue.length) scheduleFlush()
+  queue = []
 }
 
 function listen() {

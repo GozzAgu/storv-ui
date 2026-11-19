@@ -107,23 +107,6 @@ import leads from '~/server/api/demo/leads.post'
 import insights from '~/server/api/demo/insights.get'
 import setStatus from '~/server/api/demo/leads/[id].patch'
 
-interface TestSession {
-  visitorId: string
-  device: string
-  pageViews: number
-  activeSeconds: number
-  pageCount: number
-  pages: Record<string, { views?: number; seconds?: number }>
-  actions: Record<string, number>
-  leadId?: string
-}
-interface TestActivity {
-  activeSeconds: number
-  topPages: Array<{ label: string }>
-}
-
-const session = () => m.docs[`demoSessions/${SESSION}`] as unknown as TestSession
-
 const event = {} as H3Event
 const VISITOR = 'v'.repeat(32)
 const SESSION = 's'.repeat(32)
@@ -148,76 +131,28 @@ beforeEach(() => {
 })
 
 describe('POST /api/demo/track', () => {
-  it('starts a session and adds up page views, time and actions', async () => {
+  it('stores nothing: demo activity is no longer written to Firestore', async () => {
     m.body = {
       visitorId: VISITOR,
       sessionId: SESSION,
       events: [
-        { type: 'page', path: '/demo/dashboard', seconds: 0 },
         { type: 'page', path: '/demo/dashboard', seconds: 40 },
-        { type: 'page', path: '/demo/dashboard/receipts', seconds: 0 },
         { type: 'action', name: 'sale_created' },
       ],
     }
     await track(event)
     expect(m.status).toBe(204)
-    const doc = session()
-    expect(doc.visitorId).toBe(VISITOR)
-    expect(doc.device).toBe('mobile')
-    expect(doc.pageViews).toBe(2)
-    expect(doc.activeSeconds).toBe(40)
-    expect(doc.pageCount).toBe(2)
-    expect(doc.pages.dashboard).toEqual({ views: 1, seconds: 40 })
-    expect(doc.actions.sale_created).toBe(1)
+    expect(m.docs).toEqual({})
 
-    // A second batch adds to the same session.
-    m.body = {
-      visitorId: VISITOR,
-      sessionId: SESSION,
-      events: [{ type: 'page', path: '/demo/dashboard/receipts', seconds: 25 }],
-    }
-    await track(event)
-    expect(doc.activeSeconds).toBe(65)
-    expect(doc.pages['dashboard~receipts']).toEqual({ views: 1, seconds: 25 })
-  })
-
-  it('refuses another visitor writing into someone else’s session', async () => {
-    m.docs[`demoSessions/${SESSION}`] = { visitorId: 'x'.repeat(32), pageViews: 3 }
-    m.body = {
-      visitorId: VISITOR,
-      sessionId: SESSION,
-      events: [{ type: 'action', name: 'exit' }],
-    }
-    await expect(track(event)).rejects.toMatchObject({ statusCode: 409 })
-    expect(m.docs[`demoSessions/${SESSION}`].pageViews).toBe(3)
-  })
-
-  it('rejects malformed batches and accepts beacon text bodies', async () => {
-    m.body = { visitorId: 'bad', sessionId: SESSION, events: [] }
-    await expect(track(event)).rejects.toMatchObject({ statusCode: 400 })
-
-    m.body = JSON.stringify({
-      visitorId: VISITOR,
-      sessionId: SESSION,
-      events: [{ type: 'action', name: 'book_click' }],
-    })
-    await track(event)
-    expect(session().actions.book_click).toBe(1)
+    // Old tabs may still send a beacon (text body, or junk): it is accepted and dropped.
+    m.body = 'not json'
+    expect(await track(event)).toBeNull()
+    expect(m.docs).toEqual({})
   })
 })
 
 describe('POST /api/demo/leads', () => {
-  it('saves the request with the visitor’s demo activity and emails the team', async () => {
-    m.docs[`demoSessions/${SESSION}`] = {
-      visitorId: VISITOR,
-      activeSeconds: 300,
-      pageViews: 6,
-      pages: {
-        dashboard: { views: 2, seconds: 200 },
-        'dashboard~receipts': { views: 1, seconds: 100 },
-      },
-      actions: { sale_created: 1 },
-    }
+  it('emails the team and saves nothing to Firestore', async () => {
     m.body = {
       name: 'Ada Obi',
       business: 'Ada Gadgets',
@@ -228,31 +163,23 @@ describe('POST /api/demo/leads', () => {
     }
     await expect(leads(event)).resolves.toEqual({ success: true })
 
-    const saved = m.added[0]
-    expect(saved.path).toMatch(/^demoLeads\//)
-    expect(saved.data).toMatchObject({
-      name: 'Ada Obi',
-      phone: '+2348030000000',
-      status: 'new',
-      source: 'demo_exit',
-    })
-    const activity = saved.data.activity as TestActivity
-    expect(activity.activeSeconds).toBe(300)
-    expect(activity.topPages[0].label).toBe('Overview')
-    expect(session().leadId).toBe(saved.path.split('/')[1])
+    expect(m.added).toHaveLength(0)
+    expect(m.docs).toEqual({})
 
     const email = m.sent[0] as { to: string[]; subject: string; html: string }
     expect(email.to).toEqual(['sales@storvv.com'])
     expect(email.subject).toContain('Ada Obi (Ada Gadgets)')
-    expect(email.html).toContain('sale created ×1')
+    expect(email.html).toContain('+2348030000000')
   })
 
-  it('does not link activity from someone else’s session', async () => {
-    m.docs[`demoSessions/${SESSION}`] = { visitorId: 'x'.repeat(32), activeSeconds: 900 }
-    m.body = { name: 'Ada', email: 'ada@shop.ng', visitorId: VISITOR, sessionId: SESSION }
-    await leads(event)
-    expect(m.added[0].data.activity).toBeNull()
-    expect(session().leadId).toBeUndefined()
+  it('tells the visitor when the email could not be sent, so the request is not lost', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false, status: 500, json: async () => ({}) }))
+    )
+    m.body = { name: 'Ada', email: 'ada@shop.ng' }
+    await expect(leads(event)).rejects.toMatchObject({ statusCode: 503 })
+    expect(m.added).toHaveLength(0)
   })
 
   it('escapes what visitors type in the email', async () => {

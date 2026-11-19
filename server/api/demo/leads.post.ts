@@ -1,10 +1,13 @@
 import { createError, defineEventHandler, readBody } from 'h3'
-import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { assertRateLimit } from '~/server/utils/rate-limit'
-import { createDemoLead, demoRequestMeta, notifyDemoLead } from '~/server/utils/demo-insights'
+import { notifyDemoLead } from '~/server/utils/demo-insights'
 import { validateDemoLead } from '~/utils/demo-insights'
 
-/** "Book a walkthrough" requests from the demo and the website. Public, so tightly limited. */
+/**
+ * "Book a walkthrough" requests from the demo and the website. Public, so tightly limited.
+ * Nothing is stored in Firestore: the request is emailed to the team. If that email can't go
+ * out, the visitor is told and pointed to the calendar or WhatsApp, so no request is lost.
+ */
 export default defineEventHandler(async (event) => {
   await assertRateLimit(event, { id: 'demo-leads', limit: 5, windowMs: 10 * 60_000 })
 
@@ -24,8 +27,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const db = getAdminFirestore()
-  const { activity } = await createDemoLead(db, validated.data, demoRequestMeta(event))
-  await notifyDemoLead(validated.data, activity)
+  const sent = await notifyDemoLead(validated.data, null)
+  if (!sent) {
+    throw createError({
+      statusCode: 503,
+      message:
+        'We couldn’t send your request just now. Please pick a time on the calendar or message us on WhatsApp.',
+    })
+  }
   return { success: true }
 })
