@@ -683,25 +683,139 @@
 }
 
 /* ── Row action menu ─────────────────────────────────────── */
-.s-menu {
+/* The three-dot menu on every list (SMenu + SMenuItem). Compact rows, one highlight at a time,
+   a solid surface with a hairline edge, and destructive actions set apart below a divider. */
+.s-popover.s-menu {
   z-index: var(--s-z-overlay);
   width: auto;
   min-width: 184px;
+  padding: 4px;
+  border: 1px solid var(--s-menu-edge);
+  border-radius: 12px;
+  background: var(--s-surface);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 12px 32px -12px rgb(0 0 0 / 0.28);
+  --s-menu-edge: rgb(0 0 0 / 0.08);
+}
+
+html.dark .s-popover.s-menu {
+  background: var(--s-surface-2);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 16px 40px -12px rgb(0 0 0 / 0.7);
+  --s-menu-edge: rgb(255 255 255 / 0.08);
+}
+
+.s-menu .s-menu-row {
+  gap: 10px;
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-family: var(--s-font-sans);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+.s-menu .s-menu-row__label {
+  font-weight: inherit;
+}
+
+.s-menu .s-menu-row__icon {
+  width: 15px;
+  height: 15px;
+}
+
+/* One highlight: hover, or keyboard focus. The global focus ring is replaced by the row tint,
+   and a focused row stops showing once the pointer is over another one. */
+.s-menu .s-menu-row:focus-visible {
+  box-shadow: none;
+}
+
+.s-menu:hover .s-menu-row:focus-visible:not(:hover) {
+  background: transparent;
+}
+
+.s-menu:hover .s-menu-row--danger:focus-visible:not(:hover) {
+  background: transparent;
+}
+
+.s-menu .s-menu-row:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.s-menu .s-menu-row:disabled:hover {
+  background: transparent;
+}
+
+/* Destructive actions sit after a thin divider, whatever page builds the menu. */
+.s-menu .s-menu-row:not(.s-menu-row--danger) + .s-menu-row--danger {
+  position: relative;
+  margin-top: 9px;
+}
+
+.s-menu .s-menu-row:not(.s-menu-row--danger) + .s-menu-row--danger::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  left: -4px;
+  height: 1px;
+  background: var(--s-menu-edge);
+  pointer-events: none;
 }
 
 /* ── Hidden figures (eye toggle, HideFiguresToggle) ──────── */
-.s-stat__value,
-.s-stat__foot,
-.s-metrics__value,
-[data-figure] {
-  transition: filter var(--s-duration-fast) ease;
-}
-
+/* Figures are replaced by "****", like a banking app: the real value keeps its space (so nothing
+   shifts) but is hidden, and the asterisks are drawn over it. Right-aligned figures keep their
+   asterisks on the right. */
 html.s-figures-hidden :is(.s-stat__value, .s-stat__foot, .s-metrics__value, [data-figure]) {
-  filter: blur(8px);
+  position: relative;
+  visibility: hidden;
   user-select: none;
 }
 
+html.s-figures-hidden :is(.s-stat__value, .s-stat__foot, .s-metrics__value, [data-figure])::after {
+  content: '****';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: var(--s-figure-mask-align, flex-start);
+  overflow: hidden;
+  visibility: visible;
+  color: var(--s-text);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* Shrink to the asterisks so text after a short figure doesn't sit behind a gap. Right-aligned
+   figures keep their width so columns stay lined up. */
+html.s-figures-hidden
+  :is(.s-stat__value, .s-stat__foot, .s-metrics__value, [data-figure]):not(
+    .s-table__num,
+    .s-today__row-value,
+    [data-figure-align='end']
+  ) {
+  max-width: 4.5em;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+html.s-figures-hidden span[data-figure]:not(.s-table__num, [data-figure-align='end']) {
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+html.s-figures-hidden :is(.s-stat__foot)::after {
+  color: var(--s-text-muted);
+}
+
+html.s-figures-hidden :is(.s-table__num, .s-today__row-value, [data-figure-align='end']) {
+  --s-figure-mask-align: flex-end;
+}
+
 html.s-figures-hidden :is(.apexcharts-yaxis-label, .apexcharts-datalabel, .apexcharts-tooltip) {
-  filter: blur(6px);
+  visibility: hidden;
 }

@@ -42,6 +42,8 @@ import {
 } from './actor'
 import { verifyApprovalPin } from './approval-pin'
 import { logSaleActivity } from './records'
+import { soldPriceStamp } from './sold-price'
+import { receiptNumberFor } from '~/utils/receipt-number'
 import { OPEN_STOCK_LOAN_STATUSES, normalizeStockLoanStatus } from '~/types/stock-loans'
 
 /** Most lines one sale may carry (each line is up to two writes in one transaction). */
@@ -55,6 +57,8 @@ export interface SaleLineRequest {
   quantity: number
   /** Checkout discount per unit. */
   discountAmount?: number
+  /** Price per unit agreed at checkout, when it differs from the inventory price. */
+  unitPrice?: number
 }
 
 export interface CreateSaleRequest {
@@ -189,6 +193,9 @@ export function parseCreateSaleRequest(body: Record<string, unknown>): CreateSal
       itemId: assertId(line.itemId, 'itemId'),
       quantity: Math.floor(quantity),
       discountAmount: money(line.discountAmount, 'discountAmount'),
+      ...(line.unitPrice !== undefined &&
+        line.unitPrice !== null &&
+        line.unitPrice !== '' && { unitPrice: money(line.unitPrice, 'unitPrice') }),
     }
   })
   if (new Set(lines.map((l) => l.itemId)).size !== lines.length) {
@@ -315,6 +322,7 @@ function priceLines(
         quantity: request.quantity,
         serial,
         discountPerUnit: request.discountAmount ?? 0,
+        unitPriceOverride: request.unitPrice,
       })
     } catch (err) {
       if (err instanceof SalePricingError) bad(err.message)
@@ -354,7 +362,11 @@ async function requireApproval(
 }
 
 function approvalReasonFor(lines: LoadedLine[]): string | null {
-  return lines.some((l) => l.priced.needsApproval) ? 'This sale has a discount above 10%.' : null
+  const flagged = lines.filter((l) => l.priced.needsApproval)
+  if (!flagged.length) return null
+  return flagged.some((l) => l.priced.priceChanged)
+    ? 'A price was lowered more than 10% below the inventory price.'
+    : 'This sale has a discount above 10%.'
 }
 
 /**
@@ -570,7 +582,7 @@ export async function createSale(
       ...(input.customer?.phone && { customerPhone: input.customer.phone }),
       ...(input.customer?.address && { customerAddress: input.customer.address }),
       date: Timestamp.fromDate(saleDate),
-      items: lines.map((l) => receiptLine(l)),
+      items: lines.map((l) => receiptLine(l, actor)),
       itemsCount: lines.reduce((n, l) => n + l.priced.quantity, 0),
       total: totals.total,
       paymentMethod: input.payment?.split ? 'Split Payment' : input.payment?.method || 'Cash',
@@ -662,7 +674,19 @@ export async function createSale(
         ...(line.item.sellerLoanOutId ? clearLoan : {}),
       }
       if (line.serial) {
-        tx.update(line.snap.ref, { ...common, dateOut: soldAt })
+        tx.update(line.snap.ref, {
+          ...common,
+          ...soldPriceStamp({
+            soldPrice: line.priced.finalPrice,
+            receiptId: input.saleId,
+            ...(line.priced.priceChanged && {
+              listPrice: line.priced.listPrice,
+              changedBy: actor.uid,
+              changedByName: actor.displayName,
+            }),
+          }),
+          dateOut: soldAt,
+        })
       } else {
         const stock = resolveBulkStockFieldAndValueFromMap(
           line.snap.data() ?? {},
@@ -744,18 +768,20 @@ export async function createSale(
   return result.done
 }
 
-/**
- * A short, readable receipt number from the sale's random ID, so two tills (or a till and its
- * own offline replay) can't produce the same number the way a clock-based one could.
- */
-export function receiptNumberFor(saleId: string): string {
-  return `REC-${saleId
-    .replace(/[^A-Za-z0-9]/g, '')
-    .slice(0, 8)
-    .toUpperCase()}`
+export { receiptNumberFor }
+
+/** Who changed a line's price at checkout, and from what. Empty when it wasn't changed. */
+function priceChangeFields(line: LoadedLine, actor: StoreActor): Record<string, unknown> {
+  if (!line.priced.priceChanged) return {}
+  return {
+    priceChanged: true,
+    listPrice: line.priced.listPrice,
+    priceChangedBy: actor.uid,
+    priceChangedByName: actor.displayName,
+  }
 }
 
-function receiptLine(line: LoadedLine): Record<string, unknown> {
+function receiptLine(line: LoadedLine, actor: StoreActor): Record<string, unknown> {
   const { item, priced } = line
   const serialNo =
     getInventoryItemField(item, 'serialNo') ||
@@ -774,6 +800,7 @@ function receiptLine(line: LoadedLine): Record<string, unknown> {
     ...(getInventoryItemField(item, 'model') && { model: getInventoryItemField(item, 'model') }),
     ...(getInventoryItemField(item, 'sku') && { sku: getInventoryItemField(item, 'sku') }),
     productDetails: getReceiptProductDetails(item),
+    ...priceChangeFields(line, actor),
     ...(priced.hasDiscount && {
       originalPrice: priced.originalPrice,
       hasDiscount: true,

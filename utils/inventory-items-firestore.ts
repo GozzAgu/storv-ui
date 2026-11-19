@@ -142,52 +142,41 @@ export function docToInventoryItem(
   } as InventoryItem
 }
 
+/**
+ * Everyone reads a category the same way. The path is already the owner's store, so items are
+ * not filtered by `createdBy`: stock written by staff, transfers or imports carries other UIDs
+ * there, and filtering on it hid that stock from the owner.
+ */
 function buildOrderedPageQuery(
   itemsRef: CollectionReference,
   folderId: string,
-  queryUserId: string,
-  isStaff: boolean,
   pageSize: number,
   after: QueryDocumentSnapshot | null
 ) {
   const wf = where('folderId', '==', folderId)
   const ob = orderBy('createdAt', 'desc')
-  if (isStaff) {
-    return after
-      ? query(itemsRef, wf, ob, startAfter(after), limit(pageSize))
-      : query(itemsRef, wf, ob, limit(pageSize))
-  }
-  const wc = where('createdBy', '==', queryUserId)
   return after
-    ? query(itemsRef, wf, wc, ob, startAfter(after), limit(pageSize))
-    : query(itemsRef, wf, wc, ob, limit(pageSize))
+    ? query(itemsRef, wf, ob, startAfter(after), limit(pageSize))
+    : query(itemsRef, wf, ob, limit(pageSize))
 }
 
 /** Unordered fallback only for first chunk (no cursor). */
 function buildUnorderedPageQuery(
   itemsRef: CollectionReference,
   folderId: string,
-  queryUserId: string,
-  isStaff: boolean,
   pageSize: number
 ) {
-  const wf = where('folderId', '==', folderId)
-  if (isStaff) {
-    return query(itemsRef, wf, limit(pageSize))
-  }
-  return query(itemsRef, wf, where('createdBy', '==', queryUserId), limit(pageSize))
+  return query(itemsRef, where('folderId', '==', folderId), limit(pageSize))
 }
 
 async function getOnePageOrdered(
   itemsRef: CollectionReference,
   folderId: string,
-  queryUserId: string,
-  isStaff: boolean,
   pageSize: number,
   after: QueryDocumentSnapshot | null
 ) {
   try {
-    const q = buildOrderedPageQuery(itemsRef, folderId, queryUserId, isStaff, pageSize, after)
+    const q = buildOrderedPageQuery(itemsRef, folderId, pageSize, after)
     return await getDocs(q)
   } catch {
     if (after) {
@@ -195,7 +184,7 @@ async function getOnePageOrdered(
         'A database index is required for inventory pagination. Please contact Storvv support.'
       )
     }
-    return getDocs(buildUnorderedPageQuery(itemsRef, folderId, queryUserId, isStaff, pageSize))
+    return getDocs(buildUnorderedPageQuery(itemsRef, folderId, pageSize))
   }
 }
 
@@ -216,13 +205,14 @@ export async function getInventoryItemsPage(
     itemsRef: CollectionReference
     folderId: string
     queryUserId: string
-    isStaff: boolean
+    /** No longer changes the query; kept so callers need not change. */
+    isStaff?: boolean
     page: number
     pageSize: number
     force: boolean
   }
 ): Promise<InventoryItem[]> {
-  const { itemsRef, folderId, queryUserId, isStaff, page, pageSize, force } = params
+  const { itemsRef, folderId, queryUserId, page, pageSize, force } = params
   if (page < 1) throw new Error('page must be >= 1')
 
   const pKey = pageCacheKey(folderId, page, pageSize)
@@ -237,14 +227,7 @@ export async function getInventoryItemsPage(
   let lastPageItems: InventoryItem[] = []
 
   for (let p = 1; p <= page; p++) {
-    const snap = await getOnePageOrdered(
-      itemsRef,
-      folderId,
-      queryUserId,
-      isStaff,
-      pageSize,
-      p === 1 ? null : cursor
-    )
+    const snap = await getOnePageOrdered(itemsRef, folderId, pageSize, p === 1 ? null : cursor)
     lastPageItems = snap.docs.map((doc) => docToInventoryItem(doc, folderId, queryUserId))
     sortItemsDesc(lastPageItems)
     pageDataCache.set(pageCacheKey(folderId, p, pageSize), {
@@ -284,14 +267,15 @@ export async function fetchAllInventoryItemsChunked(
     itemsRef: CollectionReference
     folderId: string
     queryUserId: string
-    isStaff: boolean
+    /** No longer changes the query; kept so callers need not change. */
+    isStaff?: boolean
     pageSize: number
     force: boolean
     /** Disambiguate same folderId across branches (multi-store sync). */
     cacheNamespace?: string
   }
 ): Promise<InventoryItem[]> {
-  const { itemsRef, folderId, queryUserId, isStaff, pageSize, force, cacheNamespace } = params
+  const { itemsRef, folderId, queryUserId, pageSize, force, cacheNamespace } = params
   const cacheKey = cacheNamespace ? `${cacheNamespace}:${folderId}` : folderId
   if (!force) {
     const hit = allItemsCache.get(cacheKey)
@@ -305,14 +289,7 @@ export async function fetchAllInventoryItemsChunked(
 
   try {
     for (;;) {
-      const snap = await getOnePageOrdered(
-        itemsRef,
-        folderId,
-        queryUserId,
-        isStaff,
-        pageSize,
-        cursor
-      )
+      const snap = await getOnePageOrdered(itemsRef, folderId, pageSize, cursor)
       if (snap.empty) break
       for (const doc of snap.docs) {
         all.push(docToInventoryItem(doc, folderId, queryUserId))
@@ -321,9 +298,7 @@ export async function fetchAllInventoryItemsChunked(
       cursor = snap.docs[snap.docs.length - 1]!
     }
   } catch {
-    const snap = await getDocs(
-      buildUnorderedPageQuery(itemsRef, folderId, queryUserId, isStaff, 5000)
-    )
+    const snap = await getDocs(buildUnorderedPageQuery(itemsRef, folderId, 5000))
     for (const doc of snap.docs) {
       all.push(docToInventoryItem(doc, folderId, queryUserId))
     }

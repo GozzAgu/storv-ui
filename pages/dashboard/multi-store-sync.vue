@@ -267,19 +267,19 @@
                           <span class="s-transfer-ref">{{ transferRef(transfer) }}</span> ·
                           {{ formatTransferDate(transfer.createdAt) }}
                         </span>
-                        <span class="s-transfer-route">
-                          <span class="s-transfer-route__store">{{
-                            transferSourceName(transfer)
-                          }}</span>
-                          <ArrowRight
-                            :size="12"
-                            :stroke-width="2"
-                            class="s-transfer-route__arrow"
-                            aria-label="to"
-                          />
-                          <span class="s-transfer-route__store">{{
-                            transferDestinationName(transfer)
-                          }}</span>
+                        <span class="s-transfer-ends">
+                          <span class="s-transfer-ends__row">
+                            <span class="s-transfer-ends__label">From</span>
+                            <span class="s-transfer-ends__value">{{
+                              transferSourceEndpoint(transfer)
+                            }}</span>
+                          </span>
+                          <span class="s-transfer-ends__row">
+                            <span class="s-transfer-ends__label">To</span>
+                            <span class="s-transfer-ends__value">{{
+                              transferDestinationEndpoint(transfer)
+                            }}</span>
+                          </span>
                         </span>
                         <span class="s-list__secondary s-loan__items">
                           {{
@@ -321,13 +321,27 @@
               <!-- Tablet and desktop -->
               <div class="s-table-wrap s-hide-sm">
                 <table class="s-table s-transfer-table">
+                  <colgroup>
+                    <col class="s-transfer-table__col-toggle" />
+                    <col class="s-transfer-table__col-ref" />
+                    <col class="s-transfer-table__col-end" />
+                    <col class="s-transfer-table__col-arrow" />
+                    <col class="s-transfer-table__col-end" />
+                    <col class="s-transfer-table__col-items" />
+                    <col class="s-transfer-table__col-status" />
+                    <col class="s-transfer-table__col-actions" />
+                  </colgroup>
                   <thead>
                     <tr>
                       <th scope="col" class="s-transfer-table__toggle">
                         <span class="ds-sr-only">Details</span>
                       </th>
                       <th scope="col">Transfer</th>
-                      <th scope="col">Route</th>
+                      <th scope="col">From</th>
+                      <th scope="col" class="s-transfer-table__arrow">
+                        <span class="ds-sr-only">to</span>
+                      </th>
+                      <th scope="col">To</th>
                       <th scope="col">Items</th>
                       <th scope="col">Status</th>
                       <th scope="col" class="s-table__actions">
@@ -372,26 +386,26 @@
                           }}</span>
                         </td>
                         <td>
-                          <span class="s-transfer-route">
-                            <span class="s-transfer-route__store">{{
-                              transferSourceName(transfer)
-                            }}</span>
-                            <ArrowRight
-                              :size="14"
-                              :stroke-width="2"
-                              class="s-transfer-route__arrow"
-                              aria-label="to"
-                            />
-                            <span class="s-transfer-route__store">{{
-                              transferDestinationName(transfer)
-                            }}</span>
-                          </span>
-                          <span v-if="transfer.notes" class="s-table__secondary">{{
-                            transfer.notes
+                          <span class="s-table__primary s-transfer-table__clip">{{
+                            transferSourceName(transfer)
+                          }}</span>
+                          <span class="s-table__secondary s-transfer-table__clip">{{
+                            transferFolderLabel(transfer.sourceFolderPath)
+                          }}</span>
+                        </td>
+                        <td class="s-transfer-table__arrow" aria-hidden="true">
+                          <ArrowRight :size="14" :stroke-width="2" />
+                        </td>
+                        <td>
+                          <span class="s-table__primary s-transfer-table__clip">{{
+                            transferDestinationName(transfer)
+                          }}</span>
+                          <span class="s-table__secondary s-transfer-table__clip">{{
+                            transferFolderLabel(transfer.destinationFolderPath)
                           }}</span>
                         </td>
                         <td>
-                          <span class="s-transfer-table__items">{{
+                          <span class="s-table__primary s-transfer-table__clip">{{
                             transferItemNames(transfer) || '—'
                           }}</span>
                           <span class="s-table__secondary">{{ transferUnitLabel(transfer) }}</span>
@@ -400,19 +414,11 @@
                           <SBadge :tone="transferStatusTone(transfer.status)" size="sm">
                             {{ getTransferStatusLabel(transfer.status) }}
                           </SBadge>
-                          <span v-if="transferDecision(transfer)" class="s-table__secondary">
-                            {{ transferDecision(transfer) }}
-                          </span>
                           <span
-                            v-if="transfer.carrier || transfer.trackingNumber"
-                            class="s-table__secondary s-transfer__tracking"
+                            v-if="transferDecision(transfer)"
+                            class="s-table__secondary s-transfer-table__clip"
                           >
-                            <Truck :size="14" :stroke-width="2" aria-hidden="true" />
-                            {{
-                              [transfer.carrier, transfer.trackingNumber]
-                                .filter(Boolean)
-                                .join(' · ')
-                            }}
+                            {{ transferDecision(transfer) }}
                           </span>
                         </td>
                         <td class="s-table__actions">
@@ -430,7 +436,7 @@
                         </td>
                       </tr>
                       <tr v-if="expandedTransferIds.has(transfer.id)">
-                        <td colspan="6" class="s-table__nested s-transfer-table__nested">
+                        <td colspan="8" class="s-table__nested s-transfer-table__nested">
                           <TransferDetailsPanel
                             :rows="transferItemRows(transfer)"
                             :facts="transferFacts(transfer)"
@@ -734,6 +740,7 @@ import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
 import { useTransfersApi } from '~/composables/useTransfersApi'
 import { getApiErrorMessage } from '~/utils/api-error-message'
 import { friendlyDisplayMessage } from '~/utils/friendly-error'
+import { folderPathNames, formatTransferEndpoint } from '~/utils/transfer-route'
 import { decidedByLine, decidedByName } from '~/utils/decided-by'
 import { availableTransferActions, type TransferActor } from '~/utils/transfer-policy'
 import {
@@ -1028,6 +1035,17 @@ const getAvailableQuantity = (item: any) => {
   return item.quantity || item.Quantity || 0
 }
 
+/** Category paths for the transfer being requested, read from the pickers' folder lists. */
+function requestedFolderPaths(): { sourceFolderPath: string[]; destinationFolderPath: string[] } {
+  return {
+    sourceFolderPath: folderPathNames(sourceFolders.value, transferForm.value.folderId),
+    destinationFolderPath: folderPathNames(
+      destinationFolders.value,
+      transferForm.value.destinationFolderId
+    ),
+  }
+}
+
 // Create a transfer request (pending approval). No stock is moved until transfer is completed.
 const requestTransfer = async () => {
   if (!canTransfer.value) return
@@ -1059,6 +1077,7 @@ const requestTransfer = async () => {
         itemsCount: transferredItems.length,
         hasSerialNumbers: sourceFolder?.hasSerialNumbers || false,
         notes: transferForm.value.notes || '',
+        ...requestedFolderPaths(),
       })
       toast.success(
         'Transfer requested. Approve it from Transfer History, then complete when stock arrives.'
@@ -1154,6 +1173,8 @@ const requestTransfer = async () => {
       // Both branches see the route even when they can't read each other's branch record.
       sourceStoreName: String(sourceStore.name || sourceStore.branchName || '').slice(0, 120),
       destinationStoreName: String(destStore.name || destStore.branchName || '').slice(0, 120),
+      // Category and subcategory at each end; the server rewrites these when the stock lands.
+      ...requestedFolderPaths(),
       status: 'pending_approval',
       createdBy: userId,
       createdAt: serverTimestamp(),
@@ -1919,6 +1940,9 @@ interface TransferRecord {
   sourceStoreName?: string
   destinationStoreId?: string
   destinationStoreName?: string
+  /** Category names, top level first, at each end of the route. */
+  sourceFolderPath?: string[]
+  destinationFolderPath?: string[]
   items?: Array<{ quantity?: number | string }>
   itemsCount?: number
   createdAt?: unknown
@@ -1953,8 +1977,23 @@ function transferDestinationName(transfer: TransferRecord): string {
   return getStoreName(transfer.destinationStoreId || '', transfer.destinationStoreName)
 }
 
+/** "Lagos › Cars › Sedan": the branch plus the category (and subcategory) stock left from. */
+function transferSourceEndpoint(transfer: TransferRecord): string {
+  return formatTransferEndpoint(transferSourceName(transfer), transfer.sourceFolderPath)
+}
+
+/** "Port Harcourt › Cars › Sedan": where the stock entered. */
+function transferDestinationEndpoint(transfer: TransferRecord): string {
+  return formatTransferEndpoint(transferDestinationName(transfer), transfer.destinationFolderPath)
+}
+
+/** "Cars › Sedan" under a branch name; older transfers saved no category path. */
+function transferFolderLabel(path: string[] | undefined): string {
+  return formatTransferEndpoint('', path) || '—'
+}
+
 function transferRoute(transfer: TransferRecord): string {
-  return `${transferSourceName(transfer)} → ${transferDestinationName(transfer)}`
+  return `${transferSourceEndpoint(transfer)} → ${transferDestinationEndpoint(transfer)}`
 }
 
 /** Short, stable reference people can quote to each other, e.g. "TR-7F3K2A". */

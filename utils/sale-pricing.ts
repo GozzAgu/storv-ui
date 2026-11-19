@@ -40,6 +40,11 @@ export interface PricedLineInput {
   serial: boolean
   /** Checkout discount per unit, in money. */
   discountPerUnit: number
+  /**
+   * Price per unit agreed at checkout when it differs from the inventory price (prices move
+   * fast). Higher needs nothing; lower counts as a discount for approval.
+   */
+  unitPriceOverride?: number
 }
 
 export interface PricedLine {
@@ -49,6 +54,10 @@ export interface PricedLine {
   discountPerUnit: number
   /** Final price per unit after the checkout discount. */
   finalPrice: number
+  /** The inventory price, when the checkout price was changed from it. */
+  listPrice?: number
+  /** True when the unit price was changed at checkout. */
+  priceChanged: boolean
   lineTotal: number
   needsApproval: boolean
   /** True when the row has a standing discount or a checkout discount. */
@@ -64,11 +73,23 @@ export class SalePricingError extends Error {
   }
 }
 
+/** A checkout price that differs from the inventory price, or undefined to keep it. */
+export function normalizePriceOverride(listPrice: number, raw: unknown): number | undefined {
+  if (raw === undefined || raw === null || raw === '') return undefined
+  const n = roundMoney(Number(raw))
+  if (!Number.isFinite(n) || n <= 0) {
+    throw new SalePricingError('A changed price must be more than zero.')
+  }
+  return Math.abs(n - roundMoney(listPrice)) < 0.005 ? undefined : n
+}
+
 export function priceSaleLine(input: PricedLineInput): PricedLine {
-  const unitPrice = saleUnitPrice(input.item)
-  if (unitPrice <= 0) {
+  const listPrice = saleUnitPrice(input.item)
+  if (listPrice <= 0) {
     throw new SalePricingError('One of the products has no Unit Price. Set one in Inventory first.')
   }
+  const override = normalizePriceOverride(listPrice, input.unitPriceOverride)
+  const unitPrice = override ?? listPrice
   const quantity = input.serial ? 1 : Math.floor(input.quantity)
   if (!Number.isFinite(quantity) || quantity < 1) {
     throw new SalePricingError('Check the product quantities.')
@@ -78,9 +99,11 @@ export function priceSaleLine(input: PricedLineInput): PricedLine {
     throw new SalePricingError('A discount is larger than the product price.')
   }
   const finalPrice = roundMoney(unitPrice - discountPerUnit)
-  const originalPrice = saleOriginalPrice(input.item)
-  const standingDiscount = typeof input.item.discountedPrice === 'number'
+  const originalPrice = override ?? saleOriginalPrice(input.item)
+  const standingDiscount = override === undefined && typeof input.item.discountedPrice === 'number'
   const hasDiscount = standingDiscount || discountPerUnit > 0
+  // Everything taken off the inventory price, by a lower price or a discount, counts together.
+  const reduction = Math.max(0, roundMoney(listPrice - finalPrice))
 
   return {
     quantity,
@@ -89,7 +112,9 @@ export function priceSaleLine(input: PricedLineInput): PricedLine {
     discountPerUnit,
     finalPrice,
     lineTotal: roundMoney(finalPrice * quantity),
-    needsApproval: discountNeedsApproval(unitPrice, discountPerUnit),
+    needsApproval: discountNeedsApproval(listPrice, reduction),
+    priceChanged: override !== undefined,
+    ...(override !== undefined && { listPrice }),
     hasDiscount,
     ...(hasDiscount && {
       discountAmount: discountPerUnit > 0 ? discountPerUnit : input.item.discountAmount,

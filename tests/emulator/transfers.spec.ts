@@ -1,13 +1,15 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { deleteApp, initializeApp, type App } from 'firebase-admin/app'
-import { getFirestore, type Firestore } from 'firebase-admin/firestore'
+import { Timestamp, getFirestore, type Firestore } from 'firebase-admin/firestore'
 import { runTransferAction } from '~/server/utils/transfers/service'
 
 const OWNER = 'owner1'
 const LAGOS = 'lagos'
 const PH = 'ph'
 const TRANSFERS_FULL = { view: true, create: true, edit: true, delete: false }
+
+const ENTERED_LAGOS = new Date('2026-03-01T09:00:00Z')
 
 describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('stock transfers (emulator)', () => {
   let app: App
@@ -63,6 +65,12 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('stock transfers (emulator
         .doc('cables')
         .set({ name: 'Cables', hasSerialNumbers: false })
     }
+    // In Port Harcourt, Phones is a subcategory of Electronics.
+    await branch(PH).collection('inventoryFolders').doc('electronics').set({ name: 'Electronics' })
+    await branch(PH)
+      .collection('inventoryFolders')
+      .doc('phones')
+      .set({ name: 'Phones', hasSerialNumbers: true, parentId: 'electronics' })
     // Sending branch: a manager who runs transfers. Receiving branch: an admin without the
     // transfers extra, who can still approve what arrives in their own branch.
     await branch(LAGOS)
@@ -86,7 +94,13 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('stock transfers (emulator
 
     await items(LAGOS)
       .doc('iphone')
-      .set({ name: 'iPhone 13', serialNo: 'SN1', folderId: 'phones', storeId: LAGOS })
+      .set({
+        name: 'iPhone 13',
+        serialNo: 'SN1',
+        folderId: 'phones',
+        storeId: LAGOS,
+        dateIn: Timestamp.fromDate(ENTERED_LAGOS),
+      })
     await items(LAGOS)
       .doc('cable')
       .set({ name: 'USB-C cable', folderId: 'cables', storeId: LAGOS, quantity: 10, Quantity: 10 })
@@ -121,11 +135,23 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('stock transfers (emulator
       folderId: 'phones',
       storeId: PH,
       transferredFrom: LAGOS,
+      createdBy: OWNER,
+      receivedBy: 'phAdmin',
+      receivedByName: expect.any(String),
+      transferId: 't1',
     })
+    // It enters Port Harcourt today; the Lagos entry date is kept alongside.
+    const landed = arrived.docs[0]!.data()
+    expect(landed.originalDateIn.toDate()).toEqual(ENTERED_LAGOS)
+    expect(Date.now() - landed.dateIn.toDate().getTime()).toBeLessThan(60_000)
     expect((await transferDoc('t1').get()).data()).toMatchObject({
       status: 'completed',
       receivedBy: 'phAdmin',
       receivedByName: expect.any(String),
+      sourceStoreName: LAGOS,
+      destinationStoreName: PH,
+      sourceFolderPath: ['Phones'],
+      destinationFolderPath: ['Electronics', 'Phones'],
     })
 
     // Approving twice does nothing.

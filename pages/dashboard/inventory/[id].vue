@@ -582,7 +582,11 @@
                         <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
                       </template>
                       <template v-else-if="isInventorySellPriceColumn(column)">
-                        <span v-if="item.discountedPrice !== undefined" class="s-price">
+                        <InventoryPriceChange
+                          v-if="getCheckoutPriceChange(item)"
+                          v-bind="getCheckoutPriceChange(item)!"
+                        />
+                        <span v-else-if="item.discountedPrice !== undefined" class="s-price">
                           <span class="s-price__now">{{
                             formatCurrency(item.discountedPrice)
                           }}</span>
@@ -733,7 +737,44 @@
                   <span v-else class="s-inv-detail__muted">-</span>
                 </div>
                 <div v-else-if="isInventorySellPriceColumn(column)">
-                  <template v-if="mobileDetailItem.discountedPrice !== undefined">
+                  <dl v-if="mobilePriceChange" class="s-inv-price-change">
+                    <div>
+                      <dt>Sold for</dt>
+                      <dd class="s-inv-detail__strong">
+                        {{ formatCurrency(mobilePriceChange.sold) }}
+                        <span
+                          :class="
+                            mobilePriceChange.sold > mobilePriceChange.initial
+                              ? 's-inv-price-change__up'
+                              : 's-inv-price-change__down'
+                          "
+                        >
+                          {{ mobilePriceChange.sold > mobilePriceChange.initial ? '↑' : '↓' }}
+                          {{ priceChangePercent(mobilePriceChange) }}
+                        </span>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Initial</dt>
+                      <dd>{{ formatCurrency(mobilePriceChange.initial) }}</dd>
+                    </div>
+                    <div>
+                      <dt>Changed by</dt>
+                      <dd>{{ mobilePriceChange.by }}</dd>
+                    </div>
+                    <div v-if="mobilePriceChange.receiptId">
+                      <dt>Sale</dt>
+                      <dd>
+                        <NuxtLink :to="mobilePriceChange.receiptTo" class="s-link">{{
+                          receiptNumberFor(mobilePriceChange.receiptId)
+                        }}</NuxtLink>
+                        <template v-if="mobilePriceChange.soldOn">
+                          · {{ mobilePriceChange.soldOn }}
+                        </template>
+                      </dd>
+                    </div>
+                  </dl>
+                  <template v-else-if="mobileDetailItem.discountedPrice !== undefined">
                     <div class="s-inv-detail__price">
                       <span class="s-inv-detail__strong">
                         {{ formatCurrency(mobileDetailItem.discountedPrice) }}
@@ -1342,6 +1383,7 @@ import {
   type TemplateField,
   type Template,
   INVENTORY_FIRESTORE_PAGE_SIZE,
+  SERVER_SALE_AND_TRANSFER_FIELDS,
 } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
@@ -1403,6 +1445,9 @@ import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
 import BulkPriceModal from '~/components/inventory/BulkPriceModal.vue'
+import InventoryPriceChange from '~/components/inventory/InventoryPriceChange.vue'
+import { useDashboardPaths } from '~/composables/useDashboardPaths'
+import { receiptNumberFor } from '~/utils/receipt-number'
 import ImportPriceUpdatesDialog from '~/components/inventory/ImportPriceUpdatesDialog.vue'
 import { friendlyErrorMessage } from '~/utils/friendly-error'
 import {
@@ -2173,6 +2218,8 @@ watch(showAddItemModal, (isOpen) => {
 /** Mobile list: slide-over with the same fields as the desktop table */
 const showMobileItemDetailPanel = ref(false)
 const mobileDetailItem = ref<InventoryItem | null>(null)
+const mobilePriceChange = computed(() => getCheckoutPriceChange(mobileDetailItem.value))
+const { dashPath } = useDashboardPaths()
 
 function openMobileItemDetail(item: InventoryItem) {
   mobileDetailItem.value = item
@@ -3028,7 +3075,48 @@ const filteredItems = computed(() => {
   return result
 })
 
+interface CheckoutPriceChange {
+  initial: number
+  sold: number
+  by: string
+  receiptId?: string
+  soldOn?: string
+  receiptTo?: string
+}
+
+/** A sold unit whose price was changed at checkout: initial and sold price, who, which sale. */
+function getCheckoutPriceChange(
+  item: InventoryItem | null | undefined
+): CheckoutPriceChange | null {
+  if (!item?.dateOut) return null
+  if (typeof item.soldPrice !== 'number' || typeof item.listPriceAtSale !== 'number') return null
+  const receiptId = item.soldReceiptId || undefined
+  return {
+    initial: item.listPriceAtSale,
+    sold: item.soldPrice,
+    by: item.priceChangedByName?.trim() || 'a team member',
+    receiptId,
+    soldOn: formatItemDate(item.dateOut),
+    receiptTo: receiptId
+      ? dashPath(`/receipts?receipt=${encodeURIComponent(receiptId)}`)
+      : undefined,
+  }
+}
+
+/** "22%", or "<1%" for a tiny change. */
+function priceChangePercent(change: Pick<CheckoutPriceChange, 'initial' | 'sold'>): string {
+  if (change.initial <= 0) return ''
+  const p = Math.abs(((change.sold - change.initial) / change.initial) * 100)
+  return `${p > 0 && p < 1 ? '<1' : Math.round(p)}%`
+}
+
 function getItemDisplayPrice(item: InventoryItem): string {
+  // A unit sold at a price changed at checkout shows what it sold for, with the direction.
+  const change = getCheckoutPriceChange(item)
+  if (change) {
+    const arrow = change.sold > change.initial ? '↑' : '↓'
+    return `${formatCurrency(change.sold)} ${arrow}${priceChangePercent(change)}`
+  }
   const amount =
     item.discountedPrice !== undefined
       ? item.discountedPrice
@@ -3463,7 +3551,8 @@ const handleEditItem = (item: InventoryItem) => {
     'discountAmount',
     'originalPrice',
     'discountedPrice',
-  ]
+    ...SERVER_SALE_AND_TRANSFER_FIELDS,
+  ] as string[]
   Object.keys(itemForm).forEach((key) => delete itemForm[key])
   Object.keys(item).forEach((key) => {
     if (!systemFields.includes(key)) {

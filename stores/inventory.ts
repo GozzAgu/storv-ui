@@ -301,7 +301,33 @@ export interface InventoryItem {
   createdAt: Date | any
   updatedAt?: Date | any
   createdBy: string
+  /** Set on items that arrived by transfer: who accepted them at this branch. */
+  receivedBy?: string
+  receivedByName?: string
+  /** Transfer that brought this item in, and the sending branch's entry date. */
+  transferId?: string
+  originalDateIn?: unknown
+  /** Set by the server on a sold serial unit: what it sold for, on which receipt. */
+  soldPrice?: number
+  soldReceiptId?: string
+  /** Only when the price was changed at checkout: the Unit Price then, and who changed it. */
+  listPriceAtSale?: number
+  priceChangedBy?: string
+  priceChangedByName?: string
 }
+
+/** Written by the server on sale or transfer; never sent back from an edit form. */
+export const SERVER_SALE_AND_TRANSFER_FIELDS = [
+  'soldPrice',
+  'soldReceiptId',
+  'listPriceAtSale',
+  'priceChangedBy',
+  'priceChangedByName',
+  'receivedBy',
+  'receivedByName',
+  'transferId',
+  'originalDateIn',
+] as const
 
 export const useInventoryStore = defineStore('inventory', {
   state: () => ({
@@ -427,32 +453,15 @@ export const useInventoryStore = defineStore('inventory', {
           let querySnapshot
 
           try {
-            // For staff: Get all folders in store (no createdBy filter)
-            // For superadmin: Filter by createdBy
-            let q
-            if (userStore.userData?.role === 'staff') {
-              // Staff sees all folders in their store
-              q = query(foldersRef, orderBy('createdAt', 'desc'))
-            } else {
-              // Superadmin sees only their folders
-              q = query(foldersRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'))
-            }
-            querySnapshot = await getDocs(q)
+            // Every category in the store, whoever created it (staff-made ones carry their own UID).
+            querySnapshot = await getDocs(query(foldersRef, orderBy('createdAt', 'desc')))
           } catch (orderByError: any) {
             // If orderBy fails (missing index), try without orderBy
             if (
               orderByError.code === 'failed-precondition' ||
               orderByError.message?.includes('index')
             ) {
-              let q
-              if (userStore.userData?.role === 'staff') {
-                // Staff sees all folders in their store
-                q = query(foldersRef)
-              } else {
-                // Superadmin sees only their folders
-                q = query(foldersRef, where('createdBy', '==', userId))
-              }
-              querySnapshot = await getDocs(q)
+              querySnapshot = await getDocs(query(foldersRef))
             } else {
               throw orderByError
             }
@@ -595,7 +604,7 @@ export const useInventoryStore = defineStore('inventory', {
                 ctx.itemsRef,
                 this.folders.map((folder) => folder.id)
               )
-            : (await getDocs(query(ctx.itemsRef, where('createdBy', '==', ctx.queryUserId)))).docs
+            : (await getDocs(query(ctx.itemsRef))).docs
           const itemsByFolder = new Map<string, InventoryItem[]>()
 
           for (const docSnap of itemDocs) {
@@ -2310,7 +2319,13 @@ export const useInventoryStore = defineStore('inventory', {
         const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
 
         // Filter out undefined values and system fields (dates are not user-editable)
-        const systemFields = ['dateOut', 'dateIn', 'swapIn', 'swapInReceiptId']
+        const systemFields = [
+          'dateOut',
+          'dateIn',
+          'swapIn',
+          'swapInReceiptId',
+          ...SERVER_SALE_AND_TRANSFER_FIELDS,
+        ]
         const cleanedUpdates = Object.fromEntries(
           Object.entries(normalizedUpdates).filter(
             ([key, value]) => value !== undefined && !systemFields.includes(key)
@@ -2527,10 +2542,9 @@ export const useInventoryStore = defineStore('inventory', {
       if (!storeId) throw new Error('No store selected')
 
       const itemsRef = getInventoryItemsCollection(db, queryUserId, storeId)
-      const isStaff = userStore.userData?.role === 'staff'
-      const countQ = isStaff
-        ? query(itemsRef, where('folderId', '==', folderId))
-        : query(itemsRef, where('folderId', '==', folderId), where('createdBy', '==', queryUserId))
+      // Same for everyone: the owner's store path already scopes it, and stock written by staff,
+      // transfers or imports carries other UIDs in `createdBy`.
+      const countQ = query(itemsRef, where('folderId', '==', folderId))
 
       const agg = await getCountFromServer(countQ)
       return agg.data().count

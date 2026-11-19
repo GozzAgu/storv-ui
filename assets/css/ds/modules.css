@@ -506,13 +506,6 @@
   justify-content: flex-end;
 }
 
-.s-transfer__tracking {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-space-half);
-  margin-top: var(--s-space-half);
-}
-
 /* Transfer history */
 .s-transfer-ref {
   color: var(--s-text-muted);
@@ -524,21 +517,28 @@
   color: var(--s-text);
 }
 
-.s-transfer-route {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px var(--s-space-1);
+/* Phone rows: From and To on their own lines, labels in one column. */
+.s-transfer-ends {
+  display: grid;
+  gap: 2px;
   min-width: 0;
 }
 
-.s-transfer-route__store {
-  overflow-wrap: anywhere;
+.s-transfer-ends__row {
+  display: grid;
+  grid-template-columns: 2.75em 1fr;
+  gap: var(--s-space-1);
+  align-items: baseline;
 }
 
-.s-transfer-route__arrow {
-  flex: none;
+.s-transfer-ends__label {
   color: var(--s-text-muted);
+  font: var(--s-text-caption);
+}
+
+.s-transfer-ends__value {
+  color: var(--s-text);
+  overflow-wrap: anywhere;
 }
 
 .s-transfer-table td {
@@ -570,9 +570,62 @@
   transform: rotate(90deg);
 }
 
-.s-transfer-table__items {
+.s-transfer-table {
+  table-layout: fixed;
+  width: 100%;
+  /* Below this the wrapper scrolls sideways instead of crushing the branch columns. */
+  min-width: 900px;
+}
+
+.s-transfer-table__col-toggle {
+  width: 44px;
+}
+
+.s-transfer-table__col-ref {
+  width: 150px;
+}
+
+/* From and To share the free width equally, so their columns line up row to row. */
+.s-transfer-table__col-end {
+  width: auto;
+}
+
+.s-transfer-table__col-arrow {
+  width: 32px;
+}
+
+.s-transfer-table__col-items {
+  width: 20%;
+}
+
+.s-transfer-table__col-status {
+  width: 160px;
+}
+
+.s-transfer-table__col-actions {
+  width: 52px;
+}
+
+.s-transfer-table th,
+.s-transfer-table td {
+  vertical-align: middle;
+}
+
+.s-transfer-table .s-transfer-table__arrow {
+  padding-left: 0;
+  padding-right: 0;
+  color: var(--s-text-muted);
+  text-align: center;
+}
+
+.s-transfer-table__arrow svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* One line per value; the full text is in the expanded details. */
+.s-transfer-table__clip {
   display: block;
-  max-width: 280px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -584,7 +637,7 @@
 
 .s-transfer-table td.s-transfer-table__nested {
   height: auto;
-  padding: 0 var(--s-space-3) var(--s-space-2) 52px;
+  padding: 0 var(--s-space-3) var(--s-space-2) 44px;
 }
 
 .s-transfer-expand {

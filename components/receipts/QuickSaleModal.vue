@@ -269,9 +269,9 @@
                 <p class="s-qs-line__name">{{ item.name }}</p>
                 <p class="s-qs-line__meta">
                   Qty: {{ item.quantity }} ×
-                  <span v-if="(item.discountAmount || 0) > 0">
+                  <span v-if="cartUnitPrice(item) !== item.price">
                     <s class="s-qs-line__was">{{ formatCurrency(item.price) }}</s>
-                    {{ formatCurrency(Math.max(0, item.price - (item.discountAmount || 0))) }}
+                    {{ formatCurrency(cartUnitPrice(item)) }}
                   </span>
                   <span v-else>{{ formatCurrency(item.price) }}</span>
                 </p>
@@ -300,6 +300,36 @@
               >
                 <TrashIcon :size="16" :stroke-width="2" aria-hidden="true" />
               </SIconButton>
+            </div>
+            <button
+              v-if="!item.showPriceInput && item.priceOverride === undefined"
+              type="button"
+              class="s-link s-qs-line__link"
+              @click="item.showPriceInput = true"
+            >
+              Change price
+            </button>
+            <div v-else class="s-qs-line__discount">
+              <label :for="`quick-sale-price-${index}`" class="s-field__label">
+                Selling price
+                <span class="s-qs-line__was-note">(inventory {{ formatCurrency(item.price) }})</span>
+              </label>
+              <div class="s-qs-line__discount-input">
+                <SInput
+                  :id="`quick-sale-price-${index}`"
+                  :model-value="item.priceOverride"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  :placeholder="String(item.price)"
+                  @update:model-value="(value) => setCartPriceOverride(item, value)"
+                >
+                  <template #prefix>{{ currencySymbol }}</template>
+                </SInput>
+              </div>
+              <SButton variant="ghost" size="sm" @click="clearCartPriceOverride(item)">
+                Reset
+              </SButton>
             </div>
             <button
               v-if="!item.showDiscountInput && !(item.discountAmount && item.discountAmount > 0)"
@@ -621,6 +651,7 @@ import {
   type SaleApproval,
 } from '~/composables/useSalesApi'
 import { discountNeedsApproval } from '~/utils/sale-pricing'
+import { roundMoney } from '~/utils/receipt-balance'
 import { isDemoModeActive } from '~/utils/demo-mode'
 import { newSaleId } from '~/utils/sales-outbox'
 import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
@@ -729,6 +760,25 @@ function handleCancel() {
   emit('update:modelValue', false)
 }
 
+type CartPriced = { price: number; priceOverride?: number; discountAmount?: number }
+
+/** Final price per unit: the checkout price (if changed) less any checkout discount. */
+function cartUnitPrice(item: CartPriced): number {
+  return Math.max(0, (item.priceOverride ?? item.price) - (Number(item.discountAmount) || 0))
+}
+
+/** Sets the checkout price; the inventory price (or an empty field) clears the change. */
+function setCartPriceOverride(item: CartPriced, raw: unknown) {
+  const n = roundMoney(parseFloat(String(raw)))
+  item.priceOverride =
+    Number.isFinite(n) && n > 0 && Math.abs(n - roundMoney(item.price)) >= 0.005 ? n : undefined
+}
+
+function clearCartPriceOverride(item: CartPriced & { showPriceInput?: boolean }) {
+  item.priceOverride = undefined
+  item.showPriceInput = false
+}
+
 function clearCartItemDiscount(item: { discountAmount?: number; showDiscountInput?: boolean }) {
   item.discountAmount = undefined
   item.showDiscountInput = false
@@ -785,6 +835,9 @@ const cartItems = ref<
     item: InventoryItem
     discountAmount?: number
     showDiscountInput?: boolean
+    /** Price per unit agreed at checkout, when it differs from the inventory price. */
+    priceOverride?: number
+    showPriceInput?: boolean
   }>
 >([])
 const showCustomerInfo = ref(false)
@@ -855,7 +908,7 @@ let html5QrCode: any = null
 
 const cartTotal = computed(() => {
   return cartItems.value.reduce(
-    (total, item) => total + Math.max(0, item.price - (item.discountAmount || 0)) * item.quantity,
+    (total, item) => total + cartUnitPrice(item) * item.quantity,
     0
   )
 })
@@ -1199,16 +1252,20 @@ const completeSale = async () => {
   if (!canCompleteQuickSale.value || isProcessing.value) return
   if (isDemoModeActive()) return completeSaleLocally()
 
+  // Same rule as the server: everything taken off the inventory price counts together.
   const needsApproval = cartItems.value.some((ci) =>
-    discountNeedsApproval(ci.price, ci.discountAmount || 0)
+    discountNeedsApproval(ci.price, Math.max(0, ci.price - cartUnitPrice(ci)))
   )
   if (needsApproval && !canApproveSales.value) {
     if (navigator.onLine === false) {
       showErrorToast('A sale that needs manager approval needs an internet connection.')
       return
     }
-    approvalReason.value =
-      'This sale has a discount above 10%. A manager must approve it with their PIN.'
+    approvalReason.value = `${
+      cartItems.value.some((ci) => ci.priceOverride !== undefined)
+        ? 'This sale is priced more than 10% below the inventory price.'
+        : 'This sale has a discount above 10%.'
+    } A manager must approve it with their PIN.`
     approvalError.value = null
     approvalOpen.value = true
     return
@@ -1233,6 +1290,7 @@ async function submitQuickSale(approval?: SaleApproval) {
           itemId: ci.id,
           quantity: selectedFolder.value?.hasSerialNumbers ? 1 : ci.quantity,
           discountAmount: ci.discountAmount || 0,
+          ...(ci.priceOverride !== undefined && { unitPrice: ci.priceOverride }),
         })),
         customer: { name: customerName.value, phone: customerPhone.value },
         payment: {
@@ -1319,10 +1377,16 @@ const completeSaleLocally = async () => {
     const receiptItems = cart.map((ci) => {
       const discountAmount = ci.discountAmount || 0
       const hasDiscount = discountAmount > 0
+      const basePrice = ci.priceOverride ?? ci.price
       return {
         itemId: ci.id,
         quantity: ci.quantity,
-        price: hasDiscount ? Math.max(0, ci.price - discountAmount) : ci.price,
+        price: cartUnitPrice(ci),
+        ...(ci.priceOverride !== undefined && {
+          priceChanged: true,
+          listPrice: ci.price,
+          priceChangedByName: 'you',
+        }),
         itemName: ci.name,
         serialNo: String((ci.item as any).serialNo || (ci.item as any).serialNumber || ''),
         brand: String((ci.item as any).brand || ''),
@@ -1330,9 +1394,9 @@ const completeSaleLocally = async () => {
         sku: String((ci.item as any).sku || ''),
         productDetails: getReceiptProductDetails(ci.item),
         ...(hasDiscount && {
-          originalPrice: ci.price,
+          originalPrice: basePrice,
           discountAmount,
-          discountPercentage: Math.round((discountAmount / ci.price) * 100),
+          discountPercentage: Math.round((discountAmount / basePrice) * 100),
           hasDiscount: true,
         }),
       }

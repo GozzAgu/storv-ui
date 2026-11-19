@@ -20,6 +20,47 @@ describe('saleUnitPrice', () => {
   })
 })
 
+describe('priceSaleLine checkout price', () => {
+  const base = { quantity: 1, serial: true, discountPerUnit: 0 }
+
+  it('sells at a higher checkout price without approval and keeps the list price', () => {
+    const line = priceSaleLine({ ...base, item: item({ price: 1000 }), unitPriceOverride: 1200 })
+    expect(line).toMatchObject({
+      finalPrice: 1200,
+      listPrice: 1000,
+      priceChanged: true,
+      needsApproval: false,
+      hasDiscount: false,
+    })
+  })
+
+  it('counts a lower price and a discount together against the 10% limit', () => {
+    const lower = (unitPriceOverride: number, discountPerUnit = 0) =>
+      priceSaleLine({ ...base, item: item({ price: 1000 }), unitPriceOverride, discountPerUnit })
+    expect(lower(950).needsApproval).toBe(false)
+    expect(lower(850).needsApproval).toBe(true)
+    expect(lower(950, 60).needsApproval).toBe(true)
+  })
+
+  it('ignores a checkout price equal to the list price and refuses zero', () => {
+    const same = priceSaleLine({ ...base, item: item({ price: 1000 }), unitPriceOverride: 1000 })
+    expect(same.priceChanged).toBe(false)
+    expect(same.listPrice).toBeUndefined()
+    expect(() =>
+      priceSaleLine({ ...base, item: item({ price: 1000 }), unitPriceOverride: 0 })
+    ).toThrow(SalePricingError)
+  })
+
+  it('replaces a standing discount rather than stacking on it', () => {
+    const line = priceSaleLine({
+      ...base,
+      item: item({ price: 1000, discountedPrice: 800, originalPrice: 1000 }),
+      unitPriceOverride: 900,
+    })
+    expect(line).toMatchObject({ finalPrice: 900, listPrice: 800, hasDiscount: false })
+  })
+})
+
 describe('priceSaleLine', () => {
   it('prices from the inventory row, not the client', () => {
     const line = priceSaleLine({

@@ -129,6 +129,95 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
       expect((await item('usb').get()).data()?.quantity).toBe(7)
     })
 
+    it('sells at a price changed at checkout and records who changed it', async () => {
+      const cashier = await actor('cashier')
+      const result = await createSale(
+        db,
+        cashier,
+        sale({ lines: [{ itemId: 'iphone', quantity: 1, unitPrice: 950_000 }] })
+      )
+      expect(result.receipt.total).toBe(950_000)
+      expect((result.receipt.items as Array<Record<string, unknown>>)[0]).toMatchObject({
+        price: 950_000,
+        priceChanged: true,
+        listPrice: 900_000,
+        priceChangedBy: 'cashier',
+      })
+      const sold = (await item('iphone').get()).data()
+      expect(sold).toMatchObject({
+        price: 900_000,
+        soldPrice: 950_000,
+        listPriceAtSale: 900_000,
+        priceChangedBy: 'cashier',
+        soldReceiptId: result.receiptId,
+      })
+      expect(typeof sold?.priceChangedByName).toBe('string')
+
+      // A refund puts it back on sale at its Unit Price, with no trace of the old sale price.
+      await refundSale(db, await actor('refunder'), {
+        receiptId: result.receiptId,
+        reason: 'Changed mind',
+      })
+      const back = (await item('iphone').get()).data()
+      expect(back?.dateOut).toBeUndefined()
+      expect(back?.soldPrice).toBeUndefined()
+      expect(back?.priceChangedBy).toBeUndefined()
+    })
+
+    it('treats a lower checkout price like a discount for approval', async () => {
+      const cashier = await actor('cashier')
+      await expect(
+        createSale(
+          db,
+          cashier,
+          sale({ lines: [{ itemId: 'iphone', quantity: 1, unitPrice: 800_000 }] })
+        )
+      ).rejects.toMatchObject({ data: { code: 'APPROVAL_REQUIRED' } })
+      const ok = await createSale(
+        db,
+        cashier,
+        sale({ lines: [{ itemId: 'iphone', quantity: 1, unitPrice: 850_000 }] })
+      )
+      expect(ok.receipt.total).toBe(850_000)
+    })
+
+    it('keeps the inventory price when the checkout price matches it', async () => {
+      const result = await createSale(
+        db,
+        await actor('cashier'),
+        sale({ lines: [{ itemId: 'iphone', quantity: 1, unitPrice: 900_000 }] })
+      )
+      expect((result.receipt.items as Array<Record<string, unknown>>)[0]?.priceChanged).toBe(
+        undefined
+      )
+      expect((await item('iphone').get()).data()).toMatchObject({ soldPrice: 900_000 })
+      expect((await item('iphone').get()).data()?.listPriceAtSale).toBeUndefined()
+    })
+
+    it('stamps the changed price when a balance-due order is paid off', async () => {
+      const cashier = await actor('cashier')
+      const held = await createSale(
+        db,
+        cashier,
+        sale({
+          lines: [{ itemId: 'iphone', quantity: 1, unitPrice: 1_000_000 }],
+          settlement: 'balance_due',
+          deposit: 100_000,
+        })
+      )
+      expect((await item('iphone').get()).data()?.soldPrice).toBeUndefined()
+      await recordBalancePayment(db, cashier, {
+        receiptId: held.receiptId,
+        amount: 900_000,
+        method: 'Cash',
+      })
+      expect((await item('iphone').get()).data()).toMatchObject({
+        soldPrice: 1_000_000,
+        listPriceAtSale: 900_000,
+        priceChangedBy: 'cashier',
+      })
+    })
+
     it('refuses to sell the same serial twice', async () => {
       const cashier = await actor('cashier')
       await createSale(db, cashier, sale({ lines: [{ itemId: 'iphone', quantity: 1 }] }))

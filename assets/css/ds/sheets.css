@@ -985,8 +985,13 @@
   font-variant-numeric: tabular-nums;
 }
 
-.s-qs-line__was {
+.s-qs-line__was,
+.s-qs-line__was-note {
   color: var(--s-text-muted);
+}
+
+.s-qs-line__was-note {
+  font-weight: 400;
 }
 
 .s-qs-line__remove {

@@ -28,7 +28,7 @@ export interface SaleApproval {
 export interface CreateSaleBody {
   saleId: string
   source: 'pos' | 'quick_sale'
-  lines: Array<{ itemId: string; quantity: number; discountAmount?: number }>
+  lines: Array<{ itemId: string; quantity: number; discountAmount?: number; unitPrice?: number }>
   customer?: { name?: string; email?: string; phone?: string; address?: string }
   payment: { method: string; split?: Array<{ method: string; amount: number }> }
   settlement?: 'paid_in_full' | 'balance_due'

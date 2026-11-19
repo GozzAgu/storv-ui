@@ -10,6 +10,7 @@ import {
 } from '~/server/utils/receipt-delete'
 import { syncLoyaltyBestEffort } from '~/server/utils/loyalty/sync'
 import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
+import { clearSoldPriceStamp } from '~/server/utils/sales/sold-price'
 
 interface DeleteReceiptBody {
   ownerUserId?: string
@@ -142,7 +143,11 @@ export default defineEventHandler(async (event) => {
           } else if (usesSerialNumbers) {
             itemWrites.push({
               ref: itemRef,
-              data: { dateOut: FieldValue.delete(), updatedAt: FieldValue.serverTimestamp() },
+              data: {
+                ...clearSoldPriceStamp(),
+                dateOut: FieldValue.delete(),
+                updatedAt: FieldValue.serverTimestamp(),
+              },
             })
           } else {
             const resolved = resolveBulkStockFieldAndValueFromMap(raw, templateFields)

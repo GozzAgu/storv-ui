@@ -7,6 +7,7 @@ import {
 import type { InventoryFolder } from '~/stores/inventory'
 import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
 import { folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
+import { soldPriceFromReceiptLine } from '~/server/utils/sales/sold-price'
 
 export type StockIssueReason =
   | 'already_sold'
@@ -43,6 +44,7 @@ interface Line {
   itemId: string
   folderId: string
   quantity: number
+  raw: Record<string, unknown>
 }
 
 /** Same folder fallback as the in-store finalize (stores/receipts.ts). */
@@ -66,6 +68,7 @@ function saleLines(receipt: Record<string, unknown>): Line[] {
       itemId,
       folderId: ID_PATTERN.test(folderId) ? folderId : '',
       quantity: Math.max(1, Math.floor(Number(line.quantity) || 1)),
+      raw: line,
     })
   }
   return lines
@@ -99,7 +102,10 @@ export async function planStockCommit(
   const folders = new Map(folderSnaps.map((s) => [s.id, s.data() as InventoryFolder | undefined]))
   const items = new Map(itemSnaps.map((s) => [s.id, s]))
 
-  const needed = new Map<string, { quantity: number; serial: boolean; folder?: InventoryFolder }>()
+  const needed = new Map<
+    string,
+    { quantity: number; serial: boolean; folder?: InventoryFolder; line: Line }
+  >()
   /** Lines with no folder: the in-store finalize changes no stock for them either. */
   const holdOnly = new Set<string>()
   for (const line of lines) {
@@ -114,6 +120,7 @@ export async function planStockCommit(
       quantity: (prev?.quantity ?? 0) + (serial ? 1 : line.quantity),
       serial: prev?.serial || serial,
       folder: prev?.folder ?? folder,
+      line: prev?.line ?? line,
     })
   }
 
@@ -164,7 +171,14 @@ export async function planStockCommit(
         if (ours) writes.push({ ref: snap.ref, data: clearHold })
         continue
       }
-      writes.push({ ref: snap.ref, data: { ...sold, dateOut: FieldValue.serverTimestamp() } })
+      writes.push({
+        ref: snap.ref,
+        data: {
+          ...sold,
+          ...(soldPriceFromReceiptLine(need.line.raw, receiptId) ?? {}),
+          dateOut: FieldValue.serverTimestamp(),
+        },
+      })
       continue
     }
     const stock = resolveBulkStockFieldAndValueFromMap(data, need.folder?.template?.fields)

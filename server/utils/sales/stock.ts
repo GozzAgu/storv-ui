@@ -7,6 +7,7 @@ import {
 import type { InventoryFolder } from '~/stores/inventory'
 import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
 import { folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
+import { clearSoldPriceStamp } from '~/server/utils/sales/sold-price'
 
 /**
  * Stock moves that undo a sale, planned inside a transaction: every read happens in the plan
@@ -103,7 +104,11 @@ export async function planStockReturn(
       if (!data.dateOut) continue
       writes.push({
         ref: snap.ref,
-        data: { dateOut: FieldValue.delete(), updatedAt: FieldValue.serverTimestamp() },
+        data: {
+          ...clearSoldPriceStamp(),
+          dateOut: FieldValue.delete(),
+          updatedAt: FieldValue.serverTimestamp(),
+        },
       })
       continue
     }

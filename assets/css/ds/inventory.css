@@ -617,6 +617,40 @@
   font: var(--s-text-caption);
 }
 
+/* Phone item sheet: a sold unit whose price was changed at checkout. */
+.s-inv-price-change {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.s-inv-price-change > div {
+  display: grid;
+  grid-template-columns: 6.5em 1fr;
+  gap: var(--s-space-1);
+}
+
+.s-inv-price-change dt {
+  color: var(--s-text-muted);
+}
+
+.s-inv-price-change dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.s-inv-price-change__down {
+  margin-left: 4px;
+  color: var(--s-warning);
+  font: var(--s-text-caption);
+}
+
+.s-inv-price-change__up {
+  margin-left: 4px;
+  color: var(--s-success);
+  font: var(--s-text-caption);
+}
+
 /* ── Category type picker ──────────────────────────────────────────────── */
 
 .s-kind-picker {

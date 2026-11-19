@@ -1,6 +1,7 @@
 import { createError } from 'h3'
 import {
   FieldValue,
+  type CollectionReference,
   type DocumentReference,
   type DocumentSnapshot,
   type Firestore,
@@ -16,6 +17,7 @@ import {
   type TransferStatus,
 } from '~/types/transfers'
 import { normalizeReason } from '~/utils/approval-decision'
+import { MAX_FOLDER_DEPTH } from '~/utils/transfer-route'
 import { decideTransferAction, isTransferAction, type TransferActor } from '~/utils/transfer-policy'
 import { enforce } from '~/server/utils/approvals/enforce'
 import { assertId, resolveStoreActor, type StoreActor } from '~/server/utils/sales/actor'
@@ -124,6 +126,12 @@ function portableItemData(data: Record<string, unknown>): Record<string, unknown
     transferredFrom: _transferredFrom,
     transferredFromFolder: _transferredFromFolder,
     transferredAt: _transferredAt,
+    receivedBy: _receivedBy,
+    receivedByName: _receivedByName,
+    dateIn: _dateIn,
+    DateIn: _DateIn,
+    originalDateIn: _originalDateIn,
+    transferId: _transferId,
     ...rest
   } = data
   return rest
@@ -134,6 +142,31 @@ const quantityOf = (data: Record<string, unknown> | undefined): number =>
 
 const lineName = (line: TransferLine, data?: Record<string, unknown>) =>
   String(data?.name || data?.itemName || line.itemName || 'An item').slice(0, 120)
+
+/** Category names from the top level down to `folderId`, read inside the transaction. */
+async function readFolderPath(
+  tx: Transaction,
+  folders: CollectionReference,
+  folderId: string
+): Promise<string[]> {
+  const names: string[] = []
+  const seen = new Set<string>()
+  let id = folderId
+  while (id && names.length < MAX_FOLDER_DEPTH && !seen.has(id)) {
+    seen.add(id)
+    const snap = await tx.get(folders.doc(id))
+    const data = snap.data()
+    if (!data) break
+    names.unshift(String(data.name || '').trim().slice(0, 120) || 'Unnamed category')
+    id = typeof data.parentId === 'string' ? data.parentId : ''
+  }
+  return names
+}
+
+async function readStoreName(tx: Transaction, store: DocumentReference): Promise<string> {
+  const data = (await tx.get(store)).data()
+  return String(data?.name || data?.branchName || '').trim().slice(0, 120)
+}
 
 /**
  * Moves the transfer's stock into the receiving branch in one transaction: every line either
@@ -174,6 +207,15 @@ async function receiveStock(
       'The destination category no longer exists. Reject this transfer and request it again.'
     )
   }
+  const sourceStore = owner.collection('stores').doc(transfer.sourceStoreId)
+  // The route as it stands when the stock lands, for the audit trail.
+  const [sourceFolderPath, destinationFolderPath, sourceStoreName, destinationStoreName] =
+    await Promise.all([
+      readFolderPath(tx, sourceStore.collection('inventoryFolders'), transfer.folderId),
+      readFolderPath(tx, destStore.collection('inventoryFolders'), transfer.destinationFolderId),
+      readStoreName(tx, sourceStore),
+      readStoreName(tx, destStore),
+    ])
   const sourceSnaps = await tx.getAll(...lines.map((l) => sourceItems.doc(l.itemId)))
   const bulkNames = transfer.hasSerialNumbers
     ? []
@@ -199,8 +241,15 @@ async function receiveStock(
     folderId: transfer.destinationFolderId,
     transferredFrom: transfer.sourceStoreId,
     transferredFromFolder: transfer.folderId,
+    transferId: ctx.transferRef.id,
     transferredAt: now,
     updatedAt: now,
+  }
+  // Items belong to the store owner (owner reads filter on createdBy); keep who received them.
+  const receivedStamp = {
+    createdBy: owner.id,
+    receivedBy: ctx.actorUid,
+    receivedByName: ctx.actorName,
   }
   const moved: TransferLine[] = []
   const skipped: string[] = []
@@ -229,8 +278,10 @@ async function receiveStock(
         ...portableItemData(data),
         ...provenance,
         id: ref.id,
-        dateIn: data.dateIn ?? data.DateIn ?? null,
-        createdBy: ctx.actorUid,
+        // Enters this branch today; the sender's entry date is kept for reference.
+        dateIn: now,
+        originalDateIn: data.dateIn ?? data.DateIn ?? null,
+        ...receivedStamp,
         createdAt: now,
       })
       tx.delete(snap.ref)
@@ -261,7 +312,11 @@ async function receiveStock(
               ref: destItems.doc(),
               base: 0,
               add: quantity,
-              create: { ...portableItemData(data), dateIn: data.dateIn ?? data.DateIn ?? null },
+              create: {
+                ...portableItemData(data),
+                dateIn: now,
+                originalDateIn: data.dateIn ?? data.DateIn ?? null,
+              },
             }
       )
     }
@@ -281,7 +336,7 @@ async function receiveStock(
         id: t.ref.id,
         quantity: qty,
         Quantity: qty,
-        createdBy: ctx.actorUid,
+        ...receivedStamp,
         createdAt: now,
       })
     } else {
@@ -298,6 +353,10 @@ async function receiveStock(
     receivedAt: now,
     receivedBy: ctx.actorUid,
     receivedByName: ctx.actorName,
+    sourceFolderPath,
+    destinationFolderPath,
+    ...(sourceStoreName && { sourceStoreName }),
+    ...(destinationStoreName && { destinationStoreName }),
     // Older screens read these names.
     completedAt: now,
     completedBy: ctx.actorUid,

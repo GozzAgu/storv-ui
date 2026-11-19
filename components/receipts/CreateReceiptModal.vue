@@ -318,6 +318,47 @@
                   </SField>
                 </div>
                 <div
+                  v-if="selectedItems.find((si) => si.id === item.id) && hasSaleUnitPrice(item)"
+                  class="s-new-sale__item-extra"
+                  @click.stop
+                >
+                  <template
+                    v-if="
+                      !selectedItems.find((si) => si.id === item.id)?.showPriceInput &&
+                      selectedItems.find((si) => si.id === item.id)?.priceOverride === undefined
+                    "
+                  >
+                    <SButton variant="ghost" size="sm" @click="togglePriceInput(item.id)">
+                      <template #leading>
+                        <PencilSquareIcon :size="16" :stroke-width="2" aria-hidden="true" />
+                      </template>
+                      Change price
+                    </SButton>
+                  </template>
+                  <SField
+                    v-else
+                    label="Selling price"
+                    :hint="`Inventory price ${formatCurrency(getEffectivePrice(item))}`"
+                  >
+                    <div class="s-inline-field">
+                      <SInput
+                        class="s-new-sale__narrow"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        :placeholder="String(getEffectivePrice(item))"
+                        :model-value="selectedItems.find((si) => si.id === item.id)?.priceOverride"
+                        @update:model-value="(value) => setItemPriceOverride(item.id, value)"
+                      >
+                        <template #prefix>{{ currencySymbol }}</template>
+                      </SInput>
+                      <SButton variant="ghost" @click="clearItemPriceOverride(item.id)">
+                        Reset
+                      </SButton>
+                    </div>
+                  </SField>
+                </div>
+                <div
                   v-if="selectedItems.find((si) => si.id === item.id)"
                   class="s-new-sale__item-extra"
                   @click.stop
@@ -382,11 +423,10 @@
                       </span>
                     </span>
                     <span class="s-new-sale__line-price">
-                      {{
-                        formatCurrency(
-                          Math.max(0, getEffectivePrice(si.item) - (si.discountAmount || 0))
-                        )
-                      }}
+                      <s v-if="si.priceOverride !== undefined" class="s-new-sale__price-was">
+                        {{ formatCurrency(getEffectivePrice(si.item)) }}
+                      </s>
+                      {{ formatCurrency(lineUnitPrice(si)) }}
                     </span>
                     <span v-if="getSelectedItemQuantityError(si.id)" class="s-new-sale__line-error">
                       {{ getSelectedItemQuantityError(si.id) }}
@@ -895,6 +935,7 @@ import {
   XMarkIcon,
   PlusCircleIcon,
   PlusIcon,
+  PencilSquareIcon,
   ArrowPathIcon,
   ChevronRightIcon,
 } from '~/utils/app-icons'
@@ -1047,6 +1088,9 @@ const selectedItems = ref<
     item: InventoryItem
     discountAmount?: number
     showDiscountInput?: boolean
+    /** Price per unit agreed at checkout, when it differs from the inventory price. */
+    priceOverride?: number
+    showPriceInput?: boolean
   }>
 >([])
 const discountReason = ref('')
@@ -1735,6 +1779,39 @@ const clearItemDiscount = (itemId: string) => {
   }
 }
 
+const togglePriceInput = (itemId: string) => {
+  const selected = selectedItems.value.find((si) => si.id === itemId)
+  if (selected) selected.showPriceInput = true
+}
+
+/** Sets the checkout price; the inventory price (or an empty field) clears the change. */
+const setItemPriceOverride = (itemId: string, raw: unknown) => {
+  const selected = selectedItems.value.find((si) => si.id === itemId)
+  if (!selected) return
+  const n = roundMoney(parseFloat(String(raw)))
+  const list = roundMoney(getEffectivePrice(selected.item))
+  selected.priceOverride = Number.isFinite(n) && n > 0 && Math.abs(n - list) >= 0.005 ? n : undefined
+}
+
+const clearItemPriceOverride = (itemId: string) => {
+  const selected = selectedItems.value.find((si) => si.id === itemId)
+  if (selected) {
+    selected.priceOverride = undefined
+    selected.showPriceInput = false
+  }
+}
+
+/** Unit price before any checkout discount: the changed price if there is one. */
+const lineBasePrice = (si: { item: InventoryItem; priceOverride?: number }): number =>
+  si.priceOverride ?? getEffectivePrice(si.item)
+
+/** Final price per unit on a line, after the checkout price change and discount. */
+const lineUnitPrice = (si: {
+  item: InventoryItem
+  priceOverride?: number
+  discountAmount?: number
+}): number => Math.max(0, lineBasePrice(si) - (si.discountAmount || 0))
+
 const getEffectivePrice = (item: InventoryItem): number => {
   // If item has a discount, use discounted price; otherwise use regular price
   if (item.discountedPrice !== undefined && item.discountedPrice !== null) {
@@ -1758,8 +1835,7 @@ const getOriginalPrice = (item: InventoryItem): number => {
 /** Sum of sold line items (after per-item discounts, including any checkout-time discount) before swap credit */
 const calculateItemsSubtotal = () => {
   return selectedItems.value.reduce((total, si) => {
-    const price = Math.max(0, getEffectivePrice(si.item) - (si.discountAmount || 0))
-    return total + price * si.quantity
+    return total + lineUnitPrice(si) * si.quantity
   }, 0)
 }
 
@@ -1889,13 +1965,16 @@ const handleCancel = () => {
   emit('update:modelValue', false)
 }
 
-/** True when any checkout discount exceeds the staff limit for its line. */
+/**
+ * True when a line sells more than the staff limit below its inventory price, by a discount, a
+ * lower checkout price, or both. Same rule as the server.
+ */
 const exceedsStaffDiscountLimit = () =>
   selectedItems.value.some((si) => {
-    const discount = si.discountAmount || 0
     const unitPrice = getEffectivePrice(si.item)
+    const reduction = unitPrice - lineUnitPrice(si)
     return (
-      discount > 0 && unitPrice > 0 && (discount / unitPrice) * 100 > STAFF_DISCOUNT_LIMIT_PERCENT
+      reduction > 0 && unitPrice > 0 && (reduction / unitPrice) * 100 > STAFF_DISCOUNT_LIMIT_PERCENT
     )
   })
 
@@ -1932,6 +2011,7 @@ function buildSaleBody(): CreateSaleBody {
       itemId: si.id,
       quantity: itemUsesSerialNumbers(si.item) ? 1 : si.quantity,
       discountAmount: si.discountAmount || 0,
+      ...(si.priceOverride !== undefined && { unitPrice: si.priceOverride }),
     })),
     customer: {
       name: resolvedCustomerName.value,
@@ -2060,9 +2140,10 @@ const createReceiptLocally = async () => {
         si.item.discountedPrice !== undefined && si.item.discountedPrice !== null
       // A checkout-time discount and a pre-existing inventory discount are mutually exclusive
       // for metadata; final unit price always applies checkout discount on top of effective price.
-      const finalPrice = Math.max(0, getEffectivePrice(si.item) - checkoutDiscount)
-      const originalPrice = getOriginalPrice(si.item)
-      const hasDiscount = inventoryHasDiscount || checkoutDiscount > 0
+      const finalPrice = lineUnitPrice(si)
+      const originalPrice = si.priceOverride ?? getOriginalPrice(si.item)
+      const hasDiscount =
+        (inventoryHasDiscount && si.priceOverride === undefined) || checkoutDiscount > 0
       const discountAmount = checkoutDiscount > 0 ? checkoutDiscount : si.item.discountAmount
       const discountPercentage =
         checkoutDiscount > 0 && originalPrice > 0
@@ -2086,6 +2167,11 @@ const createReceiptLocally = async () => {
         model: getItemField(si.item, 'model'),
         sku: getItemField(si.item, 'sku'),
         productDetails: getReceiptProductDetails(si.item),
+        ...(si.priceOverride !== undefined && {
+          priceChanged: true,
+          listPrice: getEffectivePrice(si.item),
+          priceChangedByName: 'you',
+        }),
         // Include discount information if applicable
         ...(hasDiscount && {
           originalPrice: originalPrice,

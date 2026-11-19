@@ -81,12 +81,8 @@ export default defineEventHandler(async (event): Promise<MainStoreSummaryRespons
     return { mainStore: mainStoreRef, isOwnBranch: true, totals: null, categories: [] }
   }
 
-  // Same filter as the owner's own category list, so the totals match theirs.
-  const foldersSnap = await storesRef
-    .doc(mainStore.id)
-    .collection('inventoryFolders')
-    .where('createdBy', '==', ownerId)
-    .get()
+  // Every category in the main store, the same list the owner sees.
+  const foldersSnap = await storesRef.doc(mainStore.id).collection('inventoryFolders').get()
 
   const { totals, categories } = summarizeStoreInventory(
     foldersSnap.docs.map((doc) => {
