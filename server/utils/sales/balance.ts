@@ -4,7 +4,12 @@ import { planHasFeature } from '~/types/subscription'
 import { computeBalanceDue, isBalanceFullyPaid, roundMoney } from '~/utils/receipt-balance'
 import { planStockCommit } from '~/server/utils/payments/link-stock'
 import { assertId, forbid, type StoreActor } from './actor'
-import { logSaleActivity } from './records'
+import {
+  logSaleActivity,
+  receiptActivityFacts,
+  receiptActivityLines,
+  receiptActivityLink,
+} from './records'
 import { planHoldRelease, planStockReturn } from './stock'
 
 /**
@@ -88,6 +93,28 @@ export async function recordBalancePayment(
         entityName: `Payment of ${amount.toLocaleString()} (${method}) on ${receipt.receiptNumber || receiptId}${
           completed ? ': paid in full, stock released' : ''
         }`,
+        details: {
+          facts: [
+            ...receiptActivityFacts(receipt, receiptId),
+            { label: 'Payment', value: amount, money: true, tone: 'good' },
+            { label: 'Method', value: method },
+            { label: 'Paid so far', value: newPaid, money: true },
+            {
+              label: 'Still owed',
+              value: completed ? 0 : computeBalanceDue(total, newPaid),
+              money: true,
+            },
+            ...(completed
+              ? [{ label: 'Result', value: 'Paid in full; items released as sold', tone: 'good' as const }]
+              : []),
+            ...(stock?.issues.length
+              ? [{ label: 'Stock issues', value: `${stock.issues.length} line(s) need checking`, tone: 'warn' as const }]
+              : []),
+          ],
+          linesLabel: 'Items on this sale',
+          lines: receiptActivityLines(receipt),
+          link: receiptActivityLink(receiptId),
+        },
       })
     }
     return { completed, amountPaid: newPaid, balanceDue: completed ? 0 : computeBalanceDue(total, newPaid) }
@@ -137,6 +164,19 @@ export async function cancelBalanceDue(
         entityName: `Cancelled order ${receipt.receiptNumber || receiptId}; ${plan.count} item(s) released${
           reason ? `: ${reason}` : ''
         }`,
+        details: {
+          facts: [
+            ...receiptActivityFacts(receipt, receiptId),
+            ...(typeof receipt.amountPaid === 'number' && receipt.amountPaid > 0
+              ? [{ label: 'Deposit taken', value: receipt.amountPaid, money: true, tone: 'warn' as const }]
+              : []),
+            { label: 'Items released', value: plan.count },
+            ...(reason ? [{ label: 'Reason', value: reason }] : []),
+          ],
+          linesLabel: 'Items released back to stock',
+          lines: receiptActivityLines(receipt),
+          link: receiptActivityLink(receiptId),
+        },
       })
     }
   })
@@ -189,6 +229,18 @@ export async function refundSale(
         entityName: `Refunded ${receipt.receiptNumber || receiptId}; ${plan.count} item(s) back in stock${
           reason ? `: ${reason}` : ''
         }`,
+        details: {
+          facts: [
+            ...receiptActivityFacts(receipt, receiptId),
+            { label: 'Refunded', value: Number(receipt.total) || 0, money: true, tone: 'bad' },
+            { label: 'Paid by', value: String(receipt.paymentMethod || '—') },
+            { label: 'Back in stock', value: `${plan.count} item(s)` },
+            ...(reason ? [{ label: 'Reason', value: reason }] : []),
+          ],
+          linesLabel: 'Items returned',
+          lines: receiptActivityLines(receipt),
+          link: receiptActivityLink(receiptId),
+        },
       })
     }
   })

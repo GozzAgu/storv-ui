@@ -44,6 +44,7 @@ import { verifyApprovalPin } from './approval-pin'
 import { logSaleActivity } from './records'
 import { soldPriceStamp } from './sold-price'
 import { receiptNumberFor } from '~/utils/receipt-number'
+import type { ActivityDetails } from '~/utils/activity-details'
 import { OPEN_STOCK_LOAN_STATUSES, normalizeStockLoanStatus } from '~/types/stock-loans'
 
 /** Most lines one sale may carry (each line is up to two writes in one transaction). */
@@ -751,6 +752,21 @@ export async function createSale(
         }${offline ? ' (recorded offline)' : ''}${
           priceChangedOffline ? ' (price changed while offline)' : ''
         }`,
+        details: saleActivityDetails({
+          receipt,
+          lines,
+          totals,
+          actor,
+          isBalanceDue,
+          deposit,
+          swapIn,
+          approvedBy,
+          discountReason: anyCheckoutDiscount ? input.discountReason : undefined,
+          offline,
+          priceChangedOffline,
+          clientTotal: input.clientTotal,
+          saleId: input.saleId,
+        }),
       })
     }
 
@@ -769,6 +785,102 @@ export async function createSale(
 }
 
 export { receiptNumberFor }
+
+/** Everything about a sale for its Activity entry: customer, money, each line, price changes. */
+function saleActivityDetails(input: {
+  receipt: Record<string, unknown>
+  lines: LoadedLine[]
+  totals: { subtotal: number; swapInCredit: number; commission: number; total: number }
+  actor: StoreActor
+  isBalanceDue: boolean
+  deposit: number
+  swapIn: { name: string; credit: number } | null
+  approvedBy: string | null
+  discountReason?: string
+  offline: boolean
+  priceChangedOffline: boolean
+  clientTotal?: number
+  saleId: string
+}): ActivityDetails {
+  const { receipt, lines, totals, actor } = input
+  const priceChanges = lines.filter((l) => l.priced.priceChanged)
+  const facts: ActivityDetails['facts'] = [
+    { label: 'Receipt', value: String(receipt.receiptNumber || '') },
+    { label: 'Customer', value: String(receipt.customerName || 'Walk-in Customer') },
+    ...(receipt.customerPhone ? [{ label: 'Phone', value: String(receipt.customerPhone) }] : []),
+    { label: 'Payment', value: String(receipt.paymentMethod || 'Cash') },
+    { label: 'Status', value: input.isBalanceDue ? 'Balance due (items held)' : 'Paid in full' },
+    { label: 'Subtotal', value: totals.subtotal, money: true },
+    ...(totals.swapInCredit
+      ? [{ label: 'Trade-in credit', value: -totals.swapInCredit, money: true }]
+      : []),
+    ...(totals.commission ? [{ label: 'Commission', value: totals.commission, money: true }] : []),
+    { label: 'Total', value: totals.total, money: true },
+    ...(input.isBalanceDue && input.deposit
+      ? [{ label: 'Deposit', value: input.deposit, money: true }]
+      : []),
+    ...(input.swapIn ? [{ label: 'Trade-in', value: input.swapIn.name }] : []),
+    ...(input.discountReason ? [{ label: 'Discount reason', value: input.discountReason }] : []),
+    ...(priceChanges.length
+      ? [
+          {
+            label: 'Prices changed',
+            value: `${priceChanges.length} line${priceChanges.length === 1 ? '' : 's'} by ${
+              actor.displayName
+            }`,
+            tone: 'warn' as const,
+          },
+        ]
+      : []),
+    ...(input.approvedBy && input.approvedBy !== actor.uid
+      ? [{ label: 'Manager approval', value: 'Approved with PIN', tone: 'good' as const }]
+      : []),
+    ...(input.offline ? [{ label: 'Recorded', value: 'Offline, synced later' }] : []),
+    ...(input.priceChangedOffline && input.clientTotal !== undefined
+      ? [
+          {
+            label: 'Till showed',
+            value: input.clientTotal,
+            money: true,
+            tone: 'warn' as const,
+          },
+        ]
+      : []),
+  ]
+  return {
+    facts,
+    linesLabel: input.isBalanceDue ? 'Items held' : 'Items sold',
+    lines: lines.map((l) => {
+      const serial =
+        getInventoryItemField(l.item, 'serialNo') ||
+        getInventoryItemField(l.item, 'serialNumber') ||
+        getInventoryItemField(l.item, 'serial')
+      const meta = [
+        serial ? `SN ${serial}` : '',
+        getInventoryItemField(l.item, 'model') || '',
+        getInventoryItemField(l.item, 'sku') ? `SKU ${getInventoryItemField(l.item, 'sku')}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · ')
+      return {
+        name: getInventoryItemDisplayName(l.item) || 'Product',
+        ...(meta && { meta }),
+        qty: l.priced.quantity,
+        amount: l.priced.finalPrice,
+        ...(l.priced.priceChanged && {
+          was: l.priced.listPrice,
+          note: `Price changed by ${actor.displayName}`,
+        }),
+        ...(!l.priced.priceChanged &&
+          l.priced.discountPerUnit > 0 && {
+            was: l.priced.unitPrice,
+            note: 'Checkout discount',
+          }),
+      }
+    }),
+    link: { label: 'View sale', path: `/receipts?receipt=${encodeURIComponent(input.saleId)}` },
+  }
+}
 
 /** Who changed a line's price at checkout, and from what. Empty when it wasn't changed. */
 function priceChangeFields(line: LoadedLine, actor: StoreActor): Record<string, unknown> {

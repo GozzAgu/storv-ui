@@ -256,20 +256,24 @@ export const useCustomerBuybacksStore = defineStore('customerBuybacks', {
       invalidateFolderItemCaches(folderId)
 
       const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
+      // storeId and userId were missing here, so buyback entries were never saved.
       await logActivity({
         action: 'created',
         entityType: 'item',
         entityId: itemId,
-        entityName: summary,
-        description: `Buyback from ${name} for ${purchasePrice}`,
-        metadata: {
-          customerName: name,
-          purchasePrice,
-          paymentMethod,
-          inventoryItemId: itemId,
-          folderId,
-        },
+        entityName: `Bought back from ${name}: ${summary}`,
+        storeId,
+        userId: useAuthStore().currentUser?.uid ?? userId,
         userDisplayName,
+        details: {
+          facts: [
+            { label: 'Customer', value: name },
+            { label: 'Paid to customer', value: purchasePrice, money: true },
+            { label: 'Payment method', value: paymentMethod },
+            { label: 'Added to stock as', value: summary },
+          ],
+          link: { label: 'Open category', path: `/inventory/${folderId}` },
+        },
       }).catch(() => {})
 
       await this.fetchCustomerBuybacks(true)

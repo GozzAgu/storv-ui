@@ -18,6 +18,7 @@ import {
 } from '~/types/transfers'
 import { normalizeReason } from '~/utils/approval-decision'
 import { MAX_FOLDER_DEPTH } from '~/utils/transfer-route'
+import { sanitizeActivityDetails, type ActivityDetails } from '~/utils/activity-details'
 import { decideTransferAction, isTransferAction, type TransferActor } from '~/utils/transfer-policy'
 import { enforce } from '~/server/utils/approvals/enforce'
 import { assertId, resolveStoreActor, type StoreActor } from '~/server/utils/sales/actor'
@@ -465,5 +466,122 @@ export async function runTransferAction(
     reason,
     result,
   })
+  if (planHasFeature(plan, 'activity_logs')) {
+    await logTransferActivity(db, { owner, transferId, uid, displayName, action, result })
+  }
   return result
+}
+
+/** "TR-7F3K2A", the short reference both branches see. */
+function transferRefLabel(transferId: string): string {
+  return `TR-${transferId.replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase()}`
+}
+
+const TRANSFER_VERB: Record<TransferAction, string> = {
+  dispatch: 'Dispatched',
+  receive: 'Received',
+  reject: 'Rejected',
+  cancel: 'Cancelled',
+  track: 'Updated tracking on',
+}
+
+/**
+ * One Activity entry in each branch for a transfer action, with the full route, the items and
+ * who did it. Read after the change committed so it shows the final state. Never throws: the
+ * transfer itself has already gone through.
+ */
+async function logTransferActivity(
+  db: Firestore,
+  input: {
+    owner: DocumentReference
+    transferId: string
+    uid: string
+    displayName: string
+    action: TransferAction
+    result: TransferActionResult
+  }
+): Promise<void> {
+  try {
+    const snap = await input.owner.collection('storeTransfers').doc(input.transferId).get()
+    const t = snap.data()
+    if (!t) return
+    const ref = transferRefLabel(input.transferId)
+    const sourceStoreId = String(t.sourceStoreId ?? t.fromStoreId ?? '')
+    const destinationStoreId = String(t.destinationStoreId ?? t.toStoreId ?? '')
+    const from = String(t.sourceStoreName || 'another branch')
+    const to = String(t.destinationStoreName || 'another branch')
+    const paths = (raw: unknown) =>
+      Array.isArray(raw) ? raw.map((n) => String(n ?? '')).filter(Boolean) : []
+    const items = (Array.isArray(t.items) ? t.items : []) as Array<Record<string, unknown>>
+    const units = items.reduce((n, l) => n + (Number(l.quantity) || 1), 0)
+    const verb = TRANSFER_VERB[input.action]
+    const entityName = `${verb} transfer ${ref}: ${from} → ${to}${
+      input.action === 'receive' ? `, ${input.result.moved} line(s) moved` : ''
+    }`.slice(0, 300)
+    const details: ActivityDetails = {
+      facts: [
+        { label: 'Transfer', value: ref },
+        { label: 'Status', value: String(t.status || input.result.status).replace(/_/g, ' ') },
+        { label: 'Units', value: units },
+        ...(t.carrier ? [{ label: 'Carrier', value: String(t.carrier) }] : []),
+        ...(t.trackingNumber ? [{ label: 'Tracking number', value: String(t.trackingNumber) }] : []),
+        ...(t.rejectionReason
+          ? [{ label: 'Reason', value: String(t.rejectionReason), tone: 'bad' as const }]
+          : []),
+        ...(input.result.skipped.length
+          ? [
+              {
+                label: 'Not moved',
+                value: input.result.skipped.join('; '),
+                tone: 'warn' as const,
+              },
+            ]
+          : []),
+        ...(t.notes ? [{ label: 'Notes', value: String(t.notes) }] : []),
+      ],
+      route: {
+        from: { branch: from, path: paths(t.sourceFolderPath) },
+        to: { branch: to, path: paths(t.destinationFolderPath) },
+      },
+      linesLabel: input.action === 'receive' ? 'Items received' : 'Items in transfer',
+      lines: items.map((l) => {
+        const detail = (l.details ?? {}) as Record<string, unknown>
+        const meta = [
+          l.serialNumber ? `SN ${l.serialNumber}` : '',
+          ...Object.entries(detail)
+            .filter(([k]) => !/serial/i.test(k))
+            .slice(0, 3)
+            .map(([k, v]) => `${k} ${v}`),
+        ]
+          .filter(Boolean)
+          .join(' · ')
+        return {
+          name: String(l.itemName || 'Item'),
+          ...(meta && { meta }),
+          qty: Number(l.quantity) || 1,
+        }
+      }),
+      link: { label: 'View transfer', path: '/multi-store-sync?tab=history' },
+    }
+    const clean = sanitizeActivityDetails(details)
+    const batch = db.batch()
+    for (const storeId of new Set([sourceStoreId, destinationStoreId].filter(Boolean))) {
+      const arriving = input.action === 'receive' && storeId === destinationStoreId
+      batch.create(input.owner.collection('stores').doc(storeId).collection('activityLogs').doc(), {
+        userId: input.uid,
+        userDisplayName: input.displayName,
+        action: arriving ? 'created' : 'updated',
+        entityType: 'transfer',
+        entityId: input.transferId,
+        entityName,
+        storeId,
+        source: 'server',
+        ...(clean && { details: clean }),
+        createdAt: FieldValue.serverTimestamp(),
+      })
+    }
+    await batch.commit()
+  } catch (err) {
+    console.error('[transfers] activity log failed', err instanceof Error ? err.message : err)
+  }
 }

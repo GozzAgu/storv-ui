@@ -597,6 +597,7 @@ export function appendDemoActivityLog(
     entityId: entry.entityId,
     entityName: entry.entityName,
     storeId: entry.storeId,
+    ...(entry.details && { details: entry.details }),
     createdAt: nowIso(),
   })
   extras.activityLogs = extras.activityLogs.slice(0, 200)

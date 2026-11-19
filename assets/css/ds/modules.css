@@ -177,6 +177,50 @@
   gap: var(--s-space-half);
 }
 
+.s-activity__row {
+  cursor: pointer;
+}
+
+tr.s-activity__row:hover {
+  background: var(--s-surface-hover);
+}
+
+button.s-activity__row {
+  width: 100%;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.s-table .s-activity__toggle {
+  width: 44px;
+  padding-right: 0;
+}
+
+.s-activity__chevron {
+  color: var(--s-text-muted);
+  transition: transform var(--s-duration-fast) var(--s-ease);
+}
+
+.s-activity__chevron--open {
+  transform: rotate(90deg);
+}
+
+.s-table tr.s-table__row--expanded td {
+  border-bottom-color: transparent;
+}
+
+.s-table td.s-activity__nested {
+  height: auto;
+  padding: 0 var(--s-space-3) var(--s-space-2) 44px;
+}
+
+.s-activity__expand {
+  padding: 0 var(--s-space-1-5) var(--s-space-1-5);
+}
+
 /* ── Help ────────────────────────────────────────────────── */
 .s-help__search {
   display: flex;

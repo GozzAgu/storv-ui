@@ -24,6 +24,7 @@ import {
 } from './actor'
 import { logSaleActivity } from './records'
 import { notifyStockLoanChange } from './stock-loan-notify'
+import type { ActivityDetails } from '~/utils/activity-details'
 
 /** Loan doc plus one write per item must fit in one transaction. */
 export const STOCK_LOAN_MAX_LINES = 450
@@ -167,6 +168,10 @@ export async function createStockLoan(
         entityName: pending
           ? `Requested a stock loan of ${lines.length} item(s) to ${partyName}`
           : `Loaned ${lines.length} item(s) to ${partyName}`,
+        details: stockLoanActivityDetails(
+          { partyName, partyPhone, partyNotes, lines },
+          pending ? 'Waiting for approval' : 'Out with the borrower'
+        ),
       })
     }
     return { loanId: loanRef.id, status, itemCount: lines.length }
@@ -182,6 +187,30 @@ export async function createStockLoan(
     })
   }
   return { loanId: result.loanId, status: result.status }
+}
+
+/** Borrower and the exact units on a stock loan, for its Activity entries. */
+function stockLoanActivityDetails(loan: Record<string, unknown>, status: string): ActivityDetails {
+  const lines = (Array.isArray(loan.lines) ? loan.lines : []) as Array<Record<string, unknown>>
+  return {
+    facts: [
+      { label: 'Borrower', value: String(loan.partyName || '—') },
+      ...(loan.partyPhone ? [{ label: 'Phone', value: String(loan.partyPhone) }] : []),
+      { label: 'Status', value: status },
+      { label: 'Items', value: lines.length },
+      ...(loan.partyNotes ? [{ label: 'Notes', value: String(loan.partyNotes) }] : []),
+    ],
+    linesLabel: 'Items on the loan',
+    lines: lines.map((l) => {
+      const details = (l.details ?? {}) as Record<string, unknown>
+      const meta = Object.entries(details)
+        .slice(0, 4)
+        .map(([k, v]) => `${k} ${v}`)
+        .join(' · ')
+      return { name: String(l.itemSummary || 'Item'), ...(meta && { meta }), qty: 1 }
+    }),
+    link: { label: 'View stock loans', path: '/seller-loans' },
+  }
 }
 
 const ACTIVITY_TEXT: Record<StockLoanAction, (party: string, n: number) => string> = {
@@ -268,6 +297,10 @@ export async function runStockLoanAction(
         entityType: 'items_batch',
         entityId: loanId,
         entityName: ACTIVITY_TEXT[action](String(loan.partyName || 'borrower'), lines.length),
+        details: stockLoanActivityDetails(
+          loan as Record<string, unknown>,
+          String(decision.to ?? loan.status ?? '').replace(/_/g, ' ')
+        ),
       })
     }
     return {

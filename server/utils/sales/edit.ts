@@ -8,7 +8,8 @@ import {
   type ReceiptEditChange,
 } from '~/utils/receipt-edit'
 import { assertId, forbid, type StoreActor } from './actor'
-import { logSaleActivity, notifyStore } from './records'
+import { humanizeFieldKey, type ActivityValue } from '~/utils/activity-details'
+import { logSaleActivity, receiptActivityFacts, receiptActivityLink, notifyStore } from './records'
 
 /**
  * Editing a recorded sale. Only details that don't move money or stock can change here: who the
@@ -121,6 +122,19 @@ export async function editSale(
       entityType: 'receipt',
       entityId: receiptId,
       entityName: `Edited sale #${receipt.receiptNumber ?? receiptId}: ${reason}`,
+      details: {
+        facts: [
+          ...receiptActivityFacts(receipt, receiptId),
+          { label: 'Reason', value: reason },
+          { label: 'Edit number', value: editCount },
+        ],
+        changes: changes.map((c) => ({
+          label: humanizeFieldKey(String(c.field)),
+          from: (c.from ?? null) as ActivityValue,
+          to: (c.to ?? null) as ActivityValue,
+        })),
+        link: receiptActivityLink(receiptId),
+      },
     })
     return { editCount, changes, receiptNumber: String(receipt.receiptNumber ?? receiptId) }
   })

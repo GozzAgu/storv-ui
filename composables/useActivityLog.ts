@@ -9,9 +9,20 @@ import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { resolveEffectiveSubscriptionPlan, planHasFeature } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'
+import { sanitizeActivityDetails, type ActivityDetails } from '~/utils/activity-details'
+
+export type { ActivityDetails } from '~/utils/activity-details'
 
 export type ActivityAction = 'created' | 'updated' | 'deleted'
-export type ActivityEntityType = 'folder' | 'item' | 'items_batch' | 'lead' | 'payment'
+export type ActivityEntityType =
+  | 'folder'
+  | 'item'
+  | 'items_batch'
+  | 'lead'
+  | 'payment'
+  | 'receipt'
+  | 'customer_balance'
+  | 'transfer'
 
 export interface ActivityLog {
   id: string
@@ -23,6 +34,8 @@ export interface ActivityLog {
   entityName: string
   storeId: string
   createdAt: ReturnType<typeof serverTimestamp> | Date
+  /** What exactly happened (facts, before → after, items); older entries have none. */
+  details?: ActivityDetails | null
 }
 
 export interface LogActivityParams {
@@ -33,6 +46,7 @@ export interface LogActivityParams {
   storeId: string
   userId: string
   userDisplayName: string
+  details?: ActivityDetails
 }
 
 /** Normalize typographic dashes in log summaries (em/en dash → comma or ASCII hyphen) for clearer Activity Logs UI. */
@@ -53,6 +67,9 @@ export function activityEntityTypeLabel(type: ActivityEntityType): string {
   if (type === 'folder') return 'Folder'
   if (type === 'lead') return 'Lead'
   if (type === 'payment') return 'Payment'
+  if (type === 'receipt') return 'Sale'
+  if (type === 'customer_balance') return 'Customer balance'
+  if (type === 'transfer') return 'Transfer'
   return 'Item'
 }
 
@@ -144,6 +161,7 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
       entityId: params.entityId,
       entityName: params.entityName,
       storeId: params.storeId,
+      details: sanitizeActivityDetails(params.details),
     })
     return
   }
@@ -170,6 +188,7 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
     const { useAuthStore } = await import('~/stores/auth')
     const actorUid = useAuthStore().currentUser?.uid
     if (!actorUid) return
+    const details = sanitizeActivityDetails(params.details)
     await setDoc(logRef, {
       userId: actorUid,
       userDisplayName: params.userDisplayName,
@@ -178,6 +197,7 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
       entityId: params.entityId,
       entityName: normalizeActivityLogText(params.entityName),
       storeId: params.storeId,
+      ...(details && { details }),
       createdAt: serverTimestamp(),
     })
   } catch (e) {
@@ -226,6 +246,7 @@ export async function fetchActivityLogs(
       entityName: normalizeActivityLogText((data.entityName as string | undefined) ?? '-'),
       storeId: data.storeId ?? storeId,
       createdAt: data.createdAt?.toDate?.() ?? new Date(data.createdAt),
+      details: sanitizeActivityDetails(data.details),
     } as ActivityLog
   })
 }

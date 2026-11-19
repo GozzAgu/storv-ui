@@ -154,6 +154,22 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('stock transfers (emulator
       destinationFolderPath: ['Electronics', 'Phones'],
     })
 
+    // Both branches' Activity record the receipt, with the route and the units.
+    for (const id of [LAGOS, PH]) {
+      const logs = await branch(id).collection('activityLogs').where('entityId', '==', 't1').get()
+      const received = logs.docs.map((d) => d.data()).find((l) => /^Received/.test(l.entityName))
+      expect(received).toMatchObject({
+        entityType: 'transfer',
+        userId: 'phAdmin',
+        action: id === PH ? 'created' : 'updated',
+      })
+      expect(received?.details.route).toEqual({
+        from: { branch: LAGOS, path: ['Phones'] },
+        to: { branch: PH, path: ['Electronics', 'Phones'] },
+      })
+      expect(received?.details.lines[0]).toMatchObject({ name: 'iPhone 13', qty: 1 })
+    }
+
     // Approving twice does nothing.
     await expect(act('phAdmin', 't1', 'receive')).rejects.toMatchObject({ statusCode: 409 })
   })

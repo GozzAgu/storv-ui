@@ -153,6 +153,24 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('server sales (emulator)',
       })
       expect(typeof sold?.priceChangedByName).toBe('string')
 
+      // The Activity entry says exactly what happened.
+      const logs = await store().collection('activityLogs').where('entityId', '==', result.receiptId).get()
+      const details = logs.docs[0]?.data().details
+      expect(details.facts).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ label: 'Total', value: 950_000, money: true }),
+          expect.objectContaining({ label: 'Prices changed', tone: 'warn' }),
+        ])
+      )
+      expect(details.lines[0]).toMatchObject({
+        name: 'iPhone 15',
+        meta: expect.stringContaining('SN1'),
+        qty: 1,
+        amount: 950_000,
+        was: 900_000,
+      })
+      expect(details.link.path).toBe(`/receipts?receipt=${result.receiptId}`)
+
       // A refund puts it back on sale at its Unit Price, with no trace of the old sale price.
       await refundSale(db, await actor('refunder'), {
         receiptId: result.receiptId,

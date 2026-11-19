@@ -745,6 +745,7 @@ import { useTransfersApi } from '~/composables/useTransfersApi'
 import { getApiErrorMessage } from '~/utils/api-error-message'
 import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { folderPathNames, formatTransferEndpoint } from '~/utils/transfer-route'
+import { getCurrentUserDisplayName, logActivity } from '~/composables/useActivityLog'
 import { decidedByLine, decidedByName } from '~/utils/decided-by'
 import { availableTransferActions, type TransferActor } from '~/utils/transfer-policy'
 import {
@@ -1182,6 +1183,39 @@ const requestTransfer = async () => {
       status: 'pending_approval',
       createdBy: userId,
       createdAt: serverTimestamp(),
+    })
+
+    // Recorded in the sending branch's Activity; later steps are logged by the server.
+    const sourceName = String(sourceStore.name || sourceStore.branchName || 'this branch')
+    const destName = String(destStore.name || destStore.branchName || 'another branch')
+    const paths = requestedFolderPaths()
+    void logActivity({
+      action: 'created',
+      entityType: 'transfer',
+      entityId: transferRef.id,
+      entityName: `Requested transfer ${transferRefFromId(transferRef.id)}: ${sourceName} → ${destName}`,
+      storeId: transferForm.value.sourceStoreId,
+      userId,
+      userDisplayName: await getCurrentUserDisplayName().catch(() => 'Unknown'),
+      details: {
+        facts: [
+          { label: 'Transfer', value: transferRefFromId(transferRef.id) },
+          { label: 'Status', value: 'Waiting for dispatch' },
+          { label: 'Units', value: transferredItems.reduce((n, l) => n + (Number(l.quantity) || 1), 0) },
+          ...(transferForm.value.notes ? [{ label: 'Notes', value: transferForm.value.notes }] : []),
+        ],
+        route: {
+          from: { branch: sourceName, path: paths.sourceFolderPath },
+          to: { branch: destName, path: paths.destinationFolderPath },
+        },
+        linesLabel: 'Items requested',
+        lines: transferredItems.map((l) => ({
+          name: String(l.itemName || 'Item'),
+          ...(l.serialNumber && { meta: `SN ${l.serialNumber}` }),
+          qty: Number(l.quantity) || 1,
+        })),
+        link: { label: 'View transfer', path: '/multi-store-sync?tab=history' },
+      },
     })
 
     toast.success(
@@ -2061,6 +2095,9 @@ function transferFolderLabel(path: string[] | undefined): string {
 function transferRoute(transfer: TransferRecord): string {
   return `${transferSourceEndpoint(transfer)} → ${transferDestinationEndpoint(transfer)}`
 }
+
+/** "TR-7F3K2A" from a bare transfer ID. */
+const transferRefFromId = (id: string) => transferRef({ id })
 
 /** Short, stable reference people can quote to each other, e.g. "TR-7F3K2A". */
 function transferRef(transfer: { id?: string }): string {

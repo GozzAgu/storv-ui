@@ -77,6 +77,7 @@ import {
   isStoreListFetchFresh,
   type StoreFetchStamp,
 } from '~/utils/store-data-cache'
+import { itemChanges, itemEditDetails, itemSnapshotFacts } from '~/utils/inventory-activity'
 
 export { INVENTORY_FIRESTORE_PAGE_SIZE }
 
@@ -1426,6 +1427,21 @@ export const useInventoryStore = defineStore('inventory', {
 
         const folderName = (normalizedUpdates as { name?: string }).name ?? folder?.name ?? folderId
         const userDisplayNameForFolder = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        const folderChanges = itemChanges(
+          folder as unknown as Record<string, unknown>,
+          Object.fromEntries(
+            Object.entries(normalizedUpdates as Record<string, unknown>).filter(
+              ([k]) => !['template', 'allowedDepartments', 'allowedStaff'].includes(k)
+            )
+          )
+        )
+        const templateChanged =
+          'template' in (normalizedUpdates as object) &&
+          JSON.stringify((normalizedUpdates as { template?: unknown }).template) !==
+            JSON.stringify(folder?.template)
+        const accessChanged =
+          'allowedDepartments' in (normalizedUpdates as object) ||
+          'allowedStaff' in (normalizedUpdates as object)
         await logActivity({
           action: 'updated',
           entityType: 'folder',
@@ -1434,6 +1450,14 @@ export const useInventoryStore = defineStore('inventory', {
           storeId,
           userId: authStore.currentUser!.uid,
           userDisplayName: userDisplayNameForFolder,
+          details: {
+            facts: [
+              ...(templateChanged ? [{ label: 'Fields', value: 'Product fields changed' }] : []),
+              ...(accessChanged ? [{ label: 'Access', value: 'Who can open it changed' }] : []),
+            ],
+            changes: folderChanges,
+            link: { label: 'Open category', path: `/inventory/${folderId}` },
+          },
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
       } catch (error: any) {
         console.error('Error updating folder:', error)
@@ -1537,6 +1561,16 @@ export const useInventoryStore = defineStore('inventory', {
           storeId,
           userId: authStore.currentUser!.uid,
           userDisplayName: userDisplayNameForFolder,
+          details: {
+            facts: [
+              { label: 'Category', value: folderName },
+              { label: 'Products in it', value: folder?.itemCount ?? null },
+              {
+                label: 'Fields',
+                value: (folder?.template?.fields ?? []).map((f) => f.label || f.name).join(', '),
+              },
+            ],
+          },
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
       } catch (error: any) {
         console.error('Error deleting folder:', error)
@@ -2007,10 +2041,14 @@ export const useInventoryStore = defineStore('inventory', {
           action: 'created',
           entityType: 'item',
           entityId: newItemRef.id,
-          entityName: String(itemName),
+          entityName: `Added ${String(itemName)}`,
           storeId,
           userId: createdByUid,
           userDisplayName: userDisplayNameForItem,
+          details: {
+            facts: itemSnapshotFacts(itemPayload as Record<string, unknown>, folder),
+            link: { label: 'Open category', path: `/inventory/${folderId}` },
+          },
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
 
         const wasFirstItem = this.totalItems <= 1
@@ -2359,14 +2397,28 @@ export const useInventoryStore = defineStore('inventory', {
         }
         const finalItemName = itemName
         const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        const editDetails = itemEditDetails(
+          existingItem as Record<string, unknown> | undefined,
+          cleanedUpdates as Record<string, unknown>,
+          this.getFolderById(folderId)
+        )
+        const changedLabels = (editDetails.changes ?? []).map((c) => c.label)
         await logActivity({
           action: 'updated',
           entityType: 'item',
           entityId: itemId,
-          entityName: String(finalItemName),
+          entityName: changedLabels.length
+            ? `${finalItemName}: changed ${changedLabels.slice(0, 3).join(', ')}${
+                changedLabels.length > 3 ? ` +${changedLabels.length - 3} more` : ''
+              }`
+            : String(finalItemName),
           storeId,
           userId: authStore.currentUser!.uid,
           userDisplayName,
+          details: {
+            ...editDetails,
+            link: { label: 'Open category', path: `/inventory/${folderId}` },
+          },
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
 
         const auditFields: Array<{
@@ -2499,10 +2551,18 @@ export const useInventoryStore = defineStore('inventory', {
           action: 'deleted',
           entityType: 'item',
           entityId: itemId,
-          entityName: String(itemName),
+          entityName: `Deleted ${String(itemName)}`,
           storeId,
           userId: authStore.currentUser!.uid,
           userDisplayName: userDisplayNameForDelete,
+          details: existingItem
+            ? {
+                facts: itemSnapshotFacts(
+                  existingItem as unknown as Record<string, unknown>,
+                  this.getFolderById(folderId)
+                ),
+              }
+            : undefined,
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
 
         try {
@@ -3498,10 +3558,25 @@ export const useInventoryStore = defineStore('inventory', {
           action: 'updated',
           entityType: 'item',
           entityId: itemId,
-          entityName: String(itemNameForLog),
+          entityName: `Discount on ${String(itemNameForLog)}`,
           storeId,
           userId: authStore.currentUser!.uid,
           userDisplayName: userDisplayNameDiscount,
+          details: {
+            facts: [
+              { label: 'Discount', value: discountPercentage ? `${discountPercentage}%` : null },
+              { label: 'Amount off', value: discountAmount ?? null, money: true },
+            ],
+            changes: [
+              {
+                label: 'Selling price',
+                from: originalPrice ?? null,
+                to: Math.round(discountedPrice * 100) / 100,
+                money: true,
+              },
+            ],
+            link: { label: 'Open category', path: `/inventory/${folderId}` },
+          },
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
 
         return {
@@ -3823,10 +3898,20 @@ export const useInventoryStore = defineStore('inventory', {
           action: 'updated',
           entityType: 'item',
           entityId: itemId,
-          entityName: String(itemNameRemove),
+          entityName: `Removed discount on ${String(itemNameRemove)}`,
           storeId,
           userId: authStore.currentUser!.uid,
           userDisplayName: userDisplayNameRemove,
+          details: {
+            facts: [
+              {
+                label: 'Price now',
+                value: (itemForLog?.originalPrice as number | undefined) ?? null,
+                money: true,
+              },
+            ],
+            link: { label: 'Open category', path: `/inventory/${folderId}` },
+          },
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
       } catch (error: any) {
         console.error('Error removing discount:', error)

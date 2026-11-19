@@ -87,6 +87,13 @@ export interface BulkPriceResult {
  * on a stock loan and items held for a balance payment are left alone (and counted as skipped).
  * Writes a price-history entry per changed field and one activity log entry.
  */
+/** "Set to 9,000,000" / "+10%" for the Activity entry. */
+function priceRuleText(rule: { mode: 'set' | 'percent'; value: number }): string {
+  return rule.mode === 'percent'
+    ? `${rule.value > 0 ? '+' : ''}${rule.value}%`
+    : `Set to ${rule.value.toLocaleString()}`
+}
+
 export async function runBulkPriceUpdate(
   db: Firestore,
   actor: StoreActor,
@@ -158,6 +165,45 @@ export async function runBulkPriceUpdate(
         entityName: perItem
           ? `Updated the prices of ${products} in ${where} from an Excel import`
           : `Changed the ${parts.join(' and ')} of ${products} in ${where}`,
+        details: {
+          facts: [
+            { label: 'Category', value: where },
+            { label: 'Products changed', value: updated },
+            { label: 'Source', value: perItem ? 'Excel import' : 'Update prices' },
+            ...(change?.unitPrice
+              ? [{ label: 'Unit price rule', value: priceRuleText(change.unitPrice) }]
+              : []),
+            ...(change?.costPrice
+              ? [{ label: 'Cost price rule', value: priceRuleText(change.costPrice) }]
+              : []),
+            ...(Object.values(summary.skippedByReason).some(Boolean)
+              ? [
+                  {
+                    label: 'Skipped',
+                    value: Object.entries(summary.skippedByReason)
+                      .filter(([, n]) => n)
+                      .map(([why, n]) => `${n} ${why.replace(/_/g, ' ')}`)
+                      .join(', '),
+                    tone: 'warn' as const,
+                  },
+                ]
+              : []),
+          ],
+          linesLabel: 'Price changes',
+          lines: summary.toUpdate.map((plan) => {
+            const item = byId.get(plan.id)!
+            const cost =
+              plan.costChanged && plan.before.cost !== plan.after.cost
+                ? `Cost ${plan.before.cost ?? '—'} → ${plan.after.cost ?? '—'}`
+                : ''
+            return {
+              name: (getInventoryItemDisplayName(item as InventoryItem) || 'Product').slice(0, 120),
+              ...(plan.after.price !== null && { amount: plan.after.price }),
+              ...(plan.priceChanged && plan.before.price !== null && { was: plan.before.price }),
+              ...(cost && { note: cost }),
+            }
+          }),
+        },
       })
     }
 
