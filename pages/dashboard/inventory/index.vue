@@ -1317,8 +1317,8 @@ watch(foldersViewMode, (m) => {
 const getInitialPage = (): number => {
   if (import.meta.client) {
     try {
-      const saved = localStorage.getItem('inventory-index-page')
-      return saved ? parseInt(saved, 10) : 1
+      const saved = parseInt(localStorage.getItem('inventory-index-page') || '', 10)
+      return Number.isFinite(saved) && saved >= 1 ? saved : 1
     } catch (e) {
       return 1
     }
@@ -2166,8 +2166,41 @@ const subfolderSyncCount = computed(() => {
   return getChildFolders(folders.value, id).length
 })
 
+const categoryPageCount = computed(() =>
+  Math.max(1, Math.ceil(foldersForCategoryList.value.length / itemsPerPage.value))
+)
+
+/**
+ * The saved page is shared by every branch and account on this browser, so a page that existed
+ * in one branch can be past the end in another (or after categories are deleted or filtered).
+ * Keep it in range rather than show an empty list with no way back.
+ */
+watch(
+  [categoryPageCount, () => inventoryStore.loading, () => folders.value.length],
+  ([pages, loadingFolders]) => {
+    // While categories load the list is briefly empty; don't throw away a valid saved page.
+    if (loadingFolders && folders.value.length === 0) return
+    if (currentPage.value <= pages) return
+    currentPage.value = pages
+    if (import.meta.client) {
+      try {
+        localStorage.setItem('inventory-index-page', String(pages))
+      } catch {
+        /* ignore */
+      }
+    }
+  },
+  { immediate: true }
+)
+
+// A new search or filter starts from the first page.
+watch([searchQuery, categoryFilter], () => {
+  currentPage.value = 1
+})
+
 const paginatedFolders = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
+  const page = Math.min(currentPage.value, categoryPageCount.value)
+  const start = (page - 1) * itemsPerPage.value
   return foldersForCategoryList.value.slice(start, start + itemsPerPage.value)
 })
 
