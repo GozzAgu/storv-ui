@@ -56,8 +56,6 @@
       </div>
     </dl>
 
-    <MainStoreSummaryCard v-if="isStaff" />
-
     <template v-if="inventoryStore.loading && folders.length === 0">
       <div class="s-category-grid" role="status" aria-label="Loading categories">
         <div
@@ -1017,7 +1015,6 @@ import SSpinner from '~/components/s/SSpinner.vue'
 import STabs from '~/components/s/STabs.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
-import MainStoreSummaryCard from '~/components/inventory/MainStoreSummaryCard.vue'
 import InventorySwapInsPanel from '~/components/inventory/InventorySwapInsPanel.vue'
 import {
   isSwapInStatusFilter,
