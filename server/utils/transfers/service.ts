@@ -271,6 +271,7 @@ async function receiveStock(
     if (data.dateOut) return skip(`${name} has been sold`)
     if (String(data.sellerLoanOutId ?? '').trim()) return skip(`${name} is out on a stock loan`)
     if (String(data.pendingSaleReceiptId ?? '').trim()) return skip(`${name} is held on an order`)
+    if (String(data.inspectionHoldId ?? '').trim()) return skip(`${name} is waiting for inspection`)
 
     const quantity = Math.max(1, Math.floor(Number(line.quantity) || 1))
     if (transfer.hasSerialNumbers) {

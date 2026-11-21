@@ -503,6 +503,14 @@
               :limit="6"
             />
           </template>
+
+          <!-- Stock losses -->
+          <StockLossesReport
+            v-else-if="activeAnalyticsTab === 'losses'"
+            :period="selectedPeriod"
+            :period-label="periodLabel"
+            :gross-profit="canViewProfitAndCost ? periodGrossProfit : null"
+          />
         </div>
       </section>
     </template>
@@ -521,6 +529,7 @@ import {
 } from 'vue'
 import { CalendarDays, ChevronRight, Clock, Download, Store } from '@lucide/vue'
 import SBadge from '~/components/s/SBadge.vue'
+import StockLossesReport from '~/components/analytics/StockLossesReport.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
@@ -698,13 +707,27 @@ function onWebPeriodChange(value: string | number | null | undefined) {
   loadAnalytics()
 }
 
-const webAnalyticsTabs = [
+const webAnalyticsTabs = computed(() => [
   { value: 'overview', label: 'Overview' },
   { value: 'revenue', label: 'Revenue' },
   { value: 'products-customers', label: 'Products & customers' },
   { value: 'payments-traffic', label: 'Payments & busy times' },
   { value: 'reports', label: 'Top lists' },
-]
+  // Losses are money at cost: only for people who can see costs and profit.
+  ...(canViewProfitAndCost.value ? [{ value: 'losses', label: 'Stock losses' }] : []),
+])
+
+// Deep link from the activity log: /analytics?tab=losses
+const reportsRoute = useRoute()
+watch(
+  () => reportsRoute.query.tab,
+  (tab) => {
+    if (typeof tab === 'string' && webAnalyticsTabs.value.some((t) => t.value === tab)) {
+      activeAnalyticsTab.value = tab
+    }
+  },
+  { immediate: true }
+)
 
 function kpiTone(tone: AnalyticsKpiCardData['tone']): 'success' | 'warning' | 'error' | undefined {
   if (tone === 'warning') return 'warning'

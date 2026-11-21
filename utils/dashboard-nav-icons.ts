@@ -16,6 +16,7 @@ import {
   LogOut,
   Network,
   Package,
+  PackageX,
   ReceiptText,
   RefreshCcwDot,
   Settings2,
@@ -30,6 +31,7 @@ export type DashboardNavIconKey =
   | 'inventory'
   | 'buybacks'
   | 'loans'
+  | 'supplier-returns'
   | 'receipts'
   | 'payment-links'
   | 'payments-awaiting'
@@ -57,6 +59,8 @@ export const DASHBOARD_NAV_ICONS: Record<DashboardNavIconKey, Component> = {
   buybacks: HandCoins,
   // Lending stock out to a seller is an agreement, not a cash wallet.
   loans: Handshake,
+  // Defective stock going back to the supplier.
+  'supplier-returns': PackageX,
   receipts: ReceiptText,
   'payment-links': Link2,
   'payments-awaiting': BadgeCheck,

@@ -206,9 +206,9 @@
                           <span class="s-list__value">{{ formatCurrency(receipt.total) }}</span>
                           <SBadge
                             v-if="receipt.status !== 'completed'"
-                            :tone="getReceiptStatusTone(receipt.status)"
+                            :tone="getReceiptDisplayStatus(receipt).tone"
                           >
-                            {{ getReceiptStatusLabel(receipt.status) }}
+                            {{ getReceiptDisplayStatus(receipt).label }}
                           </SBadge>
                         </div>
                         <SIconButton
@@ -320,8 +320,8 @@
                           {{ formatPaymentMethod(receipt.paymentMethod) }}
                         </td>
                         <td>
-                          <SBadge :tone="getReceiptStatusTone(receipt.status)" dot>
-                            {{ getReceiptStatusLabel(receipt.status) }}
+                          <SBadge :tone="getReceiptDisplayStatus(receipt).tone" dot>
+                            {{ getReceiptDisplayStatus(receipt).label }}
                           </SBadge>
                         </td>
                         <td class="s-hide-lg s-table__muted">
@@ -619,7 +619,7 @@ import ReceiptDetailsDrawer from '~/components/receipts/ReceiptDetailsDrawer.vue
 import OfflineSalesCard from '~/components/receipts/OfflineSalesCard.vue'
 import TodaySalesPanel from '~/components/receipts/TodaySalesPanel.vue'
 import { summarizeDaySales } from '~/utils/day-sales-summary'
-import { getReceiptStatusLabel, getReceiptStatusTone } from '~/utils/receipt-status'
+import { getReceiptDisplayStatus } from '~/utils/receipt-status'
 // @ts-ignore
 import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
 import EditReceiptModal from '~/components/receipts/EditReceiptModal.vue'

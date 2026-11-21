@@ -117,6 +117,28 @@ export function useItemTimeline(item: Ref<InventoryItem | null>, folderName?: Re
       })
     }
 
+    // 4c. Back from a supplier return: repaired, or a replacement unit
+    const fromSupplier = i.returnedFromSupplier
+    if (fromSupplier && typeof fromSupplier === 'object') {
+      const raw = fromSupplier.at as unknown
+      const at =
+        raw && typeof raw === 'object' && 'toDate' in raw
+          ? (raw as { toDate: () => Date }).toDate()
+          : raw
+          ? new Date(raw as string)
+          : createdAt
+      const replacement = fromSupplier.outcome === 'replacement'
+      events.push({
+        type: 'restocked',
+        label: replacement ? 'Replacement from supplier' : 'Back from supplier (repaired)',
+        description: `${fromSupplier.supplierName || 'Supplier'} ${
+          replacement ? 'sent this unit as a replacement' : 'repaired it; back on sale'
+        }`,
+        date: at,
+        metadata: { supplierReturnId: fromSupplier.returnId },
+      })
+    }
+
     // 5. Discount applied - item has discount fields
     if (i.discountPercentage !== undefined || i.discountAmount !== undefined) {
       const updatedAt = i.updatedAt

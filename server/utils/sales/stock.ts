@@ -82,9 +82,11 @@ async function readLines(tx: Transaction, store: DocumentReference, lines: SaleL
 export async function planStockReturn(
   tx: Transaction,
   store: DocumentReference,
-  receipt: Record<string, unknown>
+  receipt: Record<string, unknown>,
+  /** Items not to restock (held for inspection). */
+  exclude: ReadonlySet<string> = new Set()
 ): Promise<StockWritePlan> {
-  const lines = receiptSaleLines(receipt)
+  const lines = receiptSaleLines(receipt).filter((l) => !exclude.has(l.itemId))
   const { folders, items } = await readLines(tx, store, lines)
   const add = new Map<string, number>()
   const serial = new Set<string>()

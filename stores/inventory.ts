@@ -37,6 +37,7 @@ import {
   getInventoryItemDocument,
   getQueryUserId,
   getSellerLoanOutDocument,
+  getStockRemovalsCollection,
 } from '~/composables/useFirestorePaths'
 import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
 import {
@@ -54,6 +55,8 @@ import {
   noteInventoryChanged,
   docToInventoryItem,
 } from '~/utils/inventory-items-firestore'
+import type { CountReductionWhy, DeleteWhy } from '~/types/stock-removals'
+import { countReductionRecord } from '~/utils/stock-removal-records'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
 import {
   computeFolderAvailabilityStats,
@@ -286,6 +289,15 @@ export interface InventoryItem {
   /** Set while a balance-due receipt holds this unit; cleared when paid in full or order cancelled. */
   pendingSaleReceiptId?: string
   pendingSaleAt?: Date | string
+  /** Set by the server while a customer-returned unit waits for inspection: it can't be sold. */
+  inspectionHoldId?: string
+  /** Set by the server when the unit came back from a supplier return (repaired or replaced). */
+  returnedFromSupplier?: {
+    returnId: string
+    supplierName: string
+    outcome: 'repaired' | 'replacement'
+    at: unknown
+  }
   swapIn?: boolean // Indicates if this item was swapped in by a customer
   swapInReceiptId?: string // Receipt ID associated with this swap-in
   /** Standalone buyback from a customer (store paid cash/credit for the unit). */
@@ -319,6 +331,8 @@ export interface InventoryItem {
 
 /** Written by the server on sale or transfer; never sent back from an edit form. */
 export const SERVER_SALE_AND_TRANSFER_FIELDS = [
+  'inspectionHoldId',
+  'returnedFromSupplier',
   'soldPrice',
   'soldReceiptId',
   'listPriceAtSale',
@@ -1523,20 +1537,14 @@ export const useInventoryStore = defineStore('inventory', {
           throw new Error('No store selected')
         }
 
-        // Delete all items in this folder first (same user path as folder owner)
-        const itemsRef = getInventoryItemsCollection(db, userId, storeId)
-        const itemsQuery = query(itemsRef, where('folderId', '==', folderId))
-        const itemsSnapshot = await getDocs(itemsQuery)
-        const BATCH_SIZE = 500 // Firestore batch limit
-        if (!itemsSnapshot.empty) {
-          const docs = itemsSnapshot.docs
-          for (let i = 0; i < docs.length; i += BATCH_SIZE) {
-            const batch = writeBatch(db)
-            const chunk = docs.slice(i, i + BATCH_SIZE)
-            chunk.forEach((d) => batch.delete(d.ref))
-            await batch.commit()
-          }
+        // Remove the category's products first. The server records each one (Returns → Stock
+        // out log) and deletes them in chunks; clients can't delete inventory rows directly.
+        const { useSalesApi } = await import('~/composables/useSalesApi')
+        for (let guard = 0; guard < 1000; guard++) {
+          const { remaining } = await useSalesApi().removeCategoryItems(folderId)
+          if (!remaining) break
         }
+        invalidateFolderItemCaches(folderId)
 
         // Remove folder's items from local state
         delete this.items[folderId]
@@ -2302,12 +2310,24 @@ export const useInventoryStore = defineStore('inventory', {
     async updateItem(
       folderId: string,
       itemId: string,
-      updates: Partial<Omit<InventoryItem, 'id' | 'createdAt' | 'createdBy' | 'folderId'>>
+      updates: Partial<Omit<InventoryItem, 'id' | 'createdAt' | 'createdBy' | 'folderId'>>,
+      /** When the edit lowers the stock count: why. The drop is recorded in Returns. */
+      reduction?: CountReductionWhy
     ) {
       noteInventoryChanged()
       assertPlanWritable()
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
+        const before = this.items[folderId]?.find((item) => item.id === itemId)
+        if (reduction && before) {
+          const { useStockRemovalsStore } = await import('~/stores/stockRemovals')
+          useStockRemovalsStore().addLocalReduction(
+            before,
+            { ...before, ...updates } as InventoryItem,
+            this.getFolderById(folderId),
+            reduction
+          )
+        }
         const { applyDemoInventoryItemUpdate } = await import('~/utils/demo-bridge')
         await applyDemoInventoryItemUpdate(itemId, updates)
         return
@@ -2370,10 +2390,37 @@ export const useInventoryStore = defineStore('inventory', {
           )
         )
 
-        await updateDoc(itemRef, {
-          ...cleanedUpdates,
-          updatedAt: serverTimestamp(),
-        })
+        const reductionRecord =
+          reduction && existingItem
+            ? countReductionRecord(
+                existingItem,
+                { ...existingItem, ...cleanedUpdates } as InventoryItem,
+                folder,
+                reduction,
+                { storeId, uid: authStore.currentUser.uid, name: await getCurrentUserDisplayName() }
+              )
+            : null
+        if (reductionRecord) {
+          // The edit and its record land together, so a lowered count always has a trace.
+          const batch = writeBatch(db)
+          batch.update(itemRef, { ...cleanedUpdates, updatedAt: serverTimestamp() })
+          batch.set(doc(getStockRemovalsCollection(db, userId, storeId)), {
+            ...reductionRecord,
+            createdAt: serverTimestamp(),
+          })
+          await batch.commit()
+          try {
+            const { useStockRemovalsStore } = await import('~/stores/stockRemovals')
+            useStockRemovalsStore().markStale()
+          } catch {
+            /* optional */
+          }
+        } else {
+          await updateDoc(itemRef, {
+            ...cleanedUpdates,
+            updatedAt: serverTimestamp(),
+          })
+        }
 
         // Update local state
         let itemName: string = itemId
@@ -2483,97 +2530,59 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     // Delete an item
-    async deleteItem(folderId: string, itemId: string) {
+    /**
+     * Deletes one product. The server keeps a record of it (copy, reason, who, when) in Returns
+     * → Stock out log; clients can't delete inventory rows directly.
+     */
+    async deleteItem(folderId: string, itemId: string, why: DeleteWhy, item?: InventoryItem) {
+      await this.deleteItems(folderId, [itemId], why, item ? [item] : undefined)
+    },
+
+    /** Deletes several products in one step, each recorded with the same reason. */
+    async deleteItems(
+      folderId: string,
+      itemIds: string[],
+      why: DeleteWhy,
+      /** The rows being deleted (the page may already have removed them from the list). */
+      known?: InventoryItem[]
+    ) {
       noteInventoryChanged()
       assertPlanWritable()
+      if (itemIds.length === 0) return
       const { isDemoModeActive } = await import('~/utils/demo-mode')
       if (isDemoModeActive()) {
+        const { useStockRemovalsStore } = await import('~/stores/stockRemovals')
         const { applyDemoDeleteItem } = await import('~/utils/demo-bridge')
-        await applyDemoDeleteItem(itemId)
+        const folder = this.getFolderById(folderId)
+        for (const itemId of itemIds) {
+          const item =
+            known?.find((i) => i.id === itemId) ??
+            this.items[folderId]?.find((i) => i.id === itemId)
+          if (item) useStockRemovalsStore().addLocalDeletion(item, folder, why)
+          await applyDemoDeleteItem(itemId)
+        }
         return
       }
-
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) {
-        throw new Error(CLOUD_UNAVAILABLE_MESSAGE)
+      const { useSalesApi } = await import('~/composables/useSalesApi')
+      for (let i = 0; i < itemIds.length; i += 100) {
+        await useSalesApi().removeItems(itemIds.slice(i, i + 100), why)
       }
-
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) {
-        throw new Error('User must be authenticated to delete items')
+      if (this.items[folderId]) {
+        this.items[folderId] = this.items[folderId].filter((item) => !itemIds.includes(item.id))
       }
-
-      // Check permissions - super admins and managers can delete; other staff view-only
-      const userStore = useUserStore()
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
-      }
-      if (userStore.userData?.role === 'staff') {
-        const staffStore = useStaffStore()
-        const staffMember = await staffStore.fetchCurrentStaffMember()
-        const permissions = staffMember ? resolveStaffPermissions(staffMember) : null
-        if (!permissions || !getPermissionAction(permissions, 'products', 'delete')) {
-          throw new Error('You do not have permission to delete items from inventory.')
-        }
-      }
-
-      // Path userId: super admin's UID (for managers we use getQueryUserId so we hit the store's collection)
-      const userId = (await getQueryUserId()) ?? authStore.currentUser.uid
-      const folder = this.getFolderById(folderId)
-      const existingItem = this.items[folderId]?.find((item) => item.id === itemId)
-      const itemName = existingItem?.name ?? existingItem?.brand ?? existingItem?.model ?? itemId
-      let storeId = existingItem?.storeId ?? folder?.storeId
-      if (!storeId) {
-        storeId = (await getCurrentStoreId()) ?? ''
-      }
-      if (!storeId) {
-        throw new Error('No store selected')
-      }
-
+      invalidateFolderItemCaches(folderId)
+      await this.updateItemCount(folderId)
       try {
-        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
-        const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
-        await deleteDoc(itemRef)
-
-        // Remove from local state
-        if (this.items[folderId]) {
-          const index = this.items[folderId].findIndex((item) => item.id === itemId)
-          if (index > -1) {
-            this.items[folderId].splice(index, 1)
-          }
-        }
-
-        // Update folder item count
-        await this.updateItemCount(folderId)
-
-        const userDisplayNameForDelete = await getCurrentUserDisplayName().catch(() => 'Unknown')
-        await logActivity({
-          action: 'deleted',
-          entityType: 'item',
-          entityId: itemId,
-          entityName: `Deleted ${String(itemName)}`,
-          storeId,
-          userId: authStore.currentUser!.uid,
-          userDisplayName: userDisplayNameForDelete,
-          details: existingItem
-            ? {
-                facts: itemSnapshotFacts(
-                  existingItem as unknown as Record<string, unknown>,
-                  this.getFolderById(folderId)
-                ),
-              }
-            : undefined,
-        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
-
-        try {
-          const { useStorefrontStore } = await import('~/stores/storefront')
-          useStorefrontStore().queueItemSync(null, itemId, folderId)
-        } catch {
-          /* optional */
-        }
-      } catch (error: any) {
-        console.error('Error deleting item:', error)
-        throw new Error(error.message || 'Failed to delete item')
+        const { useStorefrontStore } = await import('~/stores/storefront')
+        for (const itemId of itemIds) useStorefrontStore().queueItemSync(null, itemId, folderId)
+      } catch {
+        /* optional */
+      }
+      try {
+        const { useStockRemovalsStore } = await import('~/stores/stockRemovals')
+        useStockRemovalsStore().markStale()
+      } catch {
+        /* optional */
       }
     },
 
@@ -3781,9 +3790,7 @@ export const useInventoryStore = defineStore('inventory', {
         const wanted = new Set(itemIds)
         const all = await this.fetchItemsAllChunked(folderId)
         const summary = planBulkPriceChange(
-          all.filter((i) => wanted.has(i.id)) as Array<
-            Record<string, unknown> & { id: string }
-          >,
+          all.filter((i) => wanted.has(i.id)) as Array<Record<string, unknown> & { id: string }>,
           perItem ? (id) => perItemChange.get(id) ?? {} : target.change
         )
         const { applyDemoInventoryItemUpdate } = await import('~/utils/demo-bridge')

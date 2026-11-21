@@ -55,6 +55,8 @@ export interface DemoReceipt {
   amountPaid?: number
   balanceDue?: number
   refundReason?: string
+  /** Refunded with items still held for inspection. */
+  inspectionPending?: boolean
   customerEmail?: string
   customerAddress?: string
   notes?: string

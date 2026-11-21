@@ -249,6 +249,7 @@ export function demoReceiptToReceipt(r: DemoReceipt): Receipt {
     amountPaid: r.amountPaid,
     balanceDue: r.balanceDue,
     refundReason: r.refundReason,
+    ...(r.inspectionPending && { inspectionPending: true }),
     folderId: r.folderId,
     itemIds: r.items.map((i) => i.itemId),
     storeId: r.storeId,
@@ -521,8 +522,11 @@ export async function applyDemoCustomerFromReceipt(
   return id
 }
 
-export async function applyDemoReceiptRefund(receiptId: string) {
-  useDemoAppStore().refundReceipt(receiptId)
+export async function applyDemoReceiptRefund(
+  receiptId: string,
+  heldItemIds: readonly string[] = []
+) {
+  useDemoAppStore().refundReceipt(receiptId, heldItemIds)
   await syncDemoToPinia()
 }
 
@@ -542,6 +546,7 @@ export async function applyDemoReceiptUpdate(receiptId: string, updates: Partial
     'editCount',
     'lastEditedByName',
     'lastEditReason',
+    'inspectionPending',
   ] as const) {
     if (updates[key] !== undefined) (receipt as Record<string, unknown>)[key] = updates[key]
   }
@@ -590,6 +595,25 @@ export async function applyDemoCreateFolder(
   })
   await syncDemoToPinia()
   return id
+}
+
+export async function applyDemoInspectionDecision(
+  itemId: string,
+  units: number,
+  action: 'restock' | 'supplier'
+) {
+  useDemoAppStore().decideHeldUnits(itemId, units, action)
+  await syncDemoToPinia()
+}
+
+export async function applyDemoStockAddition(itemId: string, units: number) {
+  useDemoAppStore().addStock(itemId, units)
+  await syncDemoToPinia()
+}
+
+export async function applyDemoStockRemoval(itemId: string, units: number) {
+  useDemoAppStore().removeStock(itemId, units)
+  await syncDemoToPinia()
 }
 
 export async function applyDemoDeleteItem(itemId: string) {

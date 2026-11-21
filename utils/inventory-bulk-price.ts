@@ -28,13 +28,20 @@ const MAX_PERCENT = 1000
 const SELL_PRICE_KEYS = ['price', 'Price', 'PRICE', 'cost', 'Cost', 'COST'] as const
 const COST_KEY = 'unitCost'
 
-export type BulkPriceSkipReason = 'sold' | 'on_loan' | 'awaiting_payment' | 'no_price' | 'unchanged'
+export type BulkPriceSkipReason =
+  | 'sold'
+  | 'on_loan'
+  | 'awaiting_payment'
+  | 'on_inspection'
+  | 'no_price'
+  | 'unchanged'
 
 export const BULK_PRICE_SKIP_LABELS: Record<BulkPriceSkipReason | 'not_found', string> = {
   not_found: 'no longer in this category',
   sold: 'sold',
   on_loan: 'out on a stock loan',
   awaiting_payment: 'held for a balance payment',
+  on_inspection: 'waiting for inspection',
   no_price: 'no current price to adjust',
   unchanged: 'already at that price',
 }
@@ -104,6 +111,7 @@ export function bulkPriceLockReason(item: Record<string, unknown>): BulkPriceSki
   if (filled(item.dateOut)) return 'sold'
   if (filled(item.sellerLoanOutId)) return 'on_loan'
   if (filled(item.pendingSaleReceiptId)) return 'awaiting_payment'
+  if (filled(item.inspectionHoldId)) return 'on_inspection'
   return null
 }
 

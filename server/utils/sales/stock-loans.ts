@@ -122,6 +122,7 @@ export async function createStockLoan(
         forbid(`You can’t lend from ${folder?.name || 'that category'}.`)
       if (item.sellerLoanOutId) conflict(`${name} is already out on a loan.`)
       if (item.pendingSaleReceiptId) conflict(`${name} is held on an outstanding order.`)
+      if (item.inspectionHoldId) conflict(`${name} was returned and is waiting for inspection.`)
       if (folderHasSerialNumbers(folder) && item.dateOut) conflict(`${name} has already been sold.`)
       return {
         inventoryItemId: snap.id,

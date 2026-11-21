@@ -21,6 +21,8 @@
         </li>
       </ul>
 
+      <slot />
+
       <div class="s-confirm__ack">
         <SCheckbox
           :model-value="confirmed"
@@ -35,7 +37,7 @@
         primary-variant="danger"
         :primary-icon="Trash2"
         :primary-label="primaryLabel"
-        :primary-disabled="!confirmed || loading"
+        :primary-disabled="!confirmed || loading || blocked"
         @cancel="emit('update:modelValue', false)"
         @primary="emit('confirm')"
       />
@@ -58,6 +60,8 @@ const props = withDefaults(
     entityLabelPlural?: string
     count: number
     itemNames?: string[]
+    /** Keeps the delete button disabled (e.g. a required reason is missing). */
+    blocked?: boolean
     warning: string
     confirmLabel: string
     /** e.g. "Delete 3 categories and all products inside" */

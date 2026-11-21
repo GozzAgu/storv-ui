@@ -110,7 +110,12 @@ export async function lockPaymentLinkItems(
     } | null
     const usesSerial = !!folder?.hasSerialNumbers
     if (usesSerial) {
-      if (data.dateOut || data.pendingSaleReceiptId || data.sellerLoanOutId) {
+      if (
+        data.dateOut ||
+        data.pendingSaleReceiptId ||
+        data.sellerLoanOutId ||
+        data.inspectionHoldId
+      ) {
         throw createError({
           statusCode: 409,
           message: `"${resolvePaymentLinkItemName(data)}" is no longer available`,

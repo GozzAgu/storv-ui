@@ -6,6 +6,7 @@ export type InventoryAvailabilityStatus =
   | 'awaiting_payment'
   | 'sold'
   | 'returned'
+  | 'on_inspection'
 
 export interface InventoryAvailabilityBadge {
   status: InventoryAvailabilityStatus
@@ -78,6 +79,18 @@ export function availabilityBadgeForStockLoan(pending = false): InventoryAvailab
   }
 }
 
+/** A customer returned it and it waits for inspection: not sellable until someone decides. */
+export function isItemOnInspection(item: InventoryItem): boolean {
+  return typeof item.inspectionHoldId === 'string' && item.inspectionHoldId !== ''
+}
+
+export function availabilityBadgeForInspection(): InventoryAvailabilityBadge {
+  return {
+    status: 'on_inspection',
+    label: 'Held for inspection',
+  }
+}
+
 export function availabilityBadgeForReturned(): InventoryAvailabilityBadge {
   return {
     status: 'returned',
@@ -88,6 +101,7 @@ export function availabilityBadgeForReturned(): InventoryAvailabilityBadge {
 /** Coarse status for an inventory item (used by storefront projection and badges). */
 export function getInventoryAvailabilityStatus(item: InventoryItem): InventoryAvailabilityStatus {
   if (isItemSold(item)) return 'sold'
+  if (isItemOnInspection(item)) return 'on_inspection'
   if (isItemOnStockLoan(item)) return 'with_seller'
   if (isItemAwaitingPayment(item)) return 'awaiting_payment'
   return 'available'
@@ -116,6 +130,7 @@ export function inventoryAvailabilityTone(
     case 'with_seller':
       return 'info'
     case 'awaiting_payment':
+    case 'on_inspection':
       return 'warning'
     case 'returned':
       return 'accent'

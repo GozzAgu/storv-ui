@@ -152,7 +152,7 @@ export async function planStockCommit(
     const data = snap.data() ?? {}
     const pending = String(data.pendingSaleReceiptId || '')
     const ours = pending === receiptId
-    if (pending && !ours) {
+    if (data.inspectionHoldId || (pending && !ours)) {
       issues.push({ itemId, reason: 'held_by_other' })
       continue
     }

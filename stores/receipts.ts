@@ -65,6 +65,7 @@ export function mapReceiptData(
     total: data.total || 0,
     paymentMethod: data.paymentMethod || '',
     status: data.status || 'completed',
+    ...(data.inspectionPending === true && { inspectionPending: true }),
     notes: data.notes || '',
     folderId: data.folderId || '',
     folderIds: Array.isArray(data.folderIds)
@@ -205,6 +206,8 @@ export interface Receipt {
   hasSerialNumbers?: boolean
   notes?: string
   refundReason?: string // Reason for return/refund (when status is refunded)
+  /** Refunded, but some returned items are still held for inspection (set by the server). */
+  inspectionPending?: boolean
   discountReason?: string // Reason for a checkout-time discount, required when any item has hasDiscount
   // Commission fields (admin/owner only): a flat amount folded into `total` so the customer
   // sees one clean number; the true subtotal is always recoverable as `total - commissionAmount`.

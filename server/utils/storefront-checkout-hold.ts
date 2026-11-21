@@ -107,7 +107,7 @@ export async function createStorefrontCheckoutPaymentLink(params: {
     const usesSerial = !!folder?.hasSerialNumbers
 
     if (usesSerial) {
-      if (itemData.dateOut || itemData.sellerLoanOutId) {
+      if (itemData.dateOut || itemData.sellerLoanOutId || itemData.inspectionHoldId) {
         throw createError({
           statusCode: 409,
           message: 'This item is no longer available.',
@@ -343,7 +343,7 @@ export async function createInquiryPaymentLink(params: {
     const existingPending = String(itemData.pendingSaleReceiptId || '')
 
     if (usesSerial) {
-      if (itemData.dateOut || itemData.sellerLoanOutId) {
+      if (itemData.dateOut || itemData.sellerLoanOutId || itemData.inspectionHoldId) {
         throw createError({ statusCode: 409, message: 'This item is no longer available.' })
       }
       if (

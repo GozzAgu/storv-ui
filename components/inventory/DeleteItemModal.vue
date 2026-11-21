@@ -4,7 +4,7 @@
     role="alertdialog"
     size="sm"
     :title="`Delete ${itemName || 'this product'}?`"
-    description="This can't be undone. The product will be permanently removed from inventory."
+    description="The product is removed from inventory. A copy is kept in Returns so it can be traced or restored."
     :dismissible="!isProcessing"
     @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
@@ -30,16 +30,12 @@
         </div>
       </dl>
 
-      <ul class="s-confirm__consequences" aria-label="What will happen">
-        <li>Product permanently deleted from inventory</li>
-        <li>All associated data removed</li>
-        <li>This action cannot be undone</li>
-      </ul>
+      <DeleteReasonFields v-model="why" :count="1" />
 
       <div class="s-confirm__ack">
         <SCheckbox
           v-model="confirmed"
-          label="I understand that this action cannot be undone and will permanently delete this product."
+          label="I understand this product will be removed from inventory."
         />
       </div>
     </div>
@@ -49,7 +45,7 @@
         primary-variant="danger"
         :primary-label="isProcessing ? 'Deleting…' : 'Delete product'"
         :primary-icon="Trash2"
-        :primary-disabled="!confirmed || isProcessing"
+        :primary-disabled="!confirmed || isProcessing || !isDeleteWhyComplete(why)"
         @cancel="handleCancel"
         @primary="handleConfirmDelete"
       />
@@ -64,6 +60,8 @@ import SDialogActions from '~/components/s/SDialogActions.vue'
 import { ref, watch } from 'vue'
 import { Trash2 } from '@lucide/vue'
 import { usePreferences } from '~/composables/usePreferences'
+import DeleteReasonFields from '~/components/inventory/DeleteReasonFields.vue'
+import { isDeleteWhyComplete, type DeleteWhy } from '~/types/stock-removals'
 
 interface Props {
   modelValue: boolean
@@ -74,13 +72,14 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  deleted: [item: any]
+  deleted: [item: any, why: DeleteWhy]
 }>()
 
 const { formatCurrency: formatCurrencyUtil } = usePreferences()
 
 const confirmed = ref(false)
 const isProcessing = ref(false)
+const why = ref<DeleteWhy>({ reason: 'entered_by_mistake', note: '' })
 
 const formatCurrency = (value: number) => {
   return formatCurrencyUtil(value)
@@ -97,7 +96,10 @@ const handleConfirmDelete = async () => {
   isProcessing.value = true
 
   try {
-    emit('deleted', props.item)
+    emit('deleted', props.item, {
+      reason: why.value.reason,
+      note: why.value.note?.trim() || undefined,
+    })
     handleCancel()
   } catch (error: any) {
     console.error('Delete error:', error)
@@ -113,6 +115,7 @@ watch(
     if (isOpen) {
       confirmed.value = false
       isProcessing.value = false
+      why.value = { reason: 'entered_by_mistake', note: '' }
     }
   }
 )

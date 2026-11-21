@@ -11,6 +11,7 @@ import {
   receiptActivityLink,
 } from './records'
 import { planHoldRelease, planStockReturn } from './stock'
+import { parseHeldItemIds, planInspectionHolds } from '~/server/utils/inspection-holds'
 
 /**
  * Balance-due payments, cancels and refunds. These used to be client writes guarded only by
@@ -189,19 +190,23 @@ export async function cancelBalanceDue(
 export async function refundSale(
   db: Firestore,
   actor: StoreActor,
-  input: { receiptId: unknown; reason?: unknown }
-): Promise<void> {
+  input: { receiptId: unknown; reason?: unknown; heldItemIds?: unknown }
+): Promise<{ inspectionHoldIds: string[] }> {
   if (!canCloseSales(actor)) forbid('You don’t have permission to refund sales.')
   const receiptId = assertId(input.receiptId, 'receiptId')
   const reason = typeof input.reason === 'string' ? input.reason.trim().slice(0, 500) : ''
+  const heldItemIds = parseHeldItemIds(input.heldItemIds)
+  assertHoldReason(heldItemIds, reason)
   const ref = actor.store.collection('receipts').doc(receiptId)
 
-  await db.runTransaction(async (tx) => {
+  return db.runTransaction(async (tx) => {
     const snap = await tx.get(ref)
     if (!snap.exists) throw createError({ statusCode: 404, message: 'Receipt not found' })
     const receipt = snap.data() ?? {}
     const v2 = isV2(receipt)
-    if (receipt.stockReturnedAt) return
+    if (receipt.stockReturnedAt) {
+      return { inspectionHoldIds: (receipt.inspectionHoldIds as string[] | undefined) ?? [] }
+    }
     if (v2 ? receipt.status !== 'refunded' : receipt.status !== 'completed') {
       conflict(
         v2 ? 'Close this sale from its Payments section first.' : 'Only completed sales can be refunded.',
@@ -209,8 +214,16 @@ export async function refundSale(
       )
     }
     if (receipt.tradeLoanId) conflict('Partner-loan sales are settled with the partner.', 'PARTNER_LOAN_SALE')
-    const plan = await planStockReturn(tx, actor.store, receipt)
+    // "Needs checking" lines wait for inspection instead of going back on sale. Plan both first.
+    const holds = await planInspectionHolds(tx, actor, {
+      receiptId,
+      receipt,
+      heldItemIds,
+      complaint: reason,
+    })
+    const plan = await planStockReturn(tx, actor.store, receipt, holds.itemIds)
     tx.update(ref, {
+      ...(holds.count > 0 && { inspectionHoldIds: holds.ids, inspectionPending: true }),
       ...(!v2 && {
         status: 'refunded',
         notes: reason ? `Returned: ${reason}` : 'Returned',
@@ -221,12 +234,14 @@ export async function refundSale(
       updatedAt: FieldValue.serverTimestamp(),
     })
     plan.apply(tx)
+    holds.apply(tx)
     if (planHasFeature(actor.plan, 'activity_logs')) {
+      const heldNote = holds.count ? `, ${holds.count} held for inspection` : ''
       logSaleActivity(tx, actor, {
         action: 'updated',
         entityType: 'receipt',
         entityId: receiptId,
-        entityName: `Refunded ${receipt.receiptNumber || receiptId}; ${plan.count} item(s) back in stock${
+        entityName: `Refunded ${receipt.receiptNumber || receiptId}; ${plan.count} item(s) back in stock${heldNote}${
           reason ? `: ${reason}` : ''
         }`,
         details: {
@@ -235,6 +250,7 @@ export async function refundSale(
             { label: 'Refunded', value: Number(receipt.total) || 0, money: true, tone: 'bad' },
             { label: 'Paid by', value: String(receipt.paymentMethod || '—') },
             { label: 'Back in stock', value: `${plan.count} item(s)` },
+            ...(holds.count ? [{ label: 'Held for inspection', value: `${holds.count} item(s)` }] : []),
             ...(reason ? [{ label: 'Reason', value: reason }] : []),
           ],
           linesLabel: 'Items returned',
@@ -243,7 +259,19 @@ export async function refundSale(
         },
       })
     }
+    return { inspectionHoldIds: holds.ids }
   })
+}
+
+/** Held lines need the customer's complaint, so whoever inspects knows what to look for. */
+export function assertHoldReason(heldItemIds: string[], reason: string): void {
+  if (heldItemIds.length && reason.trim().length < 3) {
+    throw createError({
+      statusCode: 400,
+      message: 'Write what the customer said is wrong, so whoever checks it knows what to look for.',
+      data: { code: 'HOLD_REASON_REQUIRED' },
+    })
+  }
 }
 
 /**

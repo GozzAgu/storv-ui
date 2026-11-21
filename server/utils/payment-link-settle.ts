@@ -47,6 +47,7 @@ export function evaluatePaymentLinkItemStock(params: {
 
   if (usesSerial) {
     if (itemData.dateOut) return { ok: false, reason: 'already_sold' }
+    if (itemData.inspectionHoldId) return { ok: false, reason: 'held_by_other' }
     if (pending && pending !== ourPending) return { ok: false, reason: 'held_by_other' }
     return { ok: true, usesSerial: true }
   }

@@ -68,6 +68,12 @@ export async function readInquiryFulfillInventory(
       message: 'This item is out on a stock loan. Settle the loan before selling it.',
     })
   }
+  if (itemData.inspectionHoldId) {
+    throw createError({
+      statusCode: 409,
+      message: 'This item was returned and is waiting for inspection.',
+    })
+  }
   const heldBy = String(itemData.pendingSaleReceiptId ?? '').trim()
   const paymentToken = String(inquiry.paymentLinkToken || '').trim()
   if (heldBy && !(paymentToken && heldBy === `paylink:${paymentToken}`)) {

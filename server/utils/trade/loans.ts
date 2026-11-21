@@ -518,6 +518,9 @@ export async function createTradeLoan(
       if (serial && data.dateOut) {
         throw new TradeError('ITEM_UNAVAILABLE', 409, `${name} is already sold.`)
       }
+      if (text(data.inspectionHoldId, 200)) {
+        throw new TradeError('ITEM_UNAVAILABLE', 409, `${name} is waiting for inspection.`)
+      }
       if (text(data.pendingSaleReceiptId, 200)) {
         throw new TradeError(
           'ITEM_UNAVAILABLE',

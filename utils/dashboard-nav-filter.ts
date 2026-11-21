@@ -63,6 +63,13 @@ export const DASHBOARD_NAV_DEFINITIONS: DashboardNavDefinition[] = [
     subscriptionFeature: 'inventory',
   },
   {
+    name: 'Supplier returns',
+    segment: '/supplier-returns',
+    iconKey: 'supplier-returns',
+    permissionModule: 'products',
+    subscriptionFeature: 'inventory',
+  },
+  {
     name: 'Stock loans',
     segment: '/seller-loans',
     iconKey: 'loans',
@@ -137,6 +144,7 @@ const NATIVE_MORE_PRIORITY = [
   'Storefront',
   'Sales leads',
   'Customer buybacks',
+  'Supplier returns',
   'Stock loans',
   'Departments',
   'Multi-Store Sync',

@@ -349,6 +349,13 @@ service cloud.firestore {
         && data.get('sellerLoanOutId', '').matches('trade~.*');
     }
 
+    // Inspection holds (server-written): a customer-returned unit flagged `inspectionHoldId`
+    // can't be sold until a manager decides. Clients may never set, change or clear the flag,
+    // nor delete a held unit; server/api/inspection-holds does that.
+    function inspectionHoldUntouched() {
+      return request.resource.data.get('inspectionHoldId', null) == resource.data.get('inspectionHoldId', null);
+    }
+
     function partnerLoanUntouched() {
       return (!onPartnerLoan(resource.data) && !onPartnerLoan(request.resource.data))
         || (onPartnerLoan(resource.data)
@@ -731,19 +738,21 @@ service cloud.firestore {
           // stock by the transfer route once the receiving branch approves it, not by clients.
           allow create: if planAllowsStoreWrite(userId, storeId) && canManageProducts(userId, storeId, 'create') &&
                          request.resource.data.storeId == storeId &&
-                         !onPartnerLoan(request.resource.data);
+                         !onPartnerLoan(request.resource.data) &&
+                         !request.resource.data.keys().hasAny(['inspectionHoldId']);
 
           // Update: owner or products.edit grant on this branch. Selling, refunding, holding,
           // lending and transferring stock are server routes (server/api/sales, stock-loans,
           // transfers), so members can't mark items sold or move them without the matching record.
           allow update: if planAllowsStoreWrite(userId, storeId) && partnerLoanUntouched() &&
+                        inspectionHoldUntouched() &&
                         canManageProducts(userId, storeId, 'edit') &&
                         resourceMatchesStore(storeId) &&
                         requestMatchesStore(storeId);
 
-          allow delete: if planAllowsStoreWrite(userId, storeId) && canManageProducts(userId, storeId, 'delete') &&
-                         resourceMatchesStore(storeId) &&
-                         !onPartnerLoan(resource.data);
+          // Deleting goes through server/api/inventory/remove-items (and remove-category-items),
+          // which keeps a record of every product removed: nothing leaves stock without a trace.
+          allow delete: if false;
         }
         
         // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}
@@ -821,6 +830,49 @@ service cloud.firestore {
           allow create, update: if false;
 
           allow delete: if false;
+        }
+
+        // Supplier returns: faulty units refunded off a sale, going back to the supplier. Created
+        // in the refund's transaction and moved along by server/api/supplier-returns, so nothing
+        // is written from the client. Anyone who can see products here can see them.
+        match /supplierReturns/{returnId} {
+          allow read: if canManageProducts(userId, storeId, 'view') &&
+                         resourceMatchesStore(storeId);
+          allow write: if false;
+        }
+
+        // Inspection holds: customer-returned items waiting for a manager to decide (back on sale
+        // or to the supplier). Created in the refund's transaction and decided through
+        // server/api/inspection-holds, so nothing is written from the client.
+        match /inspectionHolds/{holdId} {
+          allow read: if canManageProducts(userId, storeId, 'view') &&
+                         resourceMatchesStore(storeId);
+          allow write: if false;
+        }
+
+        // Stock write-offs: damaged, lost or rejected stock recorded as a loss. Written by
+        // server/api/write-offs with the stock change; nothing is written from the client.
+        match /stockWriteOffs/{writeOffId} {
+          allow read: if canManageProducts(userId, storeId, 'view') &&
+                         resourceMatchesStore(storeId);
+          allow write: if false;
+        }
+
+        // Stock removals: products deleted, removed with their category, or counted down by an
+        // edit. Deletions are written by the server; the app may only add a count-reduction
+        // record (in the same batch as the edit). Records are never changed or removed.
+        match /stockRemovals/{removalId} {
+          allow read: if canManageProducts(userId, storeId, 'view') &&
+                         resourceMatchesStore(storeId);
+          allow create: if planAllowsStoreWrite(userId, storeId) &&
+                           canManageProducts(userId, storeId, 'edit') &&
+                           request.resource.data.kind == 'count_reduced' &&
+                           request.resource.data.storeId == storeId &&
+                           request.resource.data.createdBy == request.auth.uid &&
+                           request.resource.data.quantity is number &&
+                           request.resource.data.quantity > 0 &&
+                           request.resource.data.restoredAt == null;
+          allow update, delete: if false;
         }
 
         // Customer buybacks: store buys items from customers into inventory.

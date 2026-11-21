@@ -151,6 +151,38 @@ export function getCustomerBuybacksCollection(
   return collection(db, 'users', userId, 'stores', storeId, 'customerBuybacks')
 }
 
+export function getStockRemovalsCollection(
+  db: Firestore,
+  userId: string,
+  storeId: string
+): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'stockRemovals')
+}
+
+export function getStockWriteOffsCollection(
+  db: Firestore,
+  userId: string,
+  storeId: string
+): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'stockWriteOffs')
+}
+
+export function getInspectionHoldsCollection(
+  db: Firestore,
+  userId: string,
+  storeId: string
+): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'inspectionHolds')
+}
+
+export function getSupplierReturnsCollection(
+  db: Firestore,
+  userId: string,
+  storeId: string
+): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'supplierReturns')
+}
+
 export function getCustomerBuybackDocument(
   db: Firestore,
   userId: string,

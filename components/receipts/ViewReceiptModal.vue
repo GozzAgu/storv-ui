@@ -474,9 +474,13 @@ const RECEIPT_STATUS_LABELS: Record<Receipt['status'], string> = {
   balance_due: 'Balance due',
   cancelled: 'Cancelled',
 }
-const receiptStatusLabel = computed(() =>
-  props.receipt ? RECEIPT_STATUS_LABELS[props.receipt.status] ?? props.receipt.status : ''
-)
+const receiptStatusLabel = computed(() => {
+  if (!props.receipt) return ''
+  // Held returns read "Return pending" until every item has been inspected.
+  if (props.receipt.status === 'refunded' && props.receipt.inspectionPending)
+    return 'Return pending'
+  return RECEIPT_STATUS_LABELS[props.receipt.status] ?? props.receipt.status
+})
 
 function toSpecs(lines: string[]): { label: string; value: string }[] {
   return lines.map((line) => {

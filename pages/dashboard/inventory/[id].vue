@@ -1163,16 +1163,61 @@
       entity-label="product"
       :count="selectedItemsForBulk.length"
       :item-names="selectedItemsForBulk.map((i) => getItemDisplayName(i))"
-      warning="This permanently deletes the selected products from inventory. This cannot be undone."
-      confirm-label="I understand these products will be permanently deleted."
+      warning="The selected products are removed from inventory. A copy of each is kept in Returns so they can be traced or restored."
+      confirm-label="I understand these products will be removed from inventory."
       :loading="isBulkDeleting"
+      :blocked="!isDeleteWhyComplete(bulkDeleteWhy)"
       @update:model-value="
         (v) => {
           if (!v) bulkDeleteConfirmed = false
         }
       "
       @confirm="handleConfirmBulkDelete"
-    />
+    >
+      <DeleteReasonFields v-model="bulkDeleteWhy" :count="selectedItemsForBulk.length" />
+    </BulkDeleteConfirmModal>
+
+    <!-- Stock count lowered by an edit: say why, so the missing units are traced -->
+    <SDialog
+      :open="!!countReduction"
+      size="sm"
+      title="Why is the count lower?"
+      :description="
+        countReduction
+          ? `${countReduction.name}: ${countReduction.before} → ${countReduction.after} (${countReduction.drop} fewer)`
+          : undefined
+      "
+      @update:open="(v: boolean) => !v && resolveCountReduction(null)"
+    >
+      <div class="s-form">
+        <SField label="Reason" required>
+          <SSelect v-model="countReductionWhy.reason" :options="countReductionOptions" />
+        </SField>
+        <SField label="Note" :hint="countReductionWhy.reason === 'other' ? 'Required' : 'Optional'">
+          <STextarea v-model="countReductionWhy.note" :rows="2" maxlength="500" />
+        </SField>
+        <p class="s-callout">
+          The {{ countReduction?.drop }} missing unit{{ countReduction?.drop === 1 ? '' : 's' }}
+          will be recorded in Returns → Stock out log. Damaged or lost? Cancel and use
+          <strong>Write off as a loss</strong> instead, so the cost shows in Reports.
+        </p>
+      </div>
+      <template #footer>
+        <SDialogActions
+          primary-label="Save"
+          :primary-disabled="
+            countReductionWhy.reason === 'other' && countReductionWhy.note.trim().length < 3
+          "
+          @cancel="resolveCountReduction(null)"
+          @primary="
+            resolveCountReduction({
+              reason: countReductionWhy.reason,
+              note: countReductionWhy.note.trim() || undefined,
+            })
+          "
+        />
+      </template>
+    </SDialog>
 
     <!-- Duplicate Item Modal (multiple serial numbers) -->
     <SDialog
@@ -1276,6 +1321,18 @@
           @select="runItemMenuAction(handleDuplicateItem)"
         />
         <SMenuItem
+          v-if="canReturnToSupplier"
+          label="Return to supplier"
+          :icon="PackageX"
+          @select="runItemMenuAction(openReturnToSupplier)"
+        />
+        <SMenuItem
+          v-if="canWriteOff"
+          label="Write off as a loss"
+          :icon="PackageMinus"
+          @select="runItemMenuAction(openWriteOff)"
+        />
+        <SMenuItem
           label="Delete"
           :icon="Trash2"
           danger
@@ -1283,6 +1340,13 @@
         />
       </template>
     </SMenu>
+
+    <ReturnToSupplierDialog
+      v-model:open="showReturnToSupplier"
+      :item="returnToSupplierItem"
+      @logged="onReturnedToSupplier"
+    />
+    <WriteOffDialog v-model:open="showWriteOff" :item="writeOffItem" @written="onWrittenOff" />
 
     <SMenu
       :open="Boolean(openSubfolderMenuId && subfolderForOpenMenu && subfolderMenuFixedStyle)"
@@ -1420,6 +1484,8 @@ import {
   availabilityBadgeForAwaitingPayment,
   availabilityBadgeForAvailable,
   availabilityBadgeForReturned,
+  availabilityBadgeForInspection,
+  isItemOnInspection,
   availabilityBadgeForSold,
   availabilityBadgeForStockLoan,
   isItemStockLoanPending,
@@ -1457,6 +1523,17 @@ import {
 import DeleteItemModal from '~/components/inventory/DeleteItemModal.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import ItemTimelineModal from '~/components/inventory/ItemTimelineModal.vue'
+import ReturnToSupplierDialog from '~/components/supplier-returns/ReturnToSupplierDialog.vue'
+import WriteOffDialog from '~/components/write-offs/WriteOffDialog.vue'
+import DeleteReasonFields from '~/components/inventory/DeleteReasonFields.vue'
+import {
+  COUNT_REDUCTION_REASON_LABELS,
+  isDeleteWhyComplete,
+  type CountReductionReason,
+  type CountReductionWhy,
+  type DeleteWhy,
+} from '~/types/stock-removals'
+import { bulkStockOf, countDrop } from '~/utils/stock-removal-records'
 import CreateSellerLoanModal from '~/components/seller-loans/CreateSellerLoanModal.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
 import {
@@ -1470,7 +1547,9 @@ import {
   History as HistoryIcon,
   LayoutGrid,
   List,
+  PackageMinus,
   PackagePlus,
+  PackageX,
   Pencil,
   Plus,
   SearchX,
@@ -2916,7 +2995,10 @@ const isItemOutOnSellerLoan = (item: InventoryItem) => {
 
 /** Sold, on loan, or reserved for balance-due: block edits, discounts, deletion, bulk select. */
 const isInventoryItemLocked = (item: InventoryItem) =>
-  isItemSold(item) || isItemOutOnSellerLoan(item) || isItemAwaitingPayment(item)
+  isItemSold(item) ||
+  isItemOutOnSellerLoan(item) ||
+  isItemAwaitingPayment(item) ||
+  isItemOnInspection(item)
 
 const selectedItemsEligibleForSellerLoan = computed(() =>
   selectedItemsForBulk.value.filter((item) => !isInventoryItemLocked(item))
@@ -2963,6 +3045,9 @@ const getItemDiscountLabel = (item: InventoryItem): string | null => {
 
 // Determine item availability status
 const getItemAvailability = (item: InventoryItem) => {
+  // Returned and waiting for inspection: not sellable until a manager decides.
+  if (isItemOnInspection(item)) return availabilityBadgeForInspection()
+
   // Check if item is in a refunded receipt (highest priority - returned takes precedence)
   const refundedReceipts = receiptsStore.receipts.filter(
     (r) => r.status === 'refunded' && r.itemIds?.includes(item.id)
@@ -3757,7 +3842,7 @@ const handleViewTimeline = async (item: InventoryItem) => {
   }
 }
 
-const handleConfirmDeleteItem = (item: InventoryItem) => {
+const handleConfirmDeleteItem = (item: InventoryItem, why: DeleteWhy) => {
   showDeleteItemModal.value = false
   selectedItemForDelete.value = null
 
@@ -3771,7 +3856,7 @@ const handleConfirmDeleteItem = (item: InventoryItem) => {
     },
     async () => {
       try {
-        await inventoryStore.deleteItem(folderId.value, item.id)
+        await inventoryStore.deleteItem(folderId.value, item.id, why, item)
         if (folder.value) {
           await inventoryStore.fetchFolder(folderId.value)
           folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
@@ -3785,20 +3870,27 @@ const handleConfirmDeleteItem = (item: InventoryItem) => {
   )
 }
 
+const bulkDeleteWhy = ref<DeleteWhy>({ reason: 'entered_by_mistake', note: '' })
+
 const openBulkDeleteModal = () => {
   bulkDeleteConfirmed.value = false
+  bulkDeleteWhy.value = { reason: 'entered_by_mistake', note: '' }
   showBulkDeleteModal.value = true
 }
 
 const handleConfirmBulkDelete = async () => {
   if (!bulkDeleteConfirmed.value || selectedItemsForBulk.value.length === 0) return
   isBulkDeleting.value = true
-  const ids = selectedItemsForBulk.value.map((i) => i.id)
+  const selected = [...selectedItemsForBulk.value]
+  const ids = selected.map((i) => i.id)
   const count = ids.length
   try {
-    for (const id of ids) {
-      await inventoryStore.deleteItem(folderId.value, id)
-    }
+    await inventoryStore.deleteItems(
+      folderId.value,
+      ids,
+      { reason: bulkDeleteWhy.value.reason, note: bulkDeleteWhy.value.note?.trim() || undefined },
+      selected
+    )
     selectedItemsForBulk.value = []
     showBulkDeleteModal.value = false
     bulkDeleteConfirmed.value = false
@@ -3921,12 +4013,29 @@ const handleSaveItem = async () => {
       const updates = { ...itemForm }
       normalizeNonSerialItemPayload(updates)
       normalizeUnitCostPayload(updates)
+      // A lower stock count needs a reason, recorded with the edit (Returns → Stock out log).
+      const original = editingItem.value
+      const drop = countDrop(original, { ...original, ...updates }, folder.value)
+      let reduction: CountReductionWhy | undefined
+      if (drop > 0) {
+        const answer = await askCountReduction({
+          name: getItemDisplayName(original),
+          before: bulkStockOf(original, folder.value) ?? 0,
+          after: bulkStockOf({ ...original, ...updates }, folder.value) ?? 0,
+          drop,
+        })
+        if (!answer) {
+          isSavingItem.value = false
+          return
+        }
+        reduction = answer
+      }
       // Close modal immediately for better UX
       handleCancelItem()
       toast.success('Updating product...')
 
       // CRITICAL: Wait for item update to complete (ensures data is saved to Firestore)
-      await inventoryStore.updateItem(currentFolderId, itemId, updates)
+      await inventoryStore.updateItem(currentFolderId, itemId, updates, reduction)
 
       // Refresh items list in background (non-blocking) - only for UI sync
       // Item is already updated in local state, so this is just to ensure consistency
@@ -5077,6 +5186,69 @@ const loadFolderData = async (options?: { force?: boolean }) => {
   } finally {
     isLoadingFolder.value = false
   }
+}
+
+// ── Return to supplier: defective stock leaves inventory for Supplier returns ──
+const canReturnToSupplier = computed(() => can('products', 'edit') || can('products', 'delete'))
+const showReturnToSupplier = ref(false)
+const returnToSupplierItem = ref<InventoryItem | null>(null)
+
+function openReturnToSupplier(item: InventoryItem) {
+  returnToSupplierItem.value = item
+  showReturnToSupplier.value = true
+}
+
+function onReturnedToSupplier() {
+  toast.success('Sent to Returns and taken out of stock')
+  void refreshCurrentItemsPage()
+}
+
+// ── Lowered stock counts: asked before saving, recorded with the edit ──
+const countReduction = ref<{ name: string; before: number; after: number; drop: number } | null>(
+  null
+)
+const countReductionWhy = reactive<{ reason: CountReductionReason; note: string }>({
+  reason: 'count_corrected',
+  note: '',
+})
+const countReductionOptions = Object.entries(COUNT_REDUCTION_REASON_LABELS).map(
+  ([value, label]) => ({ value, label })
+)
+let countReductionResolver: ((why: CountReductionWhy | null) => void) | null = null
+
+function askCountReduction(info: {
+  name: string
+  before: number
+  after: number
+  drop: number
+}): Promise<CountReductionWhy | null> {
+  countReductionWhy.reason = 'count_corrected'
+  countReductionWhy.note = ''
+  countReduction.value = info
+  return new Promise((resolve) => {
+    countReductionResolver = resolve
+  })
+}
+
+function resolveCountReduction(why: CountReductionWhy | null) {
+  countReduction.value = null
+  countReductionResolver?.(why)
+  countReductionResolver = null
+}
+
+// ── Write off: damaged or lost stock recorded as a loss (needs products delete) ──
+const canWriteOff = computed(() => can('products', 'delete'))
+const showWriteOff = ref(false)
+const writeOffItem = ref<InventoryItem | null>(null)
+
+function openWriteOff(item: InventoryItem) {
+  writeOffItem.value = item
+  showWriteOff.value = true
+}
+
+function onWrittenOff() {
+  toast.success('Written off and taken out of stock')
+  void refreshCurrentItemsPage()
 }
 
 const refreshCurrentItemsPage = () => {

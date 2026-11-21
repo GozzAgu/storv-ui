@@ -17,8 +17,9 @@
       <div class="s-receipt-callout s-receipt-callout--warning">
         <p class="s-receipt-callout__title">Confirm return / refund</p>
         <p>
-          This marks the sale as refunded and returns all items to inventory. The customer will be
-          notified and the transaction will be recorded.
+          This marks the sale as refunded and puts the items back on sale. If you're not sure an
+          item is in good condition, mark it “Needs checking”: it's held off sale until a manager
+          inspects it.
         </p>
       </div>
 
@@ -51,8 +52,20 @@
       <section class="s-form-section">
         <h3 class="s-form-section__title">Items to be returned</h3>
         <ul class="s-record-rows s-receipt-items">
-          <li v-for="(item, index) in receipt.items" :key="index" class="s-record-row">
-            <span>{{ item.itemName }} × {{ item.quantity }}</span>
+          <li
+            v-for="(item, index) in receipt.items"
+            :key="index"
+            class="s-record-row s-return-line"
+          >
+            <span class="s-return-line__main">
+              <span>{{ item.itemName }} × {{ item.quantity }}</span>
+              <SCheckbox
+                v-if="item.itemId"
+                :model-value="heldItemIds.includes(item.itemId)"
+                label="Needs checking, hold it off sale"
+                @update:model-value="(on: boolean) => toggleHeld(item.itemId, on)"
+              />
+            </span>
             <span class="s-record-row__value">
               {{ formatCurrency(item.price * item.quantity) }}
             </span>
@@ -73,18 +86,28 @@
         </p>
       </div>
 
-      <SField label="Return reason" :hint="v2 ? 'Required' : 'Optional'">
+      <p v-if="heldItemIds.length" class="s-receipt-callout">
+        {{ heldItemIds.length }} item{{ heldItemIds.length === 1 ? '' : 's' }} will be held for
+        inspection. A manager decides from Returns → To inspect whether it goes back on sale or back
+        to the supplier.
+      </p>
+
+      <SField
+        :label="heldItemIds.length ? 'What did the customer say is wrong?' : 'Return reason'"
+        :hint="reasonRequired ? 'Required' : 'Optional'"
+      >
         <STextarea
           v-model="returnReason"
           :rows="2"
-          placeholder="Enter reason for return/refund..."
+          :placeholder="
+            heldItemIds.length
+              ? 'e.g. Screen flickers, battery drains overnight'
+              : 'Enter reason for return/refund...'
+          "
         />
       </SField>
 
-      <SCheckbox
-        v-model="confirmed"
-        label="I confirm this return/refund. All items go back to inventory and the sale is marked as refunded."
-      />
+      <SCheckbox v-model="confirmed" :label="confirmLabel" />
     </div>
 
     <template #footer>
@@ -114,12 +137,13 @@ import { useInventoryStore } from '~/stores/inventory'
 import { usePreferences } from '~/composables/usePreferences'
 import { useSensitiveAction } from '~/composables/useSensitiveAction'
 import { useHaptics } from '~/composables/useHaptics'
-import { groupReceiptItemsByFolder, folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
 import { koboToNaira } from '~/utils/money-kobo'
 import { isV2Sale } from '~/utils/payments-v2-tenders'
 import { useSalesApi } from '~/composables/useSalesApi'
 import { isDemoModeActive } from '~/utils/demo-mode'
 import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
+import { useInspectionHoldsStore } from '~/stores/inspectionHolds'
+import { demoHoldsFromReceipt } from '~/utils/supplier-return-display'
 
 interface Props {
   modelValue: boolean
@@ -134,6 +158,7 @@ const emit = defineEmits<{
 
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
+const holdsStore = useInspectionHoldsStore()
 const { formatCurrency } = usePreferences()
 const { confirm: confirmSensitive } = useSensitiveAction()
 const haptics = useHaptics()
@@ -141,6 +166,21 @@ const haptics = useHaptics()
 const returnReason = ref('')
 const confirmed = ref(false)
 const isProcessing = ref(false)
+/** "Needs checking" lines: held off sale for inspection instead of restocked. */
+const heldItemIds = ref<string[]>([])
+
+function toggleHeld(itemId: string, on: boolean) {
+  heldItemIds.value = on
+    ? [...new Set([...heldItemIds.value, itemId])]
+    : heldItemIds.value.filter((id) => id !== itemId)
+}
+
+const reasonRequired = computed(() => v2.value || heldItemIds.value.length > 0)
+const confirmLabel = computed(() =>
+  heldItemIds.value.length
+    ? 'I confirm this return/refund. Held items wait for inspection; the rest go back on sale.'
+    : 'I confirm this return/refund. All items go back to inventory and the sale is marked as refunded.'
+)
 
 const paymentsV2 = usePaymentsV2()
 const salesApi = useSalesApi()
@@ -155,7 +195,8 @@ const canSubmit = computed(
   () =>
     confirmed.value &&
     !isProcessing.value &&
-    (!v2.value || (moneyHeldKobo.value === 0 && returnReason.value.trim().length >= 3))
+    (!reasonRequired.value || returnReason.value.trim().length >= 3) &&
+    (!v2.value || moneyHeldKobo.value === 0)
 )
 
 const formatDate = (date: Date | string | any) => {
@@ -177,35 +218,31 @@ const formatDate = (date: Date | string | any) => {
 const handleCancel = () => {
   returnReason.value = ''
   confirmed.value = false
+  heldItemIds.value = []
   emit('update:modelValue', false)
 }
 
-/** Demo mode: put the stock back and mark the sale refunded on this device only. */
+/**
+ * Demo mode: refund on this device only. The demo store puts the good lines back on sale and
+ * keeps held lines off it (there is no cloud inventory to update here).
+ */
 async function refundLocally(receipt: Receipt) {
-  const grouped = groupReceiptItemsByFolder(receipt.items || [], receipt.folderId)
-  for (const [folderId, lines] of grouped) {
-    const itemIds = lines.map((line) => line.itemId).filter(Boolean)
-    if (itemIds.length === 0) continue
-    const folder =
-      inventoryStore.getFolderById(folderId) ?? (await inventoryStore.fetchFolder(folderId))
-    if (folderHasSerialNumbers(folder ?? undefined)) {
-      await inventoryStore.returnItemsToStock(itemIds)
-    } else {
-      const restoreQuantities: Record<string, number> = {}
-      for (const line of lines) {
-        if (line.itemId)
-          restoreQuantities[line.itemId] =
-            (restoreQuantities[line.itemId] ?? 0) + (line.quantity ?? 0)
-      }
-      await inventoryStore.returnItemsToStock(itemIds, {
-        folderId,
-        hasSerialNumbers: false,
-        restoreQuantities,
-      })
-    }
+  const held = [...heldItemIds.value]
+  const { applyDemoReceiptRefund } = await import('~/utils/demo-bridge')
+  await applyDemoReceiptRefund(receipt.id, held)
+  if (held.length) {
+    holdsStore.addLocal(
+      demoHoldsFromReceipt(
+        receipt,
+        held,
+        returnReason.value.trim(),
+        (id) => inventoryStore.getFolderById(id)?.name
+      )
+    )
   }
   await receiptsStore.updateReceipt(receipt.id, {
     status: 'refunded',
+    ...(held.length && { inspectionPending: true }),
     notes: returnReason.value ? `Returned: ${returnReason.value}` : 'Returned',
     refundReason: returnReason.value || undefined,
   })
@@ -227,12 +264,14 @@ const handleConfirmReturn = async () => {
     } else {
       // The server closes the sale (Payments V2 refuses while money is held) and returns the
       // stock in the same step, once.
-      await salesApi.refundSale(receipt.id, returnReason.value.trim())
+      await salesApi.refundSale(receipt.id, returnReason.value.trim(), heldItemIds.value)
+      if (heldItemIds.value.length) holdsStore.markStale()
       const index = receiptsStore.receipts.findIndex((r) => r.id === receipt.id)
       if (index > -1) {
         receiptsStore.receipts[index] = {
           ...receiptsStore.receipts[index]!,
           status: 'refunded',
+          ...(heldItemIds.value.length && { inspectionPending: true }),
           refundReason: returnReason.value.trim() || undefined,
           updatedAt: new Date(),
         }
@@ -265,8 +304,22 @@ watch(
       returnReason.value = ''
       confirmed.value = false
       isProcessing.value = false
+      heldItemIds.value = []
       void paymentsV2.loadAccess()
     }
   }
 )
 </script>
+
+<style scoped>
+.s-return-line {
+  align-items: flex-start;
+}
+
+.s-return-line__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-space-1);
+  min-width: 0;
+}
+</style>

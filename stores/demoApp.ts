@@ -286,6 +286,37 @@ export const useDemoAppStore = defineStore('demoApp', {
       return folder.id
     },
 
+    /**
+     * A held customer return was inspected. Its units are still counted as sold here: back on
+     * sale releases them; to the supplier removes them from stock for good.
+     */
+    decideHeldUnits(itemId: string, units: number, action: 'restock' | 'supplier') {
+      const item = this.currentStore.items.find((i) => i.id === itemId)
+      if (!item) throw new Error('Item not found')
+      const n = Math.min(units, item.sold)
+      item.sold -= n
+      if (action === 'supplier') item.quantity = Math.max(item.sold, item.quantity - n)
+      this.persist()
+    },
+
+    /** Units back from a supplier (repaired or replaced). Ignored if the product is gone. */
+    addStock(itemId: string, units: number) {
+      const item = this.currentStore.items.find((i) => i.id === itemId)
+      if (!item) return
+      item.quantity += units
+      this.persist()
+    },
+
+    /** Takes units out of stock for good (a supplier return). Never below what has been sold. */
+    removeStock(itemId: string, units: number) {
+      const item = this.currentStore.items.find((i) => i.id === itemId)
+      if (!item) throw new Error('Item not found')
+      const left = item.quantity - item.sold
+      if (units > left) throw new Error(`Only ${left} of ${item.name} in stock`)
+      item.quantity -= units
+      this.persist()
+    },
+
     deleteInventoryItem(itemId: string) {
       const idx = this.currentStore.items.findIndex((i) => i.id === itemId)
       if (idx >= 0) {
@@ -441,11 +472,14 @@ export const useDemoAppStore = defineStore('demoApp', {
       return customer.id
     },
 
-    refundReceipt(receiptId: string) {
+    /** Refund: lines go back on sale, except `heldItemIds`, which wait for inspection. */
+    refundReceipt(receiptId: string, heldItemIds: readonly string[] = []) {
       const receipt = this.currentStore.receipts.find((r) => r.id === receiptId)
       if (!receipt || receipt.status === 'refunded') return
 
+      const held = new Set(heldItemIds)
       for (const line of receipt.items) {
+        if (held.has(line.itemId)) continue
         const item = this.currentStore.items.find((i) => i.id === line.itemId)
         if (item) item.sold = Math.max(0, item.sold - line.quantity)
       }

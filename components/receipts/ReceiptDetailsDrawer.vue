@@ -175,7 +175,7 @@ import { EyeIcon, PencilSquareIcon, PrinterIcon } from '~/utils/app-icons'
 import ReceiptEditHistory from '~/components/receipts/ReceiptEditHistory.vue'
 import type { Receipt } from '~/stores/receipts'
 import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
-import { getReceiptStatusLabel, getReceiptStatusTone } from '~/utils/receipt-status'
+import { getReceiptDisplayStatus } from '~/utils/receipt-status'
 import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 import PaymentTimeline from '~/components/payments/PaymentTimeline.vue'
@@ -221,7 +221,7 @@ const amountPaid = computed(() => (props.receipt ? receiptAmountPaid(props.recei
 const balanceDue = computed(() => (props.receipt ? receiptBalanceDue(props.receipt) : 0))
 
 const statusLabel = computed(() =>
-  props.receipt ? getReceiptStatusLabel(props.receipt.status) : ''
+  props.receipt ? getReceiptDisplayStatus(props.receipt).label : ''
 )
 const itemCount = computed(() =>
   props.receipt
@@ -232,7 +232,7 @@ const itemCount = computed(() =>
 )
 
 const statusTone = computed(() =>
-  props.receipt ? getReceiptStatusTone(props.receipt.status) : 'neutral'
+  props.receipt ? getReceiptDisplayStatus(props.receipt).tone : 'neutral'
 )
 
 function formatDate(d: Date | { toDate?: () => Date } | string | undefined) {

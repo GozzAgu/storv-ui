@@ -306,6 +306,9 @@ function priceLines(
     if (loan.startsWith('trade~')) {
       conflict(`${name} is lent to a partner and can’t be sold here.`, 'ITEM_ON_PARTNER_LOAN')
     }
+    if (item.inspectionHoldId) {
+      conflict(`${name} was returned and is waiting for inspection.`, 'ITEM_ON_INSPECTION')
+    }
     const hold = String(item.pendingSaleReceiptId || '')
     if (hold && hold !== receiptId) {
       conflict(`${name} is held on another outstanding order.`, 'ITEM_HELD')

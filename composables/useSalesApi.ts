@@ -1,4 +1,12 @@
 import type { StockLoanStatus } from '~/types/stock-loans'
+import type { InspectionDecision } from '~/types/inspection-holds'
+import type { CreateWriteOffBody } from '~/types/stock-write-offs'
+import type { DeleteWhy } from '~/types/stock-removals'
+import type {
+  CreateSupplierReturnBody,
+  SupplierReturnAction,
+  SupplierReturnStatus,
+} from '~/types/supplier-returns'
 import { useAuthenticatedFetch } from '~/composables/useAuthenticatedFetch'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
@@ -203,8 +211,39 @@ export function useSalesApi() {
         '/api/sales/edit',
         { receiptId, changes, reason }
       ),
-    refundSale: (receiptId: string, reason: string) =>
-      post<{ status: 'refunded' }>('/api/sales/refund', { receiptId, reason }),
+    /** `heldItemIds`: "Needs checking" lines, held for inspection instead of going back on sale. */
+    refundSale: (receiptId: string, reason: string, heldItemIds: string[] = []) =>
+      post<{ status: 'refunded'; inspectionHoldIds: string[] }>('/api/sales/refund', {
+        receiptId,
+        reason,
+        ...(heldItemIds.length && { heldItemIds }),
+      }),
+    /** Deletes products; the server records each one (reason, copy of the item, who, when). */
+    removeItems: (itemIds: string[], why: DeleteWhy) =>
+      post<{ removed: number }>('/api/inventory/remove-items', { itemIds, ...why }),
+    /** Records and deletes a category's products; call until `remaining` is false. */
+    removeCategoryItems: (folderId: string) =>
+      post<{ removed: number; remaining: boolean }>('/api/inventory/remove-category-items', {
+        folderId,
+      }),
+    restoreRemoval: (removalId: string) =>
+      post<{ itemId: string }>('/api/inventory/restore-removal', { removalId }),
+    /** Records stock as a loss; the server takes it out of stock in the same step. */
+    createWriteOff: (body: CreateWriteOffBody) =>
+      post<{ writeOffId: string }>('/api/write-offs/create', { ...body }),
+    resolveInspectionHold: (holdId: string, decision: InspectionDecision) =>
+      post<{ status: string; supplierReturnId?: string }>('/api/inspection-holds/resolve', {
+        holdId,
+        ...decision,
+      }),
+    /** Logs a defective in-stock item for the supplier; the server takes it out of stock. */
+    createSupplierReturn: (body: CreateSupplierReturnBody) =>
+      post<{ returnId: string }>('/api/supplier-returns/create', { ...body }),
+    updateSupplierReturn: (returnId: string, change: SupplierReturnAction) =>
+      post<{ status: SupplierReturnStatus }>('/api/supplier-returns/update', {
+        returnId,
+        ...change,
+      }),
     approvers: () =>
       get<{ approvers: Array<{ uid: string; name: string }> }>('/api/sales/approvers'),
     approvalPinStatus: () =>
