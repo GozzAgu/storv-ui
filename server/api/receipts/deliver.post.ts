@@ -81,7 +81,8 @@ export default defineEventHandler(async (event) => {
   const userCaption = (body.caption ?? '').trim().slice(0, MAX_CAPTION)
   const caption = [userCaption, statusLine].filter(Boolean).join('\n') || undefined
 
-  await assertWhatsAppSendAllowed(auth.uid)
+  // Only WhatsApp sends count against the monthly allowance, which is the business owner's.
+  if (channel === 'whatsapp') await assertWhatsAppSendAllowed(access.ownerUserId, auth.uid)
 
   if (channel === 'email') {
     if (!isValidContactEmail(contact)) {
@@ -104,7 +105,6 @@ export default defineEventHandler(async (event) => {
       attachmentMimeType: sendFile ? attachment.mimeType : undefined,
       caption: userCaption || undefined,
     })
-    await incrementWhatsAppUsage(auth.uid)
     return {
       success: true,
       channel: 'email',
@@ -126,7 +126,7 @@ export default defineEventHandler(async (event) => {
       filename: attachment.filename,
       caption,
     })
-    await incrementWhatsAppUsage(auth.uid)
+    await incrementWhatsAppUsage(access.ownerUserId, auth.uid)
     return {
       success: true,
       channel: 'whatsapp',

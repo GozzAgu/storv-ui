@@ -312,7 +312,7 @@ const ladder = [
     unlocks: [
       'Analytics and exports',
       'Sales leads and customer balances',
-      'Unlimited WhatsApp receipts',
+      '50 WhatsApp receipts a month',
     ],
     featured: true,
   },
@@ -322,7 +322,7 @@ const ladder = [
     unlocks: [
       'Stock transfers between branches',
       'Copy from branch and stock loans',
-      'Priority support',
+      'Unlimited WhatsApp receipts',
     ],
     featured: false,
   },

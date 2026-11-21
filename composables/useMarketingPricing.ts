@@ -62,7 +62,7 @@ export const MARKETING_PLANS: MarketingPlan[] = [
       'Analytics with PDF and Excel exports',
       'Sales leads and customer balances',
       'Activity log of every change',
-      'Unlimited WhatsApp receipts',
+      '50 WhatsApp receipts a month',
     ],
   },
   {
@@ -84,6 +84,7 @@ export const MARKETING_PLANS: MarketingPlan[] = [
       'Stock transfers between branches',
       'Copy categories from another branch',
       'Stock loans for serial-tracked items',
+      'Unlimited WhatsApp receipts',
       'Priority support',
     ],
   },

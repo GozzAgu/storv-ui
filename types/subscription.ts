@@ -191,7 +191,7 @@ const LIMITS_BY_PLAN: Record<SubscriptionPlan, SubscriptionLimits> = {
     maxStores: 2,
     maxDepartmentsPerStore: 10,
     maxStaffPerStore: 5,
-    maxWhatsAppMessagesPerMonth: -1,
+    maxWhatsAppMessagesPerMonth: 50,
   },
   storvv_enterprise: {
     maxStores: 5,
@@ -395,7 +395,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
     'Analytics, activity logs & PDF/Excel exports',
     'Sales leads (enquiry pipeline → receipt)',
     'Customer balance / credit ledger',
-    'Unlimited WhatsApp receipts',
+    'WhatsApp receipt sharing (50/month)',
     'Duplicate categories within the same branch',
     'Paystack auto-renew · billing history · cancel anytime in Settings',
   ],
@@ -406,6 +406,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
       LIMITS_BY_PLAN.storvv_enterprise.maxStaffPerStore
     } staff each) or staff seats (${formatNaira(SUBSCRIPTION_ADD_ON_PRICES_NGN.staff)}/mo) anytime`,
     'Multi-store sync & stock transfers',
+    'Unlimited WhatsApp receipt sharing',
     'Copy from branch (category templates across stores)',
     'Stock loans for serial-tracked inventory',
     'Priority support',

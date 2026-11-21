@@ -25,5 +25,13 @@ describe('plan-gate-message', () => {
   it('uses staff-safe WhatsApp limit copy', () => {
     expect(whatsAppLimitMessage(10, 10, { forStaff: true })).toContain('messaging limit')
     expect(whatsAppLimitMessage(10, 10, { forStaff: false })).toContain('Upgrade')
+    // Staff copy must survive the staff sanitizer, which hides anything mentioning upgrades.
+    expect(whatsAppLimitMessage(50, 50, { forStaff: true })).not.toMatch(/upgrade/i)
+  })
+
+  it('points Medium owners to Enterprise and Micro owners to Medium', () => {
+    expect(whatsAppLimitMessage(50, 50, { plan: 'storvv_medium' })).toContain('Enterprise')
+    expect(whatsAppLimitMessage(50, 50, { plan: 'storvv_medium' })).not.toContain('Medium for')
+    expect(whatsAppLimitMessage(10, 10, { plan: 'storvv_micro' })).toContain('Storvv Medium for 50')
   })
 })

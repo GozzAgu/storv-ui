@@ -183,7 +183,9 @@ export function useWhatsAppMessaging() {
     }
     return planGateMessage(
       isStaff.value,
-      'Upgrade to Storvv Medium for unlimited receipt delivery.'
+      p === 'storvv_medium'
+        ? 'Upgrade to Storvv Enterprise for unlimited WhatsApp receipts.'
+        : 'Upgrade to Storvv Medium for 50 WhatsApp receipts a month, or Enterprise for unlimited.'
     )
   }
 

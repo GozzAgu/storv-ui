@@ -19,11 +19,14 @@ export function sanitizePlanGateErrorForStaff(message: string, isStaff: boolean)
 export function whatsAppLimitMessage(
   count: number,
   limit: number,
-  options?: { forStaff?: boolean }
+  options?: { forStaff?: boolean; plan?: string }
 ): string {
-  const base = `Monthly send limit reached (${count}/${limit}).`
+  const base = `Monthly WhatsApp limit reached (${count}/${limit}). It resets on the 1st.`
   if (options?.forStaff) {
-    return `${base} This workspace has reached its messaging limit.`
+    // No "upgrade" here: staff errors mentioning it are replaced by a generic line.
+    return `${base} This workspace has reached its messaging limit; the account owner can raise it.`
   }
-  return `${base} Upgrade to Storvv Medium for unlimited sends.`
+  return options?.plan === 'storvv_medium'
+    ? `${base} Upgrade to Storvv Enterprise for unlimited sends.`
+    : `${base} Upgrade to Storvv Medium for 50 sends a month, or Enterprise for unlimited.`
 }
