@@ -37,7 +37,7 @@ const features: MkNavMenuItem[] = [
     icon: Boxes,
     title: 'Inventory',
     tint: 'sand',
-    text: "Know what's on every shelf, by category, serial or IMEI.",
+    text: "Know what's on every shelf, by serial or IMEI, and why anything left.",
     to: '/features?area=inventory#explore',
   },
   {

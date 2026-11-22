@@ -27,7 +27,8 @@ export const useFirebase = () => {
    */
   const getAnalyticsInstance = (): Analytics | null => {
     if (import.meta.server) return null
-    if (isCapacitorNative() || isPublicPayPath(window.location.pathname)) return null
+    const path = (globalThis as { location?: { pathname?: string } }).location?.pathname ?? ''
+    if (isCapacitorNative() || isPublicPayPath(path)) return null
 
     try {
       const app = getApp()

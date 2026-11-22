@@ -385,6 +385,17 @@ export const usePreferences = () => {
     return formatDate(date, { includeTime: true })
   }
 
+  /**
+   * The demo shop's own settings (naira, Lagos time). Kept in memory only, so a visitor's real
+   * preferences saved in this browser are never overwritten by the demo.
+   */
+  const applyDemoPreferences = () => {
+    const demo = userStore.userData?.preferences as Partial<UserPreferences> | undefined
+    if (!demo) return
+    preferences.value = { ...defaultPreferences, ...demo }
+    baseCurrency.value = demo.baseCurrency || demo.currency || baseCurrency.value
+  }
+
   /** Local storage only - safe for Capacitor cold start (no network). */
   const initializeLocalOnly = () => {
     loadFromLocalStorage()
@@ -394,7 +405,9 @@ export const usePreferences = () => {
   const initialize = async () => {
     loadFromLocalStorage()
     const { isDemoModeActive } = await import('~/utils/demo-mode')
-    if (!isDemoModeActive()) {
+    if (isDemoModeActive()) {
+      applyDemoPreferences()
+    } else {
       await loadFromFirestore()
     }
 
@@ -421,5 +434,6 @@ export const usePreferences = () => {
     formatTime,
     initialize,
     initializeLocalOnly,
+    applyDemoPreferences,
   }
 }

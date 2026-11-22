@@ -134,11 +134,11 @@ const contactOpen = ref(false)
 const faq: MkFaqItem[] = [
   {
     q: 'Is Micro really free?',
-    a: 'Yes. One store, up to 2 staff, inventory, sales, receipts and customers. No card.',
+    a: 'Yes. One store, up to 2 staff, inventory, sales, receipts, customers and returns. No card, no time limit.',
   },
   {
     q: 'What do Medium and Enterprise add?',
-    a: 'Medium: second store, analytics, leads, unlimited WhatsApp receipts. Enterprise: 5 stores, 10 staff each, transfers. Add more any time. <a href="/pricing">Compare plans</a>.',
+    a: 'Medium: a second store, transfers between them, reports, sales leads, customer balances, supplier returns and 50 WhatsApp receipts a month. Enterprise: 5 stores with 10 staff each, stock loans and unlimited WhatsApp receipts; add stores or staff seats any time. <a href="/pricing">Compare plans</a>.',
     html: true,
   },
   {
@@ -159,7 +159,7 @@ const faq: MkFaqItem[] = [
   },
   {
     q: 'Which payments can I record?',
-    a: 'Cash, card, transfer, OPay, Moniepoint, Palmpay, Kuda, USSD, mobile money, and splits. Edit the list in Settings.',
+    a: 'Cash, card, transfer, OPay, Moniepoint, PalmPay, Kuda, USSD, mobile money, and splits. Edit the list in Settings.',
   },
   {
     q: 'Is my data safe?',

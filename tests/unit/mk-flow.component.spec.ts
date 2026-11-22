@@ -34,7 +34,7 @@ describe('MkFlow', () => {
   it('says which plan unlocks the steps that are not on every plan', () => {
     const wrapper = mount(MkFlow)
     expect(wrapper.find('#flow-update .mk-tag').text()).toBe('Balances on Medium')
-    expect(wrapper.find('#flow-move .mk-tag').text()).toBe('Transfers on Enterprise')
+    expect(wrapper.find('#flow-move .mk-tag').text()).toBe('Transfers on Medium')
     expect(wrapper.find('#flow-stock .mk-tag').exists()).toBe(false)
   })
 })

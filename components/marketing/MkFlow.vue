@@ -92,7 +92,7 @@ const steps = [
     short: 'Transfer & reorder',
     title: 'Move stock where it sells',
     text: 'Send stock between branches with approvals, and export a reorder list of everything running low.',
-    plan: 'Transfers on Enterprise',
+    plan: 'Transfers on Medium',
     src: '/marketing/app/branches.webp',
     alt: 'Storvv transfers: stock moving between branches with approval status',
   },
