@@ -1,6 +1,8 @@
 import { getApps, type FirebaseApp } from 'firebase/app'
 import { getAnalytics, type Analytics } from 'firebase/analytics'
 import { firebaseEmulatorsEnabled } from '~/utils/firebase-emulators'
+import { isCapacitorNative } from '~/utils/capacitor-env'
+import { isPublicPayPath } from '~/utils/pay-path'
 
 /**
  * Composable to access Firebase app and services
@@ -19,9 +21,13 @@ export const useFirebase = () => {
     return apps[0] || null
   }
 
-  // Get Analytics instance
+  /**
+   * Analytics, only where the Firebase plugin turns it on: never in the iOS/Android shell (loading
+   * gtag.js there crashes the WKWebView's web process), the emulator or public pay links.
+   */
   const getAnalyticsInstance = (): Analytics | null => {
     if (import.meta.server) return null
+    if (isCapacitorNative() || isPublicPayPath(window.location.pathname)) return null
 
     try {
       const app = getApp()
@@ -36,7 +42,10 @@ export const useFirebase = () => {
 
   return {
     app: getApp(),
-    analytics: getAnalyticsInstance(),
+    /** Created on first read, not on every useFirebase() call: most callers only need the app. */
+    get analytics() {
+      return getAnalyticsInstance()
+    },
     getApp,
     getAnalyticsInstance,
   }
