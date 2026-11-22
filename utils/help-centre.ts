@@ -46,9 +46,9 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         id: 'demo',
-        q: 'Can I try it without signing up?',
-        a: 'Yes. The demo is a sample shop you can click around freely.',
-        link: { label: 'Open the demo', to: '/demo/dashboard' },
+        q: 'Can I see it before signing up?',
+        a: 'Yes. Book a free walkthrough of about 20 minutes and someone from Storvv will show you around a sample shop and answer your questions. Or start on Micro, which is free for one store.',
+        link: { label: 'Book a walkthrough', to: '/?walkthrough=1' },
       },
       {
         id: 'phone',
@@ -246,7 +246,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       {
         id: 'prices',
         q: 'What does each plan cost?',
-        a: 'Micro is free. Medium is ₦15,000 a month. Enterprise is ₦25,000 a month.',
+        a: 'Micro is free. Medium is ₦15,000 a month. Enterprise is ₦35,000 a month.',
         link: { label: 'Compare every plan', to: '/pricing' },
       },
       ...(trialOffer
@@ -266,7 +266,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       {
         id: 'add-ons',
         q: 'Can I add more stores or staff?',
-        a: 'Yes, on Enterprise. An extra store is ₦5,000 a month and an extra staff seat ₦2,000.',
+        a: 'Yes, on Enterprise. An extra store is ₦5,000 a month and an extra staff seat ₦1,000.',
       },
       {
         id: 'cancel',

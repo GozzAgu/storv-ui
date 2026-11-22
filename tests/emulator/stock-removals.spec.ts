@@ -160,6 +160,17 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('stock removals (emulator)
     })
   })
 
+  it('on Micro, still records deletions but restoring needs Medium', async () => {
+    await owner().update({ subscription: 'storvv_micro' })
+    await removeItems(db, await actor(OWNER), { itemIds: ['iphone'], reason: 'duplicate' })
+    const [doc] = (await removals().get()).docs
+    expect(doc?.data().kind).toBe('deleted')
+    await expect(
+      restoreRemoval(db, await actor(OWNER), { removalId: doc!.id })
+    ).rejects.toMatchObject({ statusCode: 403, data: { code: 'PLAN_UPGRADE_REQUIRED' } })
+    expect((await item('iphone').get()).exists).toBe(false)
+  })
+
   it('won’t restore into a deleted category or over an existing product', async () => {
     const manager = await actor('manager')
     await removeItems(db, manager, { itemIds: ['pixel'], reason: 'entered_by_mistake' })

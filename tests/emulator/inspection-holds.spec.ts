@@ -217,6 +217,24 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('inspection holds (emulato
     })
   })
 
+  it('on Micro, a held unit can go back on sale but not to the supplier', async () => {
+    const sale = await sell([{ itemId: 'iphone', quantity: 1 }])
+    const { inspectionHoldIds } = await refund(sale.receiptId, ['iphone'])
+    await owner().update({ subscription: 'storvv_micro' })
+    const manager = await actor('manager')
+    await expect(
+      resolveInspectionHold(db, manager, {
+        holdId: inspectionHoldIds[0],
+        action: 'supplier',
+        supplierName: 'Ikeja Phone Imports',
+        defect: 'Display fault',
+      })
+    ).rejects.toMatchObject({ data: { code: 'PLAN_UPGRADE_REQUIRED' } })
+    expect((await item('iphone').get()).data()?.inspectionHoldId).toBe(inspectionHoldIds[0])
+    await resolveInspectionHold(db, manager, { holdId: inspectionHoldIds[0], action: 'restock' })
+    expect((await item('iphone').get()).data()?.inspectionHoldId).toBeUndefined()
+  })
+
   it('held bulk units sent to the supplier never come back into stock', async () => {
     const sale = await sell([{ itemId: 'usb', quantity: 2 }])
     const { inspectionHoldIds } = await refund(sale.receiptId, ['usb'])

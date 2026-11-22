@@ -118,6 +118,16 @@ export type SubscriptionFeature =
   | 'payment_links'
   /** Manual sales enquiry tracking and convert-to-sale (Medium+). */
   | 'sales_leads'
+  /**
+   * Log stock that came in defective and track the claim with the supplier (Medium+). Returns
+   * already open stay manageable after a downgrade; only logging new ones needs the plan.
+   */
+  | 'supplier_returns'
+  /**
+   * The full stock out log, its search, and restoring deleted products (Medium+). Every plan
+   * records every removal; Micro sees the last STOCK_OUT_LOG_FREE_DAYS days.
+   */
+  | 'stock_out_history'
 
 /** Max limits by plan (use -1 for unlimited where applicable). */
 interface SubscriptionLimits {
@@ -158,6 +168,9 @@ export const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> =
     'customer_balance',
     'payment_links',
     'sales_leads',
+    'supplier_returns',
+    'stock_out_history',
+    'multi_store_sync',
   ],
   storvv_enterprise: [
     'dashboard',
@@ -177,8 +190,13 @@ export const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> =
     'customer_balance',
     'payment_links',
     'sales_leads',
+    'supplier_returns',
+    'stock_out_history',
   ],
 }
+
+/** Days of the stock out log a plan without `stock_out_history` can see. */
+export const STOCK_OUT_LOG_FREE_DAYS = 30
 
 const LIMITS_BY_PLAN: Record<SubscriptionPlan, SubscriptionLimits> = {
   storvv_micro: {
@@ -209,7 +227,7 @@ export const ADD_ON_ELIGIBLE_PLAN: SubscriptionPlan = 'storvv_enterprise'
 /** Monthly add-on prices in naira. Must match the Paystack add-on plan amounts. */
 export const SUBSCRIPTION_ADD_ON_PRICES_NGN: Record<SubscriptionAddOnKind, number> = {
   store: 5000,
-  staff: 2000,
+  staff: 1000,
 }
 
 export function formatNaira(amount: number): string {
@@ -377,11 +395,34 @@ export function getEligibleStoresForPlan<T extends { id: string; createdAt?: unk
 }
 
 /** Human-readable feature summary per plan (Settings “Compare plans”, upgrade copy). */
-export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = {
+/**
+ * What each plan includes, as short lines. Pass the add-on prices the server charges so the
+ * comparison never shows a different price from checkout; without them the published prices show.
+ */
+export function getPlanFeatureSummary(
+  addOnPrices: Record<SubscriptionAddOnKind, string> = {
+    store: formatNaira(SUBSCRIPTION_ADD_ON_PRICES_NGN.store),
+    staff: formatNaira(SUBSCRIPTION_ADD_ON_PRICES_NGN.staff),
+  }
+): Record<SubscriptionPlan, string[]> {
+  return {
+    ...PLAN_FEATURE_LINES,
+    storvv_enterprise: PLAN_FEATURE_LINES.storvv_enterprise.map((line) =>
+      line === ADD_ON_LINE_TOKEN
+        ? `Add stores (${addOnPrices.store}/mo, ${LIMITS_BY_PLAN.storvv_enterprise.maxStaffPerStore} staff each) or staff seats (${addOnPrices.staff}/mo) anytime`
+        : line
+    ),
+  }
+}
+
+const ADD_ON_LINE_TOKEN = '__add_ons__'
+
+const PLAN_FEATURE_LINES: Record<SubscriptionPlan, string[]> = {
   storvv_micro: [
     '1 store · 1 department · up to 2 staff',
     'Inventory (categories, subcategories, serial/bulk) & sales',
     'Receipts, returns, customers, Quick Sale & Create New Sale',
+    'Hold customer returns for inspection, write off losses, 30-day stock out log',
     'Dashboard, notifications, help center & Storvv Assistant',
     'Paystack payment links',
     'WhatsApp receipt sharing (10/month)',
@@ -395,6 +436,9 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
     'Analytics, activity logs & PDF/Excel exports',
     'Sales leads (enquiry pipeline → receipt)',
     'Customer balance / credit ledger',
+    'Supplier returns: log faulty stock and track each claim to refund, credit or replacement',
+    'Full stock out log with search, and restoring deleted products',
+    'Stock transfers between your branches & branch reports',
     'WhatsApp receipt sharing (50/month)',
     'Duplicate categories within the same branch',
     'Paystack auto-renew · billing history · cancel anytime in Settings',
@@ -402,10 +446,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
   storvv_enterprise: [
     'Everything in Medium',
     'Up to 5 stores · 10 staff per store · unlimited departments',
-    `Add stores (${formatNaira(SUBSCRIPTION_ADD_ON_PRICES_NGN.store)}/mo, ${
-      LIMITS_BY_PLAN.storvv_enterprise.maxStaffPerStore
-    } staff each) or staff seats (${formatNaira(SUBSCRIPTION_ADD_ON_PRICES_NGN.staff)}/mo) anytime`,
-    'Multi-store sync & stock transfers',
+    ADD_ON_LINE_TOKEN,
     'Unlimited WhatsApp receipt sharing',
     'Copy from branch (category templates across stores)',
     'Stock loans for serial-tracked inventory',
@@ -414,9 +455,12 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
   ],
 }
 
+export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> =
+  getPlanFeatureSummary()
+
 /** Short exclusion line for pricing cards (landing & upsell). */
 export const SUBSCRIPTION_PLAN_NOT_INCLUDED: Partial<Record<SubscriptionPlan, string>> = {
   storvv_micro:
-    'No analytics, sales leads, activity logs, customer balance ledger, duplicate category, or multi-store tools',
-  storvv_medium: 'No stock transfers, copy-from-branch, or stock loans (Enterprise)',
+    'No analytics, sales leads, activity logs, customer balances, supplier returns, or stock transfers',
+  storvv_medium: 'No copy-from-branch, stock loans, or extra stores and seats (Enterprise)',
 }

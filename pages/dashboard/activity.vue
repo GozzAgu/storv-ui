@@ -69,7 +69,7 @@
         Showing the newest {{ fetchLimit }} events. Search to find older ones.
       </p>
 
-      <section class="s-table-card" aria-label="Activity">
+      <section class="s-table-card s-activity-card" aria-label="Activity">
         <div class="s-table-card__head">
           <STabs v-model="actionFilter" :tabs="webActionTabs" label="Filter by action" />
           <div class="s-toolbar">
@@ -124,61 +124,65 @@
             </ul>
           </SCard>
 
-          <!-- Tablet and desktop: point at "What changed" for the details card -->
+          <!-- Tablet and desktop: grouped by day; point at an event for the details card -->
           <div class="s-table-wrap s-hide-sm">
-            <table class="s-table">
+            <table class="s-table s-activity-table">
               <thead>
                 <tr>
-                  <th scope="col">Person</th>
-                  <th scope="col">Action</th>
-                  <th scope="col">What changed</th>
-                  <th scope="col">When</th>
+                  <th scope="col">Event</th>
+                  <th scope="col" class="s-hide-md">Person</th>
+                  <th scope="col" class="s-activity-table__time">Time</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr v-for="log in paginatedLogs" :key="log.id">
-                  <td>
-                    <span class="s-table__inline">
-                      <SAvatar :name="log.userDisplayName" size="sm" />
-                      <span class="s-table__primary">{{ log.userDisplayName }}</span>
-                    </span>
-                  </td>
-                  <td>
-                    <SBadge :tone="activityActionTone(log.action)" size="sm" dot>
-                      {{ activityActionLabel(log.action) }}
-                    </SBadge>
-                  </td>
+              <tbody v-for="group in pageGroups" :key="group.key">
+                <tr class="s-activity-table__day">
+                  <th scope="colgroup" colspan="3">{{ group.label }}</th>
+                </tr>
+                <tr v-for="log in group.logs" :key="log.id">
                   <td>
                     <SHoverCard :label="`Details: ${displayEntityName(log)}`">
                       <template #trigger>
-                        <span class="s-table__primary s-activity__what">
-                          {{ displayEntityName(log) }}
-                        </span>
-                        <span class="s-table__secondary s-activity__meta">
-                          <component
-                            :is="entityTypeIcon(log.entityType)"
-                            :size="14"
-                            :stroke-width="2"
-                            aria-hidden="true"
-                          />
-                          {{ activityEntityTypeLabel(log.entityType) }}
-                          <template v-if="logDetailSubtitle(log)">
-                            · {{ logDetailSubtitle(log) }}</template
-                          >
-                          <span v-if="hasDetails(log)" class="s-activity__more">· Details</span>
+                        <span class="s-activity-table__event">
+                          <span class="s-activity-table__icon" aria-hidden="true">
+                            <component
+                              :is="entityTypeIcon(log.entityType)"
+                              :size="15"
+                              :stroke-width="1.75"
+                            />
+                          </span>
+                          <span class="s-activity-table__text">
+                            <span class="s-table__primary">{{ displayEntityName(log) }}</span>
+                            <span class="s-table__secondary s-activity-table__meta">
+                              <span
+                                class="s-activity-table__action"
+                                :class="`s-activity-table__action--${activityActionTone(log.action)}`"
+                                >{{ activityActionLabel(log.action) }}</span
+                              >
+                              <span aria-hidden="true">·</span>
+                              {{ activityEntityTypeLabel(log.entityType) }}
+                              <template v-if="logDetailSubtitle(log)">
+                                <span aria-hidden="true">·</span>
+                                {{ logDetailSubtitle(log) }}
+                              </template>
+                            </span>
+                          </span>
                         </span>
                       </template>
                       <ActivityDetailCard :log="log" compact />
                     </SHoverCard>
                   </td>
-                  <td class="s-table__nowrap">
-                    <span class="s-table__primary">{{ relativeTime(log.createdAt) }}</span>
-                    <span
-                      v-if="relativeTime(log.createdAt) !== formatDate(log.createdAt)"
-                      class="s-table__secondary"
-                    >
-                      {{ formatDate(log.createdAt) }}
+                  <td class="s-hide-md">
+                    <span class="s-activity-table__person">
+                      <SAvatar :name="log.userDisplayName" size="sm" />
+                      {{ log.userDisplayName }}
                     </span>
+                  </td>
+                  <td class="s-activity-table__time">
+                    <time
+                      :datetime="isoOf(log.createdAt)"
+                      :title="`${formatDate(log.createdAt)} · ${relativeTime(log.createdAt)}`"
+                      >{{ timeOfDay(log.createdAt) }}</time
+                    >
                   </td>
                 </tr>
               </tbody>
@@ -318,6 +322,51 @@ function activityActionTone(action: ActivityAction): 'success' | 'info' | 'error
   return 'info'
 }
 
+function toDate(d: Date | unknown): Date | null {
+  if (!d) return null
+  const date = d instanceof Date ? d : new Date(d as string | number)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+function isoOf(d: Date | unknown): string | undefined {
+  return toDate(d)?.toISOString()
+}
+
+function timeOfDay(d: Date | unknown): string {
+  const date = toDate(d)
+  return date ? date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : '-'
+}
+
+function dayLabel(date: Date): string {
+  const today = new Date()
+  const startOf = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
+  const days = Math.round((startOf(today) - startOf(date)) / 86_400_000)
+  if (days === 0) return 'Today'
+  if (days === 1) return 'Yesterday'
+  return date.toLocaleDateString(undefined, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    ...(date.getFullYear() === today.getFullYear() ? {} : { year: 'numeric' }),
+  })
+}
+
+/** This page's entries under a heading per day ("Today", "Yesterday", "Friday, 21 November"). */
+const pageGroups = computed(() => {
+  const groups: Array<{ key: string; label: string; logs: ActivityLog[] }> = []
+  for (const log of paginatedLogs.value) {
+    const date = toDate(log.createdAt)
+    const key = date ? date.toDateString() : 'unknown'
+    let group = groups[groups.length - 1]
+    if (!group || group.key !== key) {
+      group = { key, label: date ? dayLabel(date) : 'Unknown date', logs: [] }
+      groups.push(group)
+    }
+    group.logs.push(log)
+  }
+  return groups
+})
+
 function handlePageChange(page: number) {
   currentPage.value = page
   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -372,12 +421,6 @@ function entityTypeIcon(type: ActivityEntityType) {
   if (type === 'payment') return Wallet
   if (type === 'customer_balance') return HandCoins
   return Box
-}
-
-/** Entries written with structured details (newer ones); older entries only have a summary. */
-function hasDetails(log: ActivityLog): boolean {
-  const d = log.details
-  return Boolean(d && (d.facts?.length || d.changes?.length || d.lines?.length || d.route))
 }
 
 function formatDate(d: Date | unknown): string {

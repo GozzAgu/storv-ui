@@ -8,7 +8,7 @@
       heading: 'Built in',
       lede: 'No add-ons to buy or connect.',
       items: builtIn,
-      link: { label: 'Try the live demo', to: '/demo/dashboard' },
+      link: { label: 'Book a walkthrough', to: '?walkthrough=1' },
     }"
   />
 </template>

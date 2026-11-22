@@ -93,7 +93,7 @@
         </div>
       </dl>
 
-      <section class="s-table-card" aria-label="Leads">
+      <section class="s-table-card s-dept-table" aria-label="Leads">
         <div class="s-table-card__head">
           <STabs v-model="statusFilter" :tabs="webStatusTabs" label="Lead status" />
           <div class="s-toolbar">
@@ -103,6 +103,9 @@
               placeholder="Search leads"
               label="Search leads by customer, phone, email or product"
             />
+            <p class="s-dept-table__count" aria-live="polite">
+              {{ filteredLeads.length }} {{ filteredLeads.length === 1 ? 'lead' : 'leads' }}
+            </p>
           </div>
         </div>
 
@@ -151,7 +154,7 @@
                   <th scope="col" class="s-table__num">Value</th>
                   <th scope="col" class="s-hide-lg">Source</th>
                   <th scope="col">Status</th>
-                  <th scope="col" class="s-hide-md">Updated</th>
+                  <th scope="col" class="s-hide-md">Last updated</th>
                 </tr>
               </thead>
               <tbody>
@@ -162,19 +165,26 @@
                   @click="openLead(lead)"
                 >
                   <td>
-                    <NuxtLink
-                      :to="dashPath(`/leads/${lead.id}`)"
-                      class="s-table__primary s-lead__link"
-                      @click.stop
-                    >
-                      {{ lead.customerName }}
-                    </NuxtLink>
-                    <span v-if="lead.customerPhone" class="s-table__secondary">{{
-                      lead.customerPhone
-                    }}</span>
+                    <div class="s-team__cell">
+                      <span class="s-dept-table__mark" aria-hidden="true">
+                        {{ nameInitials(lead.customerName) }}
+                      </span>
+                      <span class="s-team__cell-text">
+                        <NuxtLink
+                          :to="dashPath(`/leads/${lead.id}`)"
+                          class="s-table__primary s-lead__link"
+                          @click.stop
+                        >
+                          {{ lead.customerName }}
+                        </NuxtLink>
+                        <span v-if="lead.customerPhone" class="s-table__secondary">{{
+                          lead.customerPhone
+                        }}</span>
+                      </span>
+                    </div>
                   </td>
                   <td>
-                    <span class="s-table__secondary s-lead__product">{{ lead.productName }}</span>
+                    <span class="s-lead__product">{{ lead.productName }}</span>
                   </td>
                   <td class="s-table__num">
                     <span v-if="lead.estimatedValue">{{
@@ -182,7 +192,11 @@
                     }}</span>
                     <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
                   </td>
-                  <td class="s-hide-lg">{{ SALES_LEAD_SOURCE_LABELS[lead.source] }}</td>
+                  <td class="s-hide-lg">
+                    <span class="s-dept-table__type">{{
+                      SALES_LEAD_SOURCE_LABELS[lead.source]
+                    }}</span>
+                  </td>
                   <td @click.stop>
                     <SSelect
                       v-if="isOpenSalesLeadStatus(lead.status)"
@@ -197,7 +211,7 @@
                       SALES_LEAD_STATUS_LABELS[lead.status]
                     }}</SBadge>
                   </td>
-                  <td class="s-hide-md s-table__nowrap">
+                  <td class="s-hide-md s-table__nowrap s-table__muted">
                     {{ formatDay(lead.updatedAt || lead.createdAt) }}
                   </td>
                 </tr>
@@ -237,6 +251,7 @@ import type { SalesLead, SalesLeadStatus } from '~/types/leads'
 import { isOpenSalesLeadStatus } from '~/types/leads'
 import { leadStatusTone } from '~/utils/lead-status'
 import { EMPTY_CELL } from '~/utils/ui-empty'
+import { nameInitials } from '~/utils/name-initials'
 
 definePageMeta({
   layout: 'dashboard',

@@ -13,7 +13,7 @@
             <NuxtLink :to="signupUrl" class="mk-cta-btn" data-mk-primary>
               Create your free store
             </NuxtLink>
-            <NuxtLink to="/demo/dashboard" class="mk-pill-link">or try the live demo</NuxtLink>
+            <NuxtLink to="?walkthrough=1" class="mk-pill-link">or book a walkthrough</NuxtLink>
           </div>
           <p class="mk-hero__note">
             Web dashboard live today · Free forever on Micro · iOS and Android coming soon

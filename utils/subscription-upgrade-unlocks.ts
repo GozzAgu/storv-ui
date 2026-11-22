@@ -10,7 +10,9 @@ const FEATURE_UNLOCK_LABELS: Partial<Record<SubscriptionFeature, string>> = {
   activity_logs: 'Activity logs',
   sales_leads: 'Sales leads pipeline',
   customer_balance: 'Customer balance ledger',
-  multi_store_sync: 'Multi-Store Sync',
+  multi_store_sync: 'Stock transfers between branches',
+  supplier_returns: 'Supplier returns and claims',
+  stock_out_history: 'Full stock out history and restoring deleted products',
   seller_loans: 'Stock loans',
 }
 

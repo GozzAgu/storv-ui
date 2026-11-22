@@ -433,99 +433,98 @@
 
 /* ── Staff permissions ─────────────────────────────────────────────────── */
 
+/* One row per area: name and what it allows on the left, a compact level picker on the right.
+   Finer actions sit underneath as plain checkboxes in a light panel. */
 .s-perm {
   display: flex;
   flex-direction: column;
-  margin: 0;
+  margin: var(--s-space-1) 0 0;
   padding: 0;
   list-style: none;
 }
 
 .s-perm__module {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-space-1);
-  padding: var(--s-space-2) 0;
+  padding: var(--s-space-1-5) 0;
 }
 
 .s-perm__module + .s-perm__module {
-  border-top: 1px solid var(--s-border);
+  border-top: 1px solid var(--s-divider);
 }
 
-.s-perm__head {
+.s-perm__row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--s-space-1);
+  gap: var(--s-space-1) var(--s-space-2);
+}
+
+.s-perm__text {
+  flex: 1 1 140px;
+  min-width: 0;
 }
 
 .s-perm__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-space-1);
   color: var(--s-text);
   font: var(--s-text-small);
   font-weight: 600;
 }
 
 .s-perm__hint {
-  margin: calc(var(--s-space-half) * -1) 0 0;
+  margin: 2px 0 0;
   color: var(--s-text-muted);
   font: var(--s-text-caption);
   font-weight: 400;
 }
 
-.s-perm__levels .s-tabs__tab {
-  position: relative;
+/* Compact segmented control: equal-width options, quieter than page tabs */
+.s-perm__levels {
+  display: grid;
+  flex: none;
+  grid-auto-columns: minmax(56px, 1fr);
+  grid-auto-flow: column;
+  gap: 2px;
+  padding: 3px;
+  align-self: center;
 }
 
-.s-perm__levels .s-tabs__tab::before,
-.s-perm__chip::before {
+.s-perm__levels .s-tabs__tab {
+  position: relative;
+  height: 28px;
+  padding: 0 var(--s-space-1);
+  font: var(--s-text-caption);
+  font-weight: 500;
+}
+
+/* Keep a full touch target on the small options */
+.s-perm__levels .s-tabs__tab::before {
   position: absolute;
-  inset: calc((var(--s-touch) - var(--s-control-h-sm)) / -2) 0;
+  inset: calc((var(--s-touch) - 28px) / -2) 0;
   content: '';
 }
 
-.s-perm__chips {
+.s-perm__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s-space-1);
+  gap: var(--s-space-half) var(--s-space-3);
+  margin-top: var(--s-space-1);
+  padding: var(--s-space-1) var(--s-space-2);
+  border-radius: var(--s-radius);
+  background: var(--s-surface-2);
 }
 
-.s-perm__chip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-space-half);
-  height: var(--s-control-h-sm);
-  padding: 0 var(--s-space-1-5);
-  border: 1px solid transparent;
-  border-radius: var(--s-radius-full);
-  background: var(--s-field-bg);
-  color: var(--s-text-2);
+.s-perm__actions .s-check__label {
   font: var(--s-text-small);
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color var(--s-duration-fast) var(--s-ease),
-    border-color var(--s-duration-fast) var(--s-ease), color var(--s-duration-fast) var(--s-ease);
 }
 
-.s-perm__chip:hover:not(:disabled) {
-  background: var(--s-field-bg-hover);
-  color: var(--s-text);
-}
-
-.s-perm__chip[aria-pressed='true'] {
-  border-color: var(--s-text);
-  background: var(--s-surface);
-  color: var(--s-text);
-}
-
-.s-perm__chip:focus-visible {
-  outline: none;
-  box-shadow: var(--s-focus-ring);
-}
-
-.s-perm__chip:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+/* Phones: the picker takes the full row under its label */
+@media (max-width: 639px) {
+  .s-perm__levels {
+    width: 100%;
+  }
 }
 
 /* ── inventory ── */

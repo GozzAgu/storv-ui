@@ -1,5 +1,5 @@
 <template>
-  <section class="s-table-card" aria-labelledby="stock-out-title">
+  <section class="s-table-card s-dept-table" aria-labelledby="stock-out-title">
     <div class="s-table-card__head">
       <div>
         <h2 id="stock-out-title" class="s-log__title">Stock out log</h2>
@@ -23,9 +23,9 @@
 
     <SCard v-if="filtered.length === 0">
       <SEmptyState
-        :title="entries.length ? 'Nothing matches' : 'Nothing has left stock yet'"
+        :title="inWindow.length ? 'Nothing matches' : emptyTitle"
         :description="
-          entries.length
+          inWindow.length
             ? 'Try another item, reason or type.'
             : 'Deleted products, write-offs, customer and supplier returns, and lowered counts will be listed here.'
         "
@@ -66,27 +66,35 @@
         <table class="s-table">
           <thead>
             <tr>
-              <th scope="col">Date</th>
               <th scope="col">Item</th>
               <th scope="col">What happened</th>
               <th scope="col" class="s-table__num">Units</th>
               <th scope="col" class="s-table__num s-hide-md">Cost</th>
               <th scope="col" class="s-hide-lg">By</th>
+              <th scope="col">Date</th>
               <th scope="col"><span class="ds-sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="row in visible" :key="row.key">
-              <td class="s-table__nowrap">{{ formatDay(row.at) }}</td>
               <td>
-                <span class="s-table__primary">{{ row.itemName }}</span>
-                <span class="s-table__secondary">{{ row.itemLine }}</span>
+                <div class="s-team__cell">
+                  <span class="s-dept-table__mark" aria-hidden="true">
+                    {{ nameInitials(row.itemName) }}
+                  </span>
+                  <span class="s-team__cell-text">
+                    <span class="s-table__primary">{{ row.itemName }}</span>
+                    <span class="s-table__secondary">{{ row.itemLine }}</span>
+                  </span>
+                </div>
               </td>
               <td>
                 <SHoverCard :label="`Why ${row.itemName} is out of stock`" :width="400">
                   <template #trigger>
                     <span class="s-log__why">
-                      <SBadge :tone="row.tone" size="sm">{{ row.typeLabel }}</SBadge>
+                      <span class="s-log__type" :class="`s-log__type--${row.tone}`">{{
+                        row.typeLabel
+                      }}</span>
                       <span class="s-table__secondary">{{ row.what }} · {{ row.why }}</span>
                     </span>
                   </template>
@@ -97,7 +105,14 @@
               <td class="s-table__num s-hide-md">
                 {{ row.cost === null ? EMPTY_CELL : formatCurrency(row.cost) }}
               </td>
-              <td class="s-hide-lg">{{ row.by || EMPTY_CELL }}</td>
+              <td class="s-hide-lg">
+                <span v-if="row.by" class="s-dept-table__manager">
+                  <SAvatar :name="row.by" size="sm" />
+                  {{ row.by }}
+                </span>
+                <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
+              </td>
+              <td class="s-table__nowrap s-table__muted">{{ formatDay(row.at) }}</td>
               <td class="s-table__nowrap">
                 <SButton
                   v-if="row.restorableId && canRestore"
@@ -122,6 +137,14 @@
       </div>
     </template>
 
+    <p v-if="olderHidden > 0" class="s-callout s-log__plan">
+      {{ olderHidden }} older {{ olderHidden === 1 ? 'entry is' : 'entries are' }} kept safely. Your
+      plan shows the last {{ STOCK_OUT_LOG_FREE_DAYS }} days; Medium and up show the full history.
+      <NuxtLink v-if="userStore.isSuperAdmin" :to="dashPath('/settings?upgrade=1')"
+        >View plans</NuxtLink
+      >
+    </p>
+
     <p v-if="error" class="s-field__error s-log__error" role="alert">{{ error }}</p>
   </section>
 </template>
@@ -129,6 +152,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { History } from '@lucide/vue'
+import SAvatar from '~/components/s/SAvatar.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
@@ -143,8 +167,11 @@ import { useInspectionHoldsStore } from '~/stores/inspectionHolds'
 import { useWriteOffsStore } from '~/stores/writeOffs'
 import { useStockRemovalsStore } from '~/stores/stockRemovals'
 import { useStoresStore } from '~/stores/stores'
+import { useUserStore } from '~/stores/user'
+import { STOCK_OUT_LOG_FREE_DAYS } from '~/types/subscription'
 import { usePreferences } from '~/composables/usePreferences'
 import { EMPTY_CELL } from '~/utils/ui-empty'
+import { nameInitials } from '~/utils/name-initials'
 import { stockItemDetailSummary } from '~/utils/stock-item-details'
 import {
   SUPPLIER_RETURN_OUTCOME_LABELS,
@@ -157,7 +184,17 @@ import { STOCK_REMOVAL_KIND_LABELS, STOCK_REMOVAL_REASON_LABELS } from '~/types/
  * One chronological list of everything that left stock outside a sale, transfer or loan:
  * supplier returns, customer returns, write-offs, deletions and lowered counts.
  */
-defineProps<{ canRestore: boolean }>()
+const props = withDefaults(
+  defineProps<{
+    canRestore: boolean
+    /** Full history is Medium and up; otherwise the last STOCK_OUT_LOG_FREE_DAYS days show. */
+    fullHistory?: boolean
+  }>(),
+  { fullHistory: true }
+)
+
+const userStore = useUserStore()
+const { dashPath } = useDashboardPaths()
 
 const supplierReturns = useSupplierReturnsStore()
 const holds = useInspectionHoldsStore()
@@ -368,9 +405,17 @@ const entries = computed<StockOutEntry[]>(() => {
   return out.sort((a, b) => (b.at ?? '').localeCompare(a.at ?? ''))
 })
 
+/** Every record is kept on every plan; without full history only the recent ones show. */
+const inWindow = computed(() => {
+  if (props.fullHistory) return entries.value
+  const cutoff = new Date(Date.now() - STOCK_OUT_LOG_FREE_DAYS * 86_400_000).toISOString()
+  return entries.value.filter((e) => !e.at || e.at >= cutoff)
+})
+const olderHidden = computed(() => entries.value.length - inWindow.value.length)
+
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase()
-  return entries.value.filter((e) => {
+  return inWindow.value.filter((e) => {
     if (typeFilter.value !== 'all' && e.type !== typeFilter.value) return false
     if (!q) return true
     return [e.itemName, e.itemLine, e.what, e.why, e.by, e.search].some((v) =>
@@ -379,6 +424,11 @@ const filtered = computed(() => {
   })
 })
 const visible = computed(() => filtered.value.slice(0, limit.value))
+const emptyTitle = computed(() =>
+  olderHidden.value
+    ? `Nothing in the last ${STOCK_OUT_LOG_FREE_DAYS} days`
+    : 'Nothing has left stock yet'
+)
 
 watch([search, typeFilter], () => {
   limit.value = 50
@@ -431,8 +481,31 @@ watch(
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--s-space-half);
+  gap: 1px;
   cursor: help;
+}
+
+/* The kind of exit reads as a small coloured word, not a pill */
+.s-log__type {
+  color: var(--s-text);
+  font: var(--s-text-small);
+  font-weight: 500;
+}
+
+.s-log__type--warning {
+  color: var(--s-warning);
+}
+
+.s-log__type--info {
+  color: var(--s-info);
+}
+
+.s-log__type--success {
+  color: var(--s-success);
+}
+
+.s-log__type--error {
+  color: var(--s-error);
 }
 
 .s-log__muted {
@@ -449,5 +522,9 @@ watch(
 .s-log__error {
   margin: 0;
   padding: var(--s-space-2) var(--s-space-3);
+}
+
+.s-log__plan {
+  margin: var(--s-space-2) var(--s-space-3);
 }
 </style>

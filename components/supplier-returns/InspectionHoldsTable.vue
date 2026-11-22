@@ -35,7 +35,12 @@
             >
               Back on sale
             </SButton>
-            <SButton variant="primary" size="sm" @click="emit('to-supplier', hold)">
+            <SButton
+              v-if="canReturnToSupplier"
+              variant="primary"
+              size="sm"
+              @click="emit('to-supplier', hold)"
+            >
               To supplier
             </SButton>
             <SButton v-if="canWriteOff" variant="ghost" size="sm" @click="emit('write-off', hold)">
@@ -85,7 +90,12 @@
                 >
                   Back on sale
                 </SButton>
-                <SButton variant="primary" size="sm" @click="emit('to-supplier', hold)">
+                <SButton
+                  v-if="canReturnToSupplier"
+                  variant="primary"
+                  size="sm"
+                  @click="emit('to-supplier', hold)"
+                >
                   Return to supplier
                 </SButton>
                 <SButton
@@ -116,13 +126,18 @@ import { stockItemDetailSummary } from '~/utils/stock-item-details'
 import type { InspectionHold } from '~/types/inspection-holds'
 
 /** Customer returns waiting for a decision, oldest first, as a table in the page body. */
-defineProps<{
-  holds: InspectionHold[]
-  canManage: boolean
-  canWriteOff: boolean
-  restockingId: string | null
-  error?: string
-}>()
+withDefaults(
+  defineProps<{
+    holds: InspectionHold[]
+    canManage: boolean
+    canWriteOff: boolean
+    /** Supplier returns are on Medium and up; without them it's back on sale or write off. */
+    canReturnToSupplier?: boolean
+    restockingId: string | null
+    error?: string
+  }>(),
+  { canReturnToSupplier: true, error: undefined }
+)
 const emit = defineEmits<{
   restock: [hold: InspectionHold]
   'to-supplier': [hold: InspectionHold]

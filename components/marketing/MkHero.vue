@@ -22,7 +22,6 @@
           <NuxtLink :to="signupUrl" class="mk-cta-btn" data-mk-primary>
             Create your free store
           </NuxtLink>
-          <NuxtLink to="/demo/dashboard" class="mkh__demo">or try the live demo</NuxtLink>
         </div>
         <p class="mk-walk mkh__walk mkh-in" style="--i: 3">
           Prefer a guided tour?

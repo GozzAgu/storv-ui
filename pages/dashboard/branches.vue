@@ -112,14 +112,14 @@
           </div>
         </dl>
 
-        <section class="s-table-card" aria-label="Branches">
+        <section class="s-table-card s-dept-table" aria-label="Branches">
           <!-- Phone -->
           <SCard flush class="s-only-sm">
             <ul class="s-list">
               <li v-for="store in visibleStores" :key="store.id">
                 <div class="s-list__item">
-                  <span class="s-team__mark" aria-hidden="true">
-                    <Store :size="16" :stroke-width="1.75" />
+                  <span class="s-dept-table__mark" aria-hidden="true">
+                    {{ nameInitials(store.name) }}
                   </span>
                   <span class="s-list__main">
                     <span class="s-list__primary">{{ store.name }}</span>
@@ -163,8 +163,8 @@
                 <tr v-for="store in visibleStores" :key="store.id">
                   <td>
                     <div class="s-team__cell">
-                      <span class="s-team__mark" aria-hidden="true">
-                        <Store :size="16" :stroke-width="1.75" />
+                      <span class="s-dept-table__mark" aria-hidden="true">
+                        {{ nameInitials(store.name) }}
                       </span>
                       <span class="s-team__cell-text">
                         <span class="s-table__primary">{{ store.name }}</span>
@@ -175,12 +175,12 @@
                     </div>
                   </td>
                   <td class="s-hide-md">
-                    <span v-if="store.address" class="s-table__secondary">{{ store.address }}</span>
+                    <span v-if="store.address" class="s-dept-table__type">{{ store.address }}</span>
                     <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
                   </td>
                   <td class="s-hide-lg">
                     <span v-if="store.phone || store.email" class="s-team__cell-text">
-                      <span v-if="store.phone" class="s-table__secondary">{{ store.phone }}</span>
+                      <span v-if="store.phone" class="s-dept-table__type">{{ store.phone }}</span>
                       <span v-if="store.email" class="s-table__secondary">{{ store.email }}</span>
                     </span>
                     <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
@@ -364,6 +364,7 @@ import { useAnchoredRowMenu } from '~/composables/useAnchoredRowMenu'
 import type { Store as Branch } from '~/composables/useStores'
 import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 import { EMPTY_CELL } from '~/utils/ui-empty'
+import { nameInitials } from '~/utils/name-initials'
 
 definePageMeta({
   layout: 'dashboard',

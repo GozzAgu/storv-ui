@@ -167,6 +167,15 @@
   scrollbar-width: none;
 }
 
+/* Six or more figures don't fit one row without cutting money off: two rows of three instead.
+   (Phones keep the sideways-scrolling strip.) */
+@media (min-width: 640px) {
+  .s-metrics:not(.s-metrics--inline):has(> :nth-child(6)) {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .s-metrics::-webkit-scrollbar {
   display: none;
 }

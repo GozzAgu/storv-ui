@@ -285,14 +285,30 @@ describe('firestore.rules', () => {
     )
   })
 
-  it('denies Medium plan from creating store transfers', async () => {
+  it('denies Micro plan from creating store transfers', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await seedOwner(context, 'u1', 'storvv_micro')
+      await seedStore(context, 'u1', 's1')
+    })
+
+    const db = testEnv.authenticatedContext('u1').firestore()
+    await assertFails(
+      setDoc(doc(db, 'users/u1/storeTransfers/t1'), {
+        createdBy: 'u1',
+        fromStoreId: 's1',
+        toStoreId: 's2',
+      })
+    )
+  })
+
+  it('lets a Medium owner request a store transfer', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await seedOwner(context, 'u1', 'storvv_medium')
       await seedStore(context, 'u1', 's1')
     })
 
     const db = testEnv.authenticatedContext('u1').firestore()
-    await assertFails(
+    await assertSucceeds(
       setDoc(doc(db, 'users/u1/storeTransfers/t1'), {
         createdBy: 'u1',
         fromStoreId: 's1',

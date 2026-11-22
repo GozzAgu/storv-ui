@@ -67,7 +67,7 @@ describe('subscription add-ons', () => {
     expect(staffLimitReachedMessage('storvv_medium', 5)).toContain(
       'Upgrade to Enterprise for 10 per store'
     )
-    expect(staffLimitReachedMessage('storvv_enterprise', 10)).toContain('₦2,000/month')
+    expect(staffLimitReachedMessage('storvv_enterprise', 10)).toContain('₦1,000/month')
     expect(storeLimitReachedMessage('storvv_medium', 2)).toContain('up to 5')
     expect(storeLimitReachedMessage('storvv_enterprise', 5)).toContain('₦5,000/month')
   })

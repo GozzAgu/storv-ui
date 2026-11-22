@@ -34,6 +34,20 @@
           </nav>
 
           <div class="mk-header__actions">
+            <span class="mk-header__country" role="img" aria-label="Nigeria, prices in naira">
+              <svg
+                class="mk-flag"
+                viewBox="0 0 3 2"
+                width="21"
+                height="14"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <rect width="3" height="2" fill="#fff" />
+                <rect width="1" height="2" fill="#008751" />
+                <rect x="2" width="1" height="2" fill="#008751" />
+              </svg>
+            </span>
             <SIconButton class="mk-header__theme" :label="themeLabel" @click="toggleTheme">
               <Moon v-if="isDark" :size="18" aria-hidden="true" />
               <Sun v-else :size="18" aria-hidden="true" />
@@ -106,30 +120,22 @@
             </ul>
           </nav>
 
-          <NuxtLink
-            to="/demo/dashboard"
-            class="mk-menu__demo mk-menu__stagger"
-            :style="{ '--i': pageLinks.length + 1 }"
-            @click="menuOpen = false"
-          >
-            <span class="mk-menu__demo-icon" aria-hidden="true">
-              <MonitorPlay :size="20" :stroke-width="1.75" />
-            </span>
-            <span class="mk-menu__demo-text">
-              <span class="mk-menu__demo-title">Try the live demo</span>
-              <span class="mk-menu__demo-sub">Sample data, no sign-up needed.</span>
-            </span>
-            <ArrowRight class="mk-menu__demo-arrow" :size="18" aria-hidden="true" />
-          </NuxtLink>
-
           <button
             type="button"
-            class="mk-menu__walkthrough mk-menu__stagger"
+            class="mk-menu__demo mk-menu__stagger"
             :style="{ '--i': pageLinks.length + 1 }"
             @click="bookFromMenu"
           >
-            <CalendarDays :size="16" aria-hidden="true" />
-            Prefer a guided tour? <span>Book a walkthrough</span>
+            <span class="mk-menu__demo-icon" aria-hidden="true">
+              <CalendarDays :size="20" :stroke-width="1.75" />
+            </span>
+            <span class="mk-menu__demo-text">
+              <span class="mk-menu__demo-title">Book a walkthrough</span>
+              <span class="mk-menu__demo-sub"
+                >A free tour of Storvv with our team, about 20 minutes.</span
+              >
+            </span>
+            <ArrowRight class="mk-menu__demo-arrow" :size="18" aria-hidden="true" />
           </button>
 
           <div class="mk-menu__foot mk-menu__stagger" :style="{ '--i': pageLinks.length + 2 }">
@@ -208,16 +214,7 @@
 import '~/assets/css/marketing.css'
 import '~/assets/css/marketing-home.css'
 import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'vue'
-import {
-  ArrowRight,
-  ArrowUp,
-  CalendarDays,
-  ChevronRight,
-  Monitor,
-  MonitorPlay,
-  Moon,
-  Sun,
-} from '@lucide/vue'
+import { ArrowRight, ArrowUp, CalendarDays, ChevronRight, Monitor, Moon, Sun } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import MkFeatureMenu from '~/components/marketing/MkFeatureMenu.vue'
@@ -244,6 +241,20 @@ function bookFromMenu() {
   menuOpen.value = false
   walkthrough.open('landing_menu')
 }
+
+// "?walkthrough=1" on any page opens the walkthrough form, so plain links can offer it.
+// "?walkthrough=demo" is where the closed demo sends visitors.
+const router = useRouter()
+watch(
+  () => route.query.walkthrough,
+  (value) => {
+    if (!import.meta.client || (value !== '1' && value !== 'demo')) return
+    walkthrough.open(value === 'demo' ? 'demo_closed' : 'landing_cta')
+    const { walkthrough: _drop, ...rest } = route.query
+    void router.replace({ query: rest, hash: route.hash })
+  },
+  { immediate: true }
+)
 const signinUrl = useMarketingSigninUrl()
 const logoSrc = useMarketingLogo()
 const { scrollToSection, scrollToTop, goToSection } = useSectionScroll()

@@ -5,6 +5,7 @@ import {
   toDemoDashboardPath,
 } from '~/utils/demo-mode'
 import { initDemoAuth, syncDemoToPinia } from '~/utils/demo-bridge'
+import { DEMO_CLOSED_REDIRECT, canOpenDemo } from '~/utils/demo-access'
 
 /**
  * Demo routes share the same theme system as the signed-in dashboard.
@@ -32,6 +33,7 @@ function applyDemoDocumentTheme(active: boolean) {
 
 export default defineNuxtPlugin(() => {
   const router = useRouter()
+  const demoAccessKey = String(useRuntimeConfig().public.demoAccessKey || '')
 
   if (import.meta.client) {
     applyDemoDocumentTheme(isDemoRoutePath(window.location.pathname))
@@ -39,6 +41,12 @@ export default defineNuxtPlugin(() => {
 
   router.beforeEach(async (to) => {
     if (isDemoRoutePath(to.path)) {
+      // Closed to the public: send them to book a walkthrough instead.
+      if (!canOpenDemo(to.query, demoAccessKey, import.meta.dev)) {
+        clearDemoSession()
+        applyDemoDocumentTheme(false)
+        return { ...DEMO_CLOSED_REDIRECT, replace: true }
+      }
       applyDemoDocumentTheme(true)
       markDemoSessionActive()
       initDemoAuth()

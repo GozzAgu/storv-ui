@@ -227,6 +227,12 @@ service cloud.firestore {
       return normalizedOwnerPlan(userId) == 'storvv_enterprise';
     }
 
+    // Transfers between branches, their history and branch reports (Medium and up). Keep in
+    // step with `multi_store_sync` in FEATURES_BY_PLAN (types/subscription.ts).
+    function planAllowsTransfers(userId) {
+      return planAtLeastMedium(userId);
+    }
+
     // Over the plan's limits the extra stores, and the extra staff in a store, are view only.
     // The server saves `planTier` on each store doc and member doc: the lowest plan that keeps it
     // fully usable (0 Micro, 1 Medium, 2 Enterprise). Missing means no limit yet. Compared with the
@@ -526,7 +532,7 @@ service cloud.firestore {
       // Store transfers subcollection: users/{userId}/storeTransfers/{transferId}
       // This collection stores transfer history for multi-store operations
       match /storeTransfers/{transferId} {
-        allow read: if planIsEnterprise(userId) && (
+        allow read: if planAllowsTransfers(userId) && (
                        isStoreOwnerForPath(userId) ||
                        (resource.data.keys().hasAny(['sourceStoreId']) &&
                          canAccessMultiStore(userId, resource.data.sourceStoreId, 'view')) ||
@@ -541,7 +547,7 @@ service cloud.firestore {
         // A request only: it starts awaiting dispatch with no approval recorded. Every later move
         // (dispatch, receive, reject, cancel, tracking) goes through /api/transfers/{id}/{action},
         // which checks who may approve it and moves the stock in one transaction.
-        allow create: if planIsEnterprise(userId) &&
+        allow create: if planAllowsTransfers(userId) &&
                        request.resource.data.createdBy == request.auth.uid &&
                        request.resource.data.get('status', 'pending_approval') == 'pending_approval' &&
                        !request.resource.data.keys().hasAny([
@@ -563,7 +569,7 @@ service cloud.firestore {
       // Store syncs subcollection: users/{userId}/storeSyncs/{syncId}
       // This collection stores sync history for multi-store operations
       match /storeSyncs/{syncId} {
-        allow read: if planIsEnterprise(userId) && (
+        allow read: if planAllowsTransfers(userId) && (
                        isStoreOwnerForPath(userId) ||
                        (resource.data.keys().hasAny(['sourceStoreId']) &&
                          canAccessMultiStore(userId, resource.data.sourceStoreId, 'view')) ||
@@ -571,7 +577,7 @@ service cloud.firestore {
                          canAccessMultiStore(userId, resource.data.destinationStoreId, 'view'))
                      );
         
-        allow create: if planIsEnterprise(userId) &&
+        allow create: if planAllowsTransfers(userId) &&
                        request.resource.data.createdBy == request.auth.uid &&
                        (
                          isStoreOwnerForPath(userId) ||
@@ -579,7 +585,7 @@ service cloud.firestore {
                            canAccessMultiStore(userId, request.resource.data.sourceStoreId, 'create'))
                        );
         
-        allow update, delete: if planIsEnterprise(userId) && (
+        allow update, delete: if planAllowsTransfers(userId) && (
                        isStoreOwnerForPath(userId) ||
                        (resource.data.keys().hasAny(['sourceStoreId']) &&
                          canAccessMultiStore(userId, resource.data.sourceStoreId, 'edit')) ||
@@ -596,7 +602,7 @@ service cloud.firestore {
         // 3. Staff member belongs to this store
         // Note: The exists() check allows staff to query stores to find where they belong
         allow read: if canAccessStoreData(userId, storeId) ||
-                     (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId));
+                     (planAllowsTransfers(userId) && isActiveWorkspaceAdmin(userId));
         
         // Created only by POST /api/workspace/stores/create, which checks the plan's branch limit
         // and stamps `planTier` (a client-made branch with no tier would count as within plan).
@@ -700,10 +706,10 @@ service cloud.firestore {
           // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
           // 2. User created the folder (createdBy matches auth.uid)
           // 3. Staff member accessing their superadmin's store (userId != auth.uid means staff, and getQueryUserId ensures correct store)
-          // 4. Enterprise branch admin picking a destination category on another branch
+          // 4. Branch admin (Medium and up) picking a destination category on another branch
           // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
           allow read: if canAccessStoreData(userId, storeId) ||
-                       (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId));
+                       (planAllowsTransfers(userId) && isActiveWorkspaceAdmin(userId));
           
           // Create/update/delete: owner, or a member granted the matching products action.
           allow create: if planAllowsStoreWrite(userId, storeId) && (canManageProducts(userId, storeId, 'create') &&
@@ -731,7 +737,7 @@ service cloud.firestore {
           allow read: if (isAuthenticated() && userId == request.auth.uid) ||
                        (isActiveStoreMember(userId, storeId) &&
                         memberCanOpenCategory(userId, storeId, resource.data.folderId)) ||
-                       (planIsEnterprise(userId) && isActiveWorkspaceAdmin(userId));
+                       (planAllowsTransfers(userId) && isActiveWorkspaceAdmin(userId));
           
           // Full create/delete: owner, or a member granted the matching products action.
           // Trade-in items are created by the sale route (POST /api/sales/create), and transferred

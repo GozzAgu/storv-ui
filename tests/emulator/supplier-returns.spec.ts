@@ -228,6 +228,20 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('supplier returns (emulato
     expect((await item('camry').get()).exists).toBe(true)
   })
 
+  it('on Micro, refuses new returns but still lets open ones be settled', async () => {
+    const { returnId } = await log('stocker', { itemId: 'camry' })
+    await owner().update({ subscription: 'storvv_micro' })
+    await expect(log('stocker', { itemId: 'civic' })).rejects.toMatchObject({
+      statusCode: 403,
+      data: { code: 'PLAN_UPGRADE_REQUIRED' },
+    })
+    expect((await item('civic').get()).exists).toBe(true)
+    const stocker = await actor('stocker')
+    await updateSupplierReturn(db, stocker, { returnId, action: 'send' })
+    await updateSupplierReturn(db, stocker, { returnId, action: 'resolve', outcome: 'refund' })
+    expect((await ret(returnId).get()).data()?.status).toBe('resolved')
+  })
+
   it('a unit can only be returned once', async () => {
     await log('stocker', { itemId: 'camry' })
     await expect(log('stocker', { itemId: 'camry' })).rejects.toMatchObject({

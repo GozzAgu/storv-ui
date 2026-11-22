@@ -5,7 +5,7 @@
         Everything that came back or left stock outside a sale: customer returns waiting for
         inspection, defective stock going back to suppliers, and a log of every item removed.
       </template>
-      <template v-if="canView && canManage && storesStore.currentStoreId" #actions>
+      <template v-if="canView && canLogReturns && storesStore.currentStoreId" #actions>
         <SButton variant="primary" @click="showLog = true">
           <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
           Return to supplier
@@ -61,13 +61,19 @@
             :holds="holdsStore.open"
             :can-manage="canManage"
             :can-write-off="canWriteOff"
+            :can-return-to-supplier="planHasSupplierReturns"
             :restocking-id="restockingId"
             :error="inspectError"
             @restock="restock"
             @to-supplier="openHoldToSupplier"
             @write-off="(hold) => openWriteOff({ hold })"
           />
-          <SCard>
+          <PlanGate
+            v-if="!planHasSupplierReturns"
+            feature="supplier_returns"
+            description="Log stock that arrived defective, take it out of stock, and track each claim until the supplier refunds, credits or replaces it."
+          />
+          <SCard v-else>
             <SEmptyState
               title="No returns yet"
               description="When stock arrives defective, log it here or from the item in Inventory. It's taken out of stock and tracked until the supplier settles it."
@@ -103,6 +109,7 @@
             :holds="holdsStore.open"
             :can-manage="canManage"
             :can-write-off="canWriteOff"
+            :can-return-to-supplier="planHasSupplierReturns"
             :restocking-id="restockingId"
             :error="inspectError"
             @restock="restock"
@@ -110,9 +117,16 @@
             @write-off="(hold) => openWriteOff({ hold })"
           />
 
-          <section class="s-table-card" aria-labelledby="sr-table-title">
+          <section class="s-table-card s-dept-table" aria-labelledby="sr-table-title">
             <div class="s-table-card__head">
               <h2 id="sr-table-title" class="s-sr-section-title">Supplier returns</h2>
+              <p v-if="!planHasSupplierReturns" class="s-callout">
+                Your plan doesn't include logging new supplier returns. You can still send, settle
+                and restock the ones already here.
+                <NuxtLink v-if="userStore.isSuperAdmin" :to="dashPath('/settings?upgrade=1')"
+                  >View plans</NuxtLink
+                >
+              </p>
               <STabs v-model="activeTab" :tabs="tabs" label="Supplier return views" />
               <div class="s-toolbar">
                 <SSearch
@@ -188,17 +202,24 @@
                   <tbody>
                     <tr v-for="row in filteredReturns" :key="row.id">
                       <td>
-                        <button
-                          type="button"
-                          class="s-table__primary s-link s-sr-row-link"
-                          @click="openDetail(row)"
-                        >
-                          {{ row.item.name }}
-                        </button>
-                        <span class="s-table__secondary">{{ itemLine(row) }}</span>
+                        <div class="s-team__cell">
+                          <span class="s-dept-table__mark" aria-hidden="true">
+                            {{ nameInitials(row.item.name) }}
+                          </span>
+                          <span class="s-team__cell-text">
+                            <button
+                              type="button"
+                              class="s-table__primary s-lead__link s-sr-row-link"
+                              @click="openDetail(row)"
+                            >
+                              {{ row.item.name }}
+                            </button>
+                            <span class="s-table__secondary">{{ itemLine(row) }}</span>
+                          </span>
+                        </div>
                       </td>
                       <td class="s-hide-md">
-                        <span class="s-table__primary">{{ row.defect || 'Faulty' }}</span>
+                        <span class="s-dept-table__type">{{ row.defect || 'Faulty' }}</span>
                       </td>
                       <td>
                         <span class="s-table__primary">{{ row.supplierName || EMPTY_CELL }}</span>
@@ -206,16 +227,18 @@
                           row.supplierReference
                         }}</span>
                       </td>
-                      <td class="s-hide-lg s-table__nowrap">
+                      <td class="s-hide-lg s-table__nowrap s-table__muted">
                         {{ formatDay(row.createdAt) }}
                       </td>
-                      <td class="s-table__num">{{ moneyOrDash(row.costValue) }}</td>
+                      <td class="s-table__num s-dept-table__money">
+                        {{ moneyOrDash(row.costValue) }}
+                      </td>
                       <td>
                         <SBadge :tone="STATUS_TONES[row.status]" size="sm" dot>
                           {{ statusText(row) }}
                         </SBadge>
                       </td>
-                      <td class="s-table__nowrap">
+                      <td class="s-table__nowrap s-sr-actions">
                         <SButton
                           v-if="canManage && row.status === 'ready'"
                           variant="secondary"
@@ -261,7 +284,11 @@
         </template>
       </template>
 
-      <StockOutLog v-else :can-restore="can('products', 'create')" />
+      <StockOutLog
+        v-else
+        :can-restore="can('products', 'create') && planHasStockOutHistory"
+        :full-history="planHasStockOutHistory"
+      />
     </template>
 
     <!-- Detail -->
@@ -571,12 +598,15 @@ import ReturnToSupplierDialog from '~/components/supplier-returns/ReturnToSuppli
 import WriteOffDialog from '~/components/write-offs/WriteOffDialog.vue'
 import InspectionHoldsTable from '~/components/supplier-returns/InspectionHoldsTable.vue'
 import StockOutLog from '~/components/supplier-returns/StockOutLog.vue'
+import PlanGate from '~/components/subscription/PlanGate.vue'
+import { useUserStore } from '~/stores/user'
 import { useSupplierReturnsStore } from '~/stores/supplierReturns'
 import { useInspectionHoldsStore } from '~/stores/inspectionHolds'
 import type { InspectionHold } from '~/types/inspection-holds'
 import { useStoresStore } from '~/stores/stores'
 import { usePreferences } from '~/composables/usePreferences'
 import { EMPTY_CELL } from '~/utils/ui-empty'
+import { nameInitials } from '~/utils/name-initials'
 import { stockItemDetailChips, stockItemDetailSummary } from '~/utils/stock-item-details'
 import { daysInStock, supplierReturnOriginFacts } from '~/utils/supplier-return-display'
 import {
@@ -600,6 +630,14 @@ const { can } = usePermissions()
 const canView = computed(() => can('products', 'view'))
 /** Mirrors the server: taking stock out needs products edit or delete. */
 const canManage = computed(() => can('products', 'edit') || can('products', 'delete'))
+// Plans: logging new supplier returns and the full stock out log are Medium and up. Returns
+// already open stay manageable on any plan, so a downgrade never strands a claim.
+const { canUse: canUsePlanFeature } = useSubscriptionFeatures()
+const userStore = useUserStore()
+const { dashPath } = useDashboardPaths()
+const planHasSupplierReturns = computed(() => canUsePlanFeature('supplier_returns'))
+const planHasStockOutHistory = computed(() => canUsePlanFeature('stock_out_history'))
+const canLogReturns = computed(() => canManage.value && planHasSupplierReturns.value)
 const showLog = ref(false)
 
 // ── Page tabs: Returns (inspect + supplier returns) and Stock out log ──
@@ -1007,6 +1045,14 @@ watch(
   font: inherit;
   text-align: start;
   cursor: pointer;
+}
+
+.s-sr-row-link:hover {
+  text-decoration: underline;
+}
+
+.s-sr-actions {
+  text-align: right;
 }
 
 .s-sr-status {

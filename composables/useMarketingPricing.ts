@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Building2, Rocket, Store } from '@lucide/vue'
 import {
   BILLING_CYCLE_PERIOD_SUFFIX,
@@ -12,7 +12,6 @@ import { fullMoneyFractionDigits } from '~/utils/format-money'
 
 export type MarketingPlanId = 'micro' | 'medium' | 'enterprise'
 type PaidPlan = Exclude<MarketingPlanId, 'micro'>
-type PricingRegion = 'NG' | 'US' | 'GB' | 'EU'
 
 export interface MarketingPlan {
   id: MarketingPlanId
@@ -39,6 +38,7 @@ export const MARKETING_PLANS: MarketingPlan[] = [
       '1 store · 1 department · up to 2 staff',
       'Inventory with serial or quantity tracking',
       'Quick Sale, receipts, returns, and customers',
+      'Write-offs and a 30-day stock out log',
       'WhatsApp receipts (10 a month)',
       'Help center',
       'Web dashboard · mobile apps coming soon',
@@ -61,6 +61,8 @@ export const MARKETING_PLANS: MarketingPlan[] = [
       'Up to 2 stores · 5 staff per store',
       'Analytics with PDF and Excel exports',
       'Sales leads and customer balances',
+      'Supplier returns and the full stock out log',
+      'Stock transfers between your branches',
       'Activity log of every change',
       '50 WhatsApp receipts a month',
     ],
@@ -75,13 +77,12 @@ export const MARKETING_PLANS: MarketingPlan[] = [
     highlights: [
       'Up to 5 stores, 10 staff each',
       'Add stores or staff seats anytime',
-      'Stock transfers between branches',
+      'Stock loans and copy from branch',
     ],
     features: [
       'Everything in Medium',
       'Up to 5 stores · 10 staff per store',
       'Unlimited departments',
-      'Stock transfers between branches',
       'Copy categories from another branch',
       'Stock loans for serial-tracked items',
       'Unlimited WhatsApp receipts',
@@ -90,64 +91,16 @@ export const MARKETING_PLANS: MarketingPlan[] = [
   },
 ]
 
-const EU_COUNTRY_CODES = new Set([
-  'AT',
-  'BE',
-  'BG',
-  'HR',
-  'CY',
-  'CZ',
-  'DK',
-  'EE',
-  'FI',
-  'FR',
-  'DE',
-  'GR',
-  'HU',
-  'IE',
-  'IT',
-  'LV',
-  'LT',
-  'LU',
-  'MT',
-  'NL',
-  'PL',
-  'PT',
-  'RO',
-  'SK',
-  'SI',
-  'ES',
-  'SE',
-])
-
-/** NG mirrors what Paystack charges; other regions are display conversions. Add-ons are monthly. */
-const PRICING_BY_REGION = {
-  NG: {
-    currency: 'NGN',
-    medium: { monthly: 15000, yearly: 153000, yearlyList: 180000 },
-    enterprise: { monthly: 25000, yearly: 200000, yearlyList: 300000 },
-    addOns: {
-      store: SUBSCRIPTION_ADD_ON_PRICES_NGN.store,
-      staff: SUBSCRIPTION_ADD_ON_PRICES_NGN.staff,
-    },
-  },
-  US: {
-    currency: 'USD',
-    medium: { monthly: 10, yearly: 102, yearlyList: 120 },
-    enterprise: { monthly: 19, yearly: 190, yearlyList: 228 },
-    addOns: { store: 3, staff: 1 },
-  },
-  GB: {
-    currency: 'GBP',
-    medium: { monthly: 8, yearly: 82, yearlyList: 96 },
-    enterprise: { monthly: 15, yearly: 150, yearlyList: 180 },
-    addOns: { store: 3, staff: 1 },
-  },
-  EU: {
-    currency: 'EUR',
-    medium: { monthly: 9, yearly: 92, yearlyList: 108 },
-    enterprise: { monthly: 17, yearly: 170, yearlyList: 204 },
-    addOns: { store: 3, staff: 1 },
+/**
+ * What Paystack charges, in naira. Everyone is billed in naira wherever they are. Add-ons are
+ * monthly.
+ */
+export const NAIRA_PRICES = {
+  medium: { monthly: 15000, yearly: 153000, yearlyList: 180000 },
+  enterprise: { monthly: 35000, yearly: 357000, yearlyList: 420000 },
+  addOns: {
+    store: SUBSCRIPTION_ADD_ON_PRICES_NGN.store,
+    staff: SUBSCRIPTION_ADD_ON_PRICES_NGN.staff,
   },
 } as const
 
@@ -156,61 +109,40 @@ export const CYCLE_SAVINGS: Partial<Record<SubscriptionBillingCycle, string>> = 
   yearly: 'Save 15%',
 }
 
-function detectRegion(locale: string): PricingRegion {
-  const regionCode = locale.split('-')[1]?.toUpperCase()
-  if (regionCode === 'NG' || regionCode === 'GB' || regionCode === 'US') return regionCode
-  if (regionCode && EU_COUNTRY_CODES.has(regionCode)) return 'EU'
-
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || ''
-  if (timeZone.startsWith('Africa/Lagos')) return 'NG'
-  if (timeZone.startsWith('Europe/London')) return 'GB'
-  if (timeZone.startsWith('Europe/')) return 'EU'
-  return 'US'
-}
-
-/** Regional plan prices for the marketing site; the region is detected from the browser. */
+/** Plan prices for the marketing site, in naira: what checkout charges, wherever the visitor is. */
 export function useMarketingPricing() {
   const cycle = ref<SubscriptionBillingCycle>('monthly')
-  const locale = ref('en-NG')
-  const region = ref<PricingRegion>('NG')
+  const currency = 'NGN'
 
-  const pricing = computed(() => PRICING_BY_REGION[region.value])
-  const currency = computed(() => pricing.value.currency)
-
-  function formatPrice(amount: number) {
-    return new Intl.NumberFormat(locale.value, {
+  // "₦15,000" in every locale, not "NGN 15,000".
+  const formatPrice = (naira: number) =>
+    new Intl.NumberFormat('en-NG', {
       style: 'currency',
-      currency: pricing.value.currency,
-      ...fullMoneyFractionDigits(amount),
-    }).format(amount)
+      currency,
+      currencyDisplay: 'narrowSymbol',
+      ...fullMoneyFractionDigits(naira),
+    }).format(naira)
+
+  function planAmount(plan: PaidPlan): number {
+    if (cycle.value === 'yearly') return NAIRA_PRICES[plan].yearly
+    return deriveBillingAmount(NAIRA_PRICES[plan].monthly, cycle.value)
   }
 
-  function planPrice(plan: PaidPlan) {
-    if (cycle.value === 'yearly') return formatPrice(pricing.value[plan].yearly)
-    return formatPrice(deriveBillingAmount(pricing.value[plan].monthly, cycle.value))
-  }
+  const planPrice = (plan: PaidPlan) => formatPrice(planAmount(plan))
 
   function planListPrice(plan: PaidPlan): string | null {
     if (cycle.value === 'monthly') return null
-    if (cycle.value === 'yearly') return formatPrice(pricing.value[plan].yearlyList)
-    return formatPrice(deriveBillingListAmount(pricing.value[plan].monthly, 'quarterly'))
+    if (cycle.value === 'yearly') return formatPrice(NAIRA_PRICES[plan].yearlyList)
+    return formatPrice(deriveBillingListAmount(NAIRA_PRICES[plan].monthly, 'quarterly'))
   }
 
-  function addOnPrice(kind: SubscriptionAddOnKind) {
-    return formatPrice(pricing.value.addOns[kind])
-  }
+  const addOnPrice = (kind: SubscriptionAddOnKind) => formatPrice(NAIRA_PRICES.addOns[kind])
 
   const periodSuffix = computed(() => BILLING_CYCLE_PERIOD_SUFFIX[cycle.value])
 
   const renewLabel = computed(() =>
     cycle.value === 'yearly' ? 'yearly' : cycle.value === 'quarterly' ? 'each quarter' : 'monthly'
   )
-
-  onMounted(() => {
-    const browserLocale = Intl.DateTimeFormat().resolvedOptions().locale || 'en-NG'
-    locale.value = browserLocale
-    region.value = detectRegion(browserLocale)
-  })
 
   return { cycle, currency, planPrice, planListPrice, addOnPrice, periodSuffix, renewLabel }
 }

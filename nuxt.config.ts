@@ -120,8 +120,13 @@ export default defineNuxtConfig({
     paystackPlanCodeEnterpriseYearly: process.env.PAYSTACK_PLAN_CODE_ENTERPRISE_YEARLY || '',
     // Enterprise add-ons: one monthly Paystack subscription per extra store / staff seat (kobo).
     paystackAddOnStoreAmount: parseInt(process.env.PAYSTACK_ADDON_STORE_AMOUNT || '500000', 10),
-    paystackAddOnStaffAmount: parseInt(process.env.PAYSTACK_ADDON_STAFF_AMOUNT || '200000', 10),
+    paystackAddOnStaffAmount: parseInt(process.env.PAYSTACK_ADDON_STAFF_AMOUNT || '100000', 10),
     paystackPlanCodeAddOnStore: process.env.PAYSTACK_PLAN_CODE_ADDON_STORE || '',
+    /**
+     * Grandfathered plans: subscribers on an old price keep renewing at it. A comma list of
+     * PLN_code:plan:cycle:amountKobo, e.g. PLN_abc:storvv_enterprise:monthly:2500000.
+     */
+    paystackLegacyPlans: process.env.PAYSTACK_LEGACY_PLANS || '',
     paystackPlanCodeAddOnStaff: process.env.PAYSTACK_PLAN_CODE_ADDON_STAFF || '',
     // Platform fee (%) retained by Storvv on each payment-link sale (Paystack subaccount percentage_charge).
     paymentLinkPlatformFeePercent: parseFloat(process.env.PAYMENT_LINK_PLATFORM_FEE_PERCENT || '0'),
@@ -144,6 +149,11 @@ export default defineNuxtConfig({
       bookingUrl: process.env.NUXT_PUBLIC_BOOKING_URL || '',
       /** Optional sales WhatsApp number in international format, e.g. 2348030000000. */
       salesWhatsapp: process.env.NUXT_PUBLIC_SALES_WHATSAPP || '',
+      /**
+       * The demo is closed to the public. The Storvv team opens it with /demo?access=<this key>
+       * (remembered per browser). Unset: only local development can open it.
+       */
+      demoAccessKey: process.env.NUXT_PUBLIC_DEMO_ACCESS_KEY || '',
       /** Initial hint only; client refreshes via /api/assistant/status */
       assistantConfigured: Boolean(process.env.GEMINI_API_KEY || process.env.NUXT_GEMINI_API_KEY),
       appVersion: '0.1',

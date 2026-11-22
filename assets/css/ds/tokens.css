@@ -6,7 +6,8 @@
 
 :root {
   /* Color: neutrals (pure greys, no blue cast; blue is reserved for the accent) */
-  --s-bg: #f0f0f2;
+  /* Close to the white cards so the page and cards blend; a faint ring keeps card edges */
+  --s-bg: #f6f6f7;
   --s-surface: #ffffff;
   --s-surface-2: #f4f4f5;
   --s-surface-hover: #efeff0;
@@ -69,9 +70,9 @@
   --s-btn-secondary: rgb(0 0 0 / 0.055);
   --s-btn-secondary-hover: rgb(0 0 0 / 0.09);
 
-  /* Resting cards: solid white lifted by shadow alone, so they read without an outline */
-  --s-card-shadow: 0 1px 2px rgb(16 18 24 / 0.05), 0 2px 6px -2px rgb(16 18 24 / 0.06),
-    0 8px 24px -12px rgb(16 18 24 / 0.1);
+  /* Resting cards: solid white with a whisper of a ring and a soft, low shadow */
+  --s-card-shadow: 0 0 0 1px rgb(16 18 24 / 0.035), 0 1px 2px rgb(16 18 24 / 0.03),
+    0 4px 12px -8px rgb(16 18 24 / 0.06);
 
   /* Glass (glass.css): cards are solid in light mode; only chrome and overlays are frosted */
   --s-glass: #ffffff;
@@ -136,8 +137,8 @@
 
   /* Elevation: `sm` separates borderless cards from the page; `md`/`lg` are for overlays */
   --s-shadow-sm: var(--s-card-shadow);
-  --s-shadow-md: 0 4px 12px -2px rgb(16 24 40 / 0.08), 0 2px 4px -2px rgb(16 24 40 / 0.04);
-  --s-shadow-lg: 0 16px 40px -8px rgb(16 24 40 / 0.16), 0 4px 8px -4px rgb(16 24 40 / 0.06);
+  --s-shadow-md: 0 4px 12px -4px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.03);
+  --s-shadow-lg: 0 12px 32px -10px rgb(16 24 40 / 0.12), 0 2px 6px -2px rgb(16 24 40 / 0.04);
   --s-scrim: rgb(12 12 14 / 0.32);
 
   /* Icons */
@@ -188,7 +189,7 @@
 
 html.dark {
   /* Neutral greys, no blue cast; the accent is the only colour */
-  --s-bg: #050505;
+  --s-bg: #0c0c0c;
   /* Lifted further from the canvas than in light mode so borderless cards still read */
   --s-surface: #171717;
   --s-surface-2: #222222;
@@ -252,10 +253,10 @@ html.dark {
   --s-field-border: rgb(255 255 255 / 0.22);
   --s-field-border-focus: rgb(255 255 255 / 0.36);
 
-  --s-card-shadow: 0 0 0 1px rgb(255 255 255 / 0.09), 0 1px 2px rgb(0 0 0 / 0.4);
+  --s-card-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 1px 2px rgb(0 0 0 / 0.25);
   --s-shadow-sm: var(--s-card-shadow);
-  --s-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.45);
-  --s-shadow-lg: 0 16px 40px -8px rgb(0 0 0 / 0.6);
+  --s-shadow-md: 0 4px 12px -4px rgb(0 0 0 / 0.35);
+  --s-shadow-lg: 0 12px 32px -10px rgb(0 0 0 / 0.5);
   --s-scrim: rgb(0 0 0 / 0.6);
 
   --s-tier-bronze: #e0a070;

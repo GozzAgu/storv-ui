@@ -162,7 +162,7 @@ function chipsFor(row: StockItemRow) {
   flex-direction: column;
   border: 1px solid var(--s-divider);
   border-radius: var(--s-radius-lg);
-  background: var(--s-surface-2);
+  background: var(--s-surface);
   overflow: hidden;
 }
 
@@ -183,11 +183,9 @@ function chipsFor(row: StockItemRow) {
   align-items: center;
   gap: 6px;
   margin: 0;
-  color: var(--s-text-muted);
+  color: var(--s-text-2);
   font: var(--s-text-caption);
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .s-transfer-panel__count {
@@ -212,9 +210,8 @@ function chipsFor(row: StockItemRow) {
   gap: 6px;
   min-width: 0;
   padding: var(--s-space-1-5);
-  border: 1px solid var(--s-divider);
   border-radius: 10px;
-  background: var(--s-surface);
+  background: var(--s-surface-2);
 }
 
 .s-transfer-panel__end-label {
@@ -282,7 +279,7 @@ function chipsFor(row: StockItemRow) {
   height: 28px;
   border: 1px solid var(--s-divider);
   border-radius: var(--s-radius-full);
-  background: var(--s-surface-2);
+  background: var(--s-surface);
   color: var(--s-text-muted);
   transform: translate(-50%, -50%);
 }
@@ -450,7 +447,7 @@ function chipsFor(row: StockItemRow) {
 
 .s-transfer-panel__name {
   color: var(--s-text);
-  font-weight: 600;
+  font-weight: 500;
   overflow-wrap: anywhere;
 }
 
@@ -466,8 +463,8 @@ function chipsFor(row: StockItemRow) {
   align-items: center;
   gap: 6px;
   padding: 2px 8px;
-  border: 1px solid var(--s-divider);
   border-radius: 6px;
+  background: var(--s-surface-2);
   white-space: nowrap;
 }
 

@@ -395,6 +395,7 @@ const SOURCE_LABELS: Record<string, string> = {
   landing_hero: 'Home page',
   landing_cta: 'Website',
   landing_menu: 'Website menu',
+  demo_closed: 'Asked for the demo',
 }
 
 function sourceLabel(source: string): string {

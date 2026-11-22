@@ -26,7 +26,7 @@
           eyebrow="Pricing"
           title="Start free."
           accent="Grow when you're ready."
-          :lede="`Prices in ${currency}. Change or cancel your plan any time.`"
+          lede="Prices in naira. Change or cancel your plan any time."
         />
         <MkTrialOffer />
         <div class="mk-plans">
@@ -71,7 +71,6 @@
       accent="on us."
       lede="Set up Micro in about ten minutes, in the browser on the phone or laptop you already have."
       :primary="{ label: 'Create your free store', to: signupUrl }"
-      :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
       walkthrough
     />
 
@@ -129,7 +128,7 @@ import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 definePageMeta({ layout: 'marketing' })
 
 const signupUrl = useMarketingSignupUrl()
-const { currency, planPrice, periodSuffix } = useMarketingPricing()
+const { planPrice, periodSuffix } = useMarketingPricing()
 const contactOpen = ref(false)
 
 const faq: MkFaqItem[] = [
@@ -168,7 +167,7 @@ const faq: MkFaqItem[] = [
   },
   {
     q: 'Can I try before signing up?',
-    a: 'Yes. The <a href="/demo/dashboard">live demo</a>. No account needed.',
+    a: 'Yes. <a href="/?walkthrough=1">Book a free walkthrough</a> and we’ll show you around a sample shop. Or start free on Micro, no card needed.',
     html: true,
   },
   {

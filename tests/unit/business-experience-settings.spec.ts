@@ -27,7 +27,13 @@ describe('business-experience-settings', () => {
 
     expect(
       getProgressiveUnlockOptionsForPlan('storvv_medium').map((option) => option.capability)
-    ).toEqual(['staffManagement', 'multiLocationAdmin', 'rolesPermissionsAdmin', 'paymentLinks'])
+    ).toEqual([
+      'staffManagement',
+      'multiLocationAdmin',
+      'rolesPermissionsAdmin',
+      'approvalWorkflows',
+      'paymentLinks',
+    ])
 
     expect(
       getProgressiveUnlockOptionsForPlan('storvv_enterprise').map((option) => option.capability)
@@ -44,7 +50,9 @@ describe('business-experience-settings', () => {
     expect(isProgressiveUnlockAvailableForPlan('staffManagement', 'storvv_micro')).toBe(true)
     expect(isProgressiveUnlockAvailableForPlan('multiLocationAdmin', 'storvv_micro')).toBe(false)
     expect(isProgressiveUnlockAvailableForPlan('multiLocationAdmin', 'storvv_medium')).toBe(true)
-    expect(isProgressiveUnlockAvailableForPlan('approvalWorkflows', 'storvv_medium')).toBe(false)
+    // Transfer approvals come with transfers, which start on Medium.
+    expect(isProgressiveUnlockAvailableForPlan('approvalWorkflows', 'storvv_micro')).toBe(false)
+    expect(isProgressiveUnlockAvailableForPlan('approvalWorkflows', 'storvv_medium')).toBe(true)
     expect(isProgressiveUnlockAvailableForPlan('approvalWorkflows', 'storvv_enterprise')).toBe(true)
     expect(isProgressiveUnlockAvailableForPlan('paymentLinks', 'storvv_micro')).toBe(true)
   })

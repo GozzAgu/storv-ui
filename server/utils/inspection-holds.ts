@@ -22,6 +22,7 @@ import {
   SUPPLIER_RETURNS_COLLECTION,
   bad,
   canManageSupplierReturns,
+  assertSupplierReturnsPlan,
   cleanText,
   conflict,
   logSupplierReturnCreated,
@@ -238,6 +239,7 @@ export async function resolveInspectionHold(
   const holdId = assertId(input.holdId, 'holdId')
   const action = String(input.action || '')
   if (action !== 'restock' && action !== 'supplier') bad('Unknown action')
+  if (action === 'supplier') assertSupplierReturnsPlan(actor)
   const holdRef = actor.store.collection(INSPECTION_HOLDS_COLLECTION).doc(holdId)
 
   return db.runTransaction(async (tx) => {

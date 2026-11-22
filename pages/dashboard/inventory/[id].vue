@@ -269,7 +269,7 @@
         </template>
       </SPageHeader>
 
-      <section class="s-table-card" aria-label="Products">
+      <section class="s-table-card s-dept-table" aria-label="Products">
         <div class="s-table-card__head">
           <div
             v-if="showBulkRowSelection && selectedItemsForBulk.length > 0"
@@ -5189,7 +5189,11 @@ const loadFolderData = async (options?: { force?: boolean }) => {
 }
 
 // ── Return to supplier: defective stock leaves inventory for Supplier returns ──
-const canReturnToSupplier = computed(() => can('products', 'edit') || can('products', 'delete'))
+const canReturnToSupplier = computed(
+  () =>
+    (can('products', 'edit') || can('products', 'delete')) &&
+    subscriptionFeaturesUi.canUse('supplier_returns')
+)
 const showReturnToSupplier = ref(false)
 const returnToSupplierItem = ref<InventoryItem | null>(null)
 

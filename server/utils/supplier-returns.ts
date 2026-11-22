@@ -52,6 +52,16 @@ export function canManageSupplierReturns(actor: StoreActor): boolean {
   )
 }
 
+/**
+ * Logging a new supplier return needs Medium or higher. Sending, settling and restocking returns
+ * already open never do, so a downgrade can't strand money a supplier owes.
+ */
+export function assertSupplierReturnsPlan(actor: StoreActor): void {
+  if (!planHasFeature(actor.plan, 'supplier_returns')) {
+    forbid('Supplier returns need the Medium plan or higher.', 'PLAN_UPGRADE_REQUIRED')
+  }
+}
+
 export function cleanText(value: unknown, max = TEXT_MAX): string {
   return typeof value === 'string' ? value.trim().slice(0, max) : ''
 }
@@ -351,6 +361,7 @@ export async function createSupplierReturn(
   if (!canManageSupplierReturns(actor)) {
     forbid('You don’t have permission to take stock out for supplier returns.')
   }
+  assertSupplierReturnsPlan(actor)
   const input = parseCreateSupplierReturn(raw)
   const itemRef = actor.store.collection('inventoryItems').doc(input.itemId)
   const returnRef = actor.store.collection(SUPPLIER_RETURNS_COLLECTION).doc()

@@ -23,7 +23,7 @@
           </STabs>
           <p class="mk-hero__note">
             <span class="mk-hero__note-soon"><Globe :size="16" aria-hidden="true" /></span>
-            Showing prices in {{ currency }} for your region
+            Prices in naira (NGN)
           </p>
         </div>
 
@@ -76,9 +76,9 @@
                 variant="ghost"
                 class="mk-btn"
                 block
-                to="/demo/dashboard"
+                to="?walkthrough=1"
               >
-                Try the demo
+                Book a walkthrough
               </SButton>
             </div>
             <ul class="mk-checks">
@@ -250,7 +250,6 @@
       title="Your first store is"
       accent="on us."
       :primary="{ label: 'Create your free store', to: signupUrl }"
-      :secondary="{ label: 'Try the live demo', to: '/demo/dashboard' }"
       walkthrough
     />
   </div>
@@ -300,7 +299,7 @@ import {
 definePageMeta({ layout: 'marketing' })
 
 const signupUrl = useMarketingSignupUrl()
-const { cycle, currency, planPrice, planListPrice, addOnPrice, periodSuffix, renewLabel } =
+const { cycle, planPrice, planListPrice, addOnPrice, periodSuffix, renewLabel } =
   useMarketingPricing()
 
 const enterpriseLimits = getPlanLimits('storvv_enterprise')
@@ -357,7 +356,7 @@ const compareGroups = computed<
       { label: 'Stores', values: ['1', 'Up to 2', 'Up to 5'] },
       { label: 'Departments', values: ['1', '10', 'Unlimited'] },
       { label: 'Staff', values: ['Up to 2', '5 per store', '10 per store'] },
-      { label: 'WhatsApp receipts', values: ['10 a month', 'Unlimited', 'Unlimited'] },
+      { label: 'WhatsApp receipts', values: ['10 a month', '50 a month', 'Unlimited'] },
       {
         label: `Extra store (${enterpriseLimits.maxStaffPerStore} staff included)`,
         values: [false, false, `${addOnPrice('store')} / month`],
@@ -375,6 +374,18 @@ const compareGroups = computed<
     ],
   },
   {
+    label: 'Returns & stock losses',
+    rows: [
+      { label: 'Hold customer returns for inspection', values: [true, true, true] },
+      { label: 'Write off damaged or lost stock', values: [true, true, true] },
+      { label: 'Reason recorded for every product removed', values: [true, true, true] },
+      { label: 'Stock out log', values: ['Last 30 days', 'Full history', 'Full history'] },
+      { label: 'Supplier returns and claims', values: [false, true, true] },
+      { label: 'Restore a deleted product', values: [false, true, true] },
+      { label: 'Stock losses report', values: [false, true, true] },
+    ],
+  },
+  {
     label: 'Insights & control',
     rows: [
       { label: 'Analytics and exports', values: [false, true, true] },
@@ -387,7 +398,7 @@ const compareGroups = computed<
   {
     label: 'Multi-branch',
     rows: [
-      { label: 'Stock transfers', values: [false, false, true] },
+      { label: 'Stock transfers', values: [false, true, true] },
       { label: 'Copy from branch', values: [false, false, true] },
       { label: 'Stock loans', values: [false, false, true] },
       { label: 'Priority support', values: [false, false, true] },
@@ -462,8 +473,8 @@ const billingFaq = computed<MkFaqItem[]>(() => [
     a: 'Nothing is deleted. You move to Micro limits and keep every record.',
   },
   {
-    q: 'Why are prices in my currency?',
-    a: 'We price by region. The price you see is the price you pay.',
+    q: 'Which currency am I billed in?',
+    a: 'Naira (NGN), wherever you are. If your card is in another currency, your bank converts the payment at its own rate, and its card fees may apply.',
   },
   {
     q: 'Does Solo or Business change my price?',

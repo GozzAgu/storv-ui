@@ -255,6 +255,9 @@ export async function restoreRemoval(
   if (!actor.isOwner && actor.permissions.products.create !== true) {
     forbid('You don’t have permission to add products.')
   }
+  if (!planHasFeature(actor.plan, 'stock_out_history')) {
+    forbid('Restoring deleted products needs the Medium plan or higher.', 'PLAN_UPGRADE_REQUIRED')
+  }
   const removalId = assertId(input.removalId, 'removalId')
   const ref = actor.store.collection(STOCK_REMOVALS_COLLECTION).doc(removalId)
 

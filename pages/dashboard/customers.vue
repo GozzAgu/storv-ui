@@ -23,7 +23,7 @@
 
     <LoyaltyTopCustomers v-if="!isLoading && customers.length > 0" />
 
-    <section class="s-table-card" aria-label="Customers">
+    <section class="s-table-card s-dept-table" aria-label="Customers">
       <div v-if="!isLoading && customers.length > 0" class="s-table-card__head">
         <STabs v-model="segment" :tabs="segmentTabs" label="Customer groups" />
         <div class="s-toolbar">
@@ -134,25 +134,29 @@
                 @keydown.enter.self="openCustomer(customer)"
               >
                 <td>
-                  <div class="s-table__inline">
-                    <SAvatar :name="customer.name" size="sm" />
+                  <div class="s-team__cell">
+                    <SAvatar :name="customer.name" />
                     <span class="s-table__primary">{{ customer.name }}</span>
                   </div>
                 </td>
                 <td class="s-hide-md">
-                  <span class="s-table__secondary">{{
+                  <span class="s-dept-table__type">{{
                     customer.phone ? maskPhone(customer.phone) : customer.email || EMPTY_CELL
                   }}</span>
                 </td>
-                <td class="s-table__num">{{ customer.receipts.length }}</td>
-                <td class="s-table__num">{{ formatCurrency(customer.totalSpent) }}</td>
+                <td class="s-table__num s-dept-table__type">{{ customer.receipts.length }}</td>
+                <td class="s-table__num s-dept-table__money">
+                  {{ formatCurrency(customer.totalSpent) }}
+                </td>
                 <td v-if="hasBalanceFeature" class="s-table__num">
                   <span v-if="balanceOf(customer) > 0" class="s-table__warning">
                     {{ formatCurrency(balanceOf(customer)) }}
                   </span>
                   <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
                 </td>
-                <td class="s-hide-md">{{ formatDate(customer.lastOrderDate) }}</td>
+                <td class="s-hide-md s-table__muted s-table__nowrap">
+                  {{ formatDate(customer.lastOrderDate) }}
+                </td>
                 <td class="s-table__actions" @click.stop>
                   <SIconButton
                     label="Customer actions"

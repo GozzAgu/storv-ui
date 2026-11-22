@@ -20,32 +20,36 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 
 ## Feature matrix
 
-| Feature                          |   Micro    |  Medium   | Enterprise |
-| -------------------------------- | :--------: | :-------: | :--------: |
-| **Stores**                       |     1      |     2     | Unlimited  |
-| **Departments per store**        |     1      |    10     | Unlimited  |
-| **Staff per store**              |     2      |    25     | Unlimited  |
-| Dashboard                        |     ✓      |     ✓     |     ✓      |
-| Inventory & categories           |     ✓      |     ✓     |     ✓      |
-| Subcategories (one level)        |     ✓      |     ✓     |     ✓      |
-| Receipts, returns, customers     |     ✓      |     ✓     |     ✓      |
-| Quick Sale & Create New Sale     |     ✓      |     ✓     |     ✓      |
-| Notifications                    |     ✓      |     ✓     |     ✓      |
-| Settings & profile               |     ✓      |     ✓     |     ✓      |
-| Departments (nav & management)   |     ✓      |     ✓     |     ✓      |
-| Help center & Storvv Assistant   |     ✓      |     ✓     |     ✓      |
-| Web dashboard & iOS app          |     ✓      |     ✓     |     ✓      |
-| **Payment links** (Paystack)     |     ✓      |     ✓     |     ✓      |
-| WhatsApp receipts                | 10 / month | Unlimited | Unlimited  |
-| Analytics & reports              |     -      |     ✓     |     ✓      |
-| Activity logs                    |     -      |     ✓     |     ✓      |
-| **Sales leads**                  |     -      |     ✓     |     ✓      |
-| Customer balance / credit ledger |     -      |     ✓     |     ✓      |
-| Duplicate category (same branch) |     -      |     ✓     |     ✓      |
-| Multi-store sync & transfers     |     -      |     -     |     ✓      |
-| Copy from branch (templates)     |     -      |     -     |     ✓      |
-| Stock loans                      |     -      |     -     |     ✓      |
-| Priority support                 |     -      |     -     |     ✓      |
+| Feature                           |   Micro    |   Medium   | Enterprise |
+| --------------------------------- | :--------: | :--------: | :--------: |
+| **Stores**                        |     1      |     2      | Unlimited  |
+| **Departments per store**         |     1      |     10     | Unlimited  |
+| **Staff per store**               |     2      |     25     | Unlimited  |
+| Dashboard                         |     ✓      |     ✓      |     ✓      |
+| Inventory & categories            |     ✓      |     ✓      |     ✓      |
+| Subcategories (one level)         |     ✓      |     ✓      |     ✓      |
+| Receipts, returns, customers      |     ✓      |     ✓      |     ✓      |
+| Quick Sale & Create New Sale      |     ✓      |     ✓      |     ✓      |
+| Notifications                     |     ✓      |     ✓      |     ✓      |
+| Settings & profile                |     ✓      |     ✓      |     ✓      |
+| Departments (nav & management)    |     ✓      |     ✓      |     ✓      |
+| Help center & Storvv Assistant    |     ✓      |     ✓      |     ✓      |
+| Web dashboard & iOS app           |     ✓      |     ✓      |     ✓      |
+| **Payment links** (Paystack)      |     ✓      |     ✓      |     ✓      |
+| WhatsApp receipts                 | 10 / month | 50 / month | Unlimited  |
+| Analytics & reports               |     -      |     ✓      |     ✓      |
+| Activity logs                     |     -      |     ✓      |     ✓      |
+| **Sales leads**                   |     -      |     ✓      |     ✓      |
+| Customer balance / credit ledger  |     -      |     ✓      |     ✓      |
+| Duplicate category (same branch)  |     -      |     ✓      |     ✓      |
+| Hold customer returns, write-offs |     ✓      |     ✓      |     ✓      |
+| Stock out log                     |  30 days   |    Full    |    Full    |
+| Supplier returns                  |     -      |     ✓      |     ✓      |
+| Restore a deleted product         |     -      |     ✓      |     ✓      |
+| Multi-store sync & transfers      |     -      |     ✓      |     ✓      |
+| Copy from branch (templates)      |     -      |     -      |     ✓      |
+| Stock loans                       |     -      |     -      |     ✓      |
+| Priority support                  |     -      |     -      |     ✓      |
 
 **Role-based (all plans):** Customer buybacks are **super admin only**, not plan-gated.
 
@@ -94,12 +98,14 @@ Includes **everything in Micro**, plus:
 | **Activity logs**      | Who changed what, dated audit trail                    |
 | **Sales leads**        | Enquiry pipeline with convert-to-sale                  |
 | **Customer balance**   | Credit ledger & payment reminders tied to balance      |
-| **WhatsApp**           | **Unlimited** receipt sharing & payment nudges         |
+| **WhatsApp**           | 50 receipt shares & payment nudges a month             |
+| **Supplier returns**   | Log faulty stock and track each claim to settlement    |
+| **Stock out log**      | Full history and restoring deleted products            |
+| **Transfers**          | Stock transfers between branches, branch reports       |
 | **Duplicate category** | Clone folder templates **within the same branch**      |
 
 ### Not included
 
-- Multi-store sync (stock transfers between branches)
 - Copy category templates **from another branch**
 - Stock loans
 - Priority support
@@ -117,7 +123,6 @@ Includes **everything in Medium**, plus:
 | **Stores**           | **Unlimited**                                                                                                     |
 | **Departments**      | **Unlimited** per store                                                                                           |
 | **Staff**            | **Unlimited** per store                                                                                           |
-| **Multi-Store Sync** | Transfer items between stores, transfer history, consolidated reporting                                           |
 | **Copy from branch** | Copy selected **category templates** from one branch to another (names, fields, serial mode - not live stock qty) |
 | **Stock loans**      | Lend serial-tracked inventory to borrowers until sold or returned                                                 |
 | **Support**          | Priority support                                                                                                  |
@@ -150,7 +155,9 @@ These build trust and word-of-mouth; keep them on every tier:
 | Customer balance screens              | Medium              | `canUse('customer_balance')`                          |
 | Duplicate category                    | Medium              | `canDuplicateByPlan` in inventory pages               |
 | WhatsApp beyond cap                   | Medium              | `maxWhatsAppMessagesPerMonth` in limits               |
-| Multi-Store Sync                      | Enterprise          | `canUse('multi_store_sync')`                          |
+| Multi-Store Sync (transfers)          | Medium              | `canUse('multi_store_sync')`, rules, server           |
+| Log a supplier return                 | Medium              | `canUse('supplier_returns')`, server                  |
+| Full stock out log, restore deleted   | Medium              | `canUse('stock_out_history')`, server (restore)       |
 | Copy from branch                      | Enterprise          | `canCopyFolderTemplatesFromBranchByPlan`, super admin |
 | Stock loans                           | Enterprise          | `canUse('seller_loans')`                              |
 | Add 2nd store (Micro) / 3rd+ (Medium) | Medium / Enterprise | `getEligibleStoresForPlan`, store creation            |
@@ -181,9 +188,13 @@ Show upgrade prompts when users **hit a limit**, not at random:
 - **Billing:** Paystack **Subscriptions** (auto-renew). Checkout passes a Paystack plan code (`PLN_xxx`) per tier and billing cycle (monthly, quarterly, yearly). Renewals are applied via the Paystack webhook (`charge.success`); failed renewals set `subscriptionStatus: past_due`; `subscription.disable` stops auto-renew. Super admins can **change plan** (including Enterprise → Medium) via Paystack checkout, or **Cancel auto-renew** (keeps plan until `subscriptionCurrentPeriodEnd`, then reverts to Micro).
 - **Env:** `PAYSTACK_PLAN_CODE_MEDIUM_MONTHLY`, `_QUARTERLY`, `_YEARLY`, and the same for Enterprise. Amount env vars must match the Paystack plan amounts. See `.env.example`.
 - **QA:** Demo Settings shows a plan switcher (Micro/Medium/Enterprise) without Paystack. Local/staging can still use `POST /api/dev/set-subscription` when `NODE_ENV=development` or `NUXT_PUBLIC_ALLOW_DEV_PLAN_SWITCHER=1` (never in production).
-- **Nav:** Sidebar hides Analytics (Micro), Activity logs (Micro), Sales leads (Micro), Multi-Store Sync & Stock loans (Micro & Medium)
+- **Nav:** Sidebar hides Analytics (Micro), Activity logs (Micro), Sales leads (Micro), Multi-Store Sync (Micro), Stock loans (Micro & Medium)
 - **Firestore rules:** `firestore.rules` - `planAtLeastMedium()` / `planIsEnterprise()` on sales leads, customer accounts, activity logs, stock loans, and multi-store sync collections
 - **Duplicate category:** Medium+ via plan check in `inventory/index.vue` and `inventory/[id].vue` (not a separate feature flag)
 - **Copy from branch:** Enterprise only in inventory pages
 
 Billing uses **Paystack** (NGN). Amounts: `server/utils/paystack-validation.ts`.
+
+**Returns after a downgrade:** every plan records every removal. Logging a _new_ supplier return
+needs Medium, but returns already open can still be sent, settled and restocked on any plan, so a
+downgrade never strands money a supplier owes.

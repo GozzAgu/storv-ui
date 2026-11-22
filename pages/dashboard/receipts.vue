@@ -68,7 +68,7 @@
             </div>
           </dl>
 
-          <div class="s-table-card">
+          <div class="s-table-card s-dept-table">
             <div class="s-table-card__head">
               <STabs v-model="activeTab" :tabs="salesTabs" label="Sales views" />
               <template v-if="activeTab === 'receipts'">
@@ -291,19 +291,23 @@
                             >
                               <CopyIcon :size="14" :stroke-width="1.75" aria-hidden="true" />
                             </SIconButton>
-                            <SBadge v-if="receipt.isSwapIn" tone="info">Swap</SBadge>
+                            <SBadge v-if="receipt.isSwapIn" tone="info" size="sm">Swap</SBadge>
                             <SBadge
                               v-if="receipt.edited"
                               tone="warning"
+                              size="sm"
                               :title="editedTitle(receipt)"
                               >Edited</SBadge
                             >
                           </span>
                         </td>
                         <td>
-                          <span class="s-table__primary s-table__clip">{{
-                            receipt.customerName || 'Walk-in customer'
-                          }}</span>
+                          <span class="s-team__cell">
+                            <SAvatar :name="receipt.customerName || 'Walk-in customer'" />
+                            <span class="s-table__primary s-table__clip">{{
+                              receipt.customerName || 'Walk-in customer'
+                            }}</span>
+                          </span>
                         </td>
                         <td class="s-hide-md s-table__muted s-table__nowrap">
                           {{ formatDate(receipt.date) }}
@@ -313,8 +317,8 @@
                             {{ getReceiptLineItemsPreview(receipt) || EMPTY_CELL }}
                           </span>
                         </td>
-                        <td class="s-table__num">
-                          <span class="s-table__primary">{{ formatCurrency(receipt.total) }}</span>
+                        <td class="s-table__num s-dept-table__money">
+                          {{ formatCurrency(receipt.total) }}
                         </td>
                         <td class="s-hide-lg s-table__muted">
                           {{ formatPaymentMethod(receipt.paymentMethod) }}
@@ -324,12 +328,10 @@
                             {{ getReceiptDisplayStatus(receipt).label }}
                           </SBadge>
                         </td>
-                        <td class="s-hide-lg s-table__muted">
-                          <span class="s-table__clip">
-                            {{
-                              receipt.createdByUserName ||
-                              getCreatorName(receipt.actualCreator || receipt.createdBy)
-                            }}
+                        <td class="s-hide-lg">
+                          <span class="s-dept-table__manager">
+                            <SAvatar :name="sellerName(receipt)" size="sm" />
+                            <span class="s-table__clip">{{ sellerName(receipt) }}</span>
                           </span>
                         </td>
                         <td class="s-table__actions" @click.stop>
@@ -592,6 +594,7 @@ import {
   Trash2,
   Undo2,
 } from '@lucide/vue'
+import SAvatar from '~/components/s/SAvatar.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
@@ -1616,6 +1619,16 @@ const handleReceiptConfirmDelete = (receipt: Receipt) => {
 const getCreatorName = (uid: string): string => {
   if (!uid) return 'Unknown'
   return creatorNames.value[uid] || 'Loading...'
+}
+
+/** Who rang up a sale, for the "Created by" column. */
+function sellerName(receipt: Receipt): string {
+  return (
+    receipt.createdByUserName ||
+    getCreatorName(
+      ((receipt as { actualCreator?: string }).actualCreator || receipt.createdBy) as string
+    )
+  )
 }
 
 // Load creator names for all unique creator UIDs in receipts

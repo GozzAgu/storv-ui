@@ -25,10 +25,10 @@
   /* Surfaces: the page sits one step lighter than the alternate band in both themes */
   /* Warm off-white page with soft stone cards, like a calm product site */
   --mk-page: #ffffff;
-  --mk-alt: #f7f7f8;
-  --mk-card: #f5f5f6;
+  --mk-alt: #fafafa;
+  --mk-card: #f7f7f8;
   --mk-chip: #ffffff;
-  --mk-band: #f5f5f6;
+  --mk-band: #f7f7f8;
 
   /*
    * One soft tint per feature area, used only behind pictures (screenshot wells, card fills),
@@ -74,8 +74,8 @@
   --mk-glass: color-mix(in srgb, var(--s-surface) 55%, transparent);
   --mk-glass-edge: rgb(255 255 255 / 0.6);
   /* The floating nav has no border: a lit top edge and a wide, faint shadow lift it instead */
-  --mk-nav-shadow: inset 0 1px 0 var(--mk-glass-edge), 0 1px 2px rgb(16 24 40 / 0.04),
-    0 12px 32px -12px rgb(16 24 40 / 0.14);
+  --mk-nav-shadow: inset 0 1px 0 var(--mk-glass-edge), 0 1px 2px rgb(16 24 40 / 0.03),
+    0 12px 32px -14px rgb(16 24 40 / 0.08);
 
   /* Hairlines, radius and lit edges shared by the home sections and footer */
   --mk-edge: color-mix(in srgb, var(--s-accent) 16%, var(--s-border));
@@ -85,7 +85,7 @@
   --mk-navy: linear-gradient(160deg, #15276a 0%, #0a1230 100%);
   /* Cards sit on a soft tinted well instead of an outline; only floating pieces get lift */
   --mk-well: var(--mk-card);
-  --mk-lift: 0 1px 2px rgb(16 24 40 / 0.04), 0 18px 40px -22px rgb(16 24 40 / 0.22);
+  --mk-lift: 0 1px 2px rgb(16 24 40 / 0.03), 0 14px 32px -22px rgb(16 24 40 / 0.14);
   --mk-sheen: inset 0 1px 0 rgb(255 255 255 / 0.08);
 
   /* The app's elevation scale is off here; --mk-lift is the one shadow */
@@ -113,10 +113,10 @@ html.dark .mk {
   --s-surface-2: #232321;
   --s-surface-hover: #2a2a27;
   --mk-page: #111110;
-  --mk-alt: #1b1b19;
-  --mk-card: #1b1b19;
+  --mk-alt: #161615;
+  --mk-card: #191917;
   --mk-chip: #2a2a27;
-  --mk-band: #1b1b19;
+  --mk-band: #191917;
   --mk-tint-sand: #25221d;
   --mk-tint-peach: #2a211b;
   --mk-tint-rose: #2a1f23;
@@ -134,9 +134,9 @@ html.dark .mk {
   --mk-glow-2: rgb(110 148 255 / 0.16);
   --mk-glass: color-mix(in srgb, var(--s-surface) 55%, transparent);
   --mk-glass-edge: rgb(255 255 255 / 0.06);
-  --mk-nav-shadow: inset 0 1px 0 var(--mk-glass-edge), 0 12px 32px -12px rgb(0 0 0 / 0.6);
+  --mk-nav-shadow: inset 0 1px 0 var(--mk-glass-edge), 0 12px 32px -14px rgb(0 0 0 / 0.45);
   --mk-well: var(--mk-card);
-  --mk-lift: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 18px 40px -22px rgb(0 0 0 / 0.8);
+  --mk-lift: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 14px 32px -22px rgb(0 0 0 / 0.6);
 }
 
 .mk :where(h1, h2, h3, h4, p, ul, ol, figure, dl, dd) {
@@ -503,6 +503,19 @@ html.dark .mk-section--alt {
   margin-left: auto;
 }
 
+.mk-header__country {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--s-space-half);
+}
+
+/* Nigeria flag: a hairline so the white band reads on a white header. */
+.mk-flag {
+  display: block;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--s-border);
+}
+
 .mk-header__signin {
   display: none;
 }
@@ -722,6 +735,19 @@ html.dark .mk-section--alt {
   transition: opacity var(--s-duration-fast) var(--s-ease);
 }
 
+/* The card is a button now (it opens the walkthrough form). */
+button.mk-menu__demo {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.mk-menu__demo:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
 .mk-menu__demo-icon {
   display: inline-flex;
   flex: none;
@@ -753,35 +779,6 @@ html.dark .mk-section--alt {
 .mk-menu__demo-arrow {
   flex: none;
   color: var(--s-text-3);
-}
-
-.mk-menu__walkthrough {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-space-1);
-  min-height: var(--s-touch);
-  margin-top: var(--s-space-1);
-  padding: 0 var(--s-space-2);
-  border: 0;
-  border-radius: var(--s-radius);
-  background: none;
-  color: var(--s-text-2);
-  font: 500 0.9375rem / 1.25rem var(--s-font-sans);
-  cursor: pointer;
-}
-
-.mk-menu__walkthrough span {
-  color: var(--s-text);
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--s-text) 35%, transparent);
-  text-underline-offset: 4px;
-}
-
-.mk-menu__walkthrough:focus-visible {
-  outline: none;
-  box-shadow: var(--s-focus-ring);
 }
 
 /* "Prefer a guided tour? Book a walkthrough": quiet line under a page's main actions */
@@ -1357,7 +1354,7 @@ html.dark .mk-section--alt {
   overflow: hidden;
   border-radius: var(--s-radius-xl);
   background: var(--s-surface);
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06), 0 24px 60px -24px rgb(28 25 23 / 0.25);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.05), 0 20px 48px -24px rgb(28 25 23 / 0.14);
 }
 
 html.dark .mk-frame {
@@ -3126,7 +3123,7 @@ html.dark .mk-frame {
   padding: var(--s-space-5) var(--s-space-5) var(--s-space-4);
   border-radius: 24px;
   background: var(--s-surface);
-  box-shadow: 0 0 0 1px var(--s-line), 0 30px 60px -20px rgb(0 0 0 / 0.18);
+  box-shadow: 0 0 0 1px var(--s-line), 0 24px 48px -20px rgb(0 0 0 / 0.1);
   transform: translateX(-50%);
 }
 

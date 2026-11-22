@@ -47,7 +47,7 @@ export function markCapacitorDocument(): void {
   // Match WebView chrome to dashboard canvas (reduces black letterboxing in light mode)
   try {
     const isDark = html.classList.contains('dark')
-    document.body.style.backgroundColor = isDark ? '#050505' : '#f3f4f6'
+    document.body.style.backgroundColor = isDark ? '#0c0c0c' : '#f6f6f7'
   } catch {
     /* ignore */
   }

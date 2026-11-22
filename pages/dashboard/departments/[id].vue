@@ -71,7 +71,7 @@
         </div>
       </dl>
 
-      <section class="s-table-card" aria-label="Staff">
+      <section class="s-table-card s-dept-table" aria-label="Staff">
         <div class="s-table-card__head">
           <STabs
             v-if="canRemoveStaff && (staff.length > 0 || removedStaff.length > 0)"
@@ -108,6 +108,10 @@
               placeholder="Search staff"
               label="Search staff by name, email or position"
             />
+            <p class="s-dept-table__count" aria-live="polite">
+              {{ rosterPaginationTotal }}
+              {{ rosterPaginationTotal === 1 ? 'member' : 'members' }}
+            </p>
           </div>
         </div>
 
@@ -215,7 +219,6 @@
                   <th scope="col">Name</th>
                   <th scope="col" class="s-hide-md">Position</th>
                   <th scope="col">Access</th>
-                  <th scope="col" class="s-hide-lg">Email</th>
                   <th scope="col">Status</th>
                   <th scope="col" class="s-table__actions">
                     <span class="ds-sr-only">Actions</span>
@@ -237,16 +240,23 @@
                     />
                   </td>
                   <td>
-                    <div class="s-table__inline">
-                      <SAvatar :name="staffName(member)" :src="member.photoURL" size="sm" />
-                      <span class="s-table__primary">
-                        {{ staffName(member) }}
-                        <span v-if="isSignedInStaff(member)" class="s-table__muted"> · me</span>
+                    <div class="s-team__cell">
+                      <SAvatar :name="staffName(member)" :src="member.photoURL" />
+                      <span class="s-team__cell-text">
+                        <span class="s-table__primary">
+                          {{ staffName(member) }}
+                          <span v-if="isSignedInStaff(member)" class="s-table__muted"> · you</span>
+                        </span>
+                        <span v-if="member.email" class="s-table__secondary">{{
+                          member.email
+                        }}</span>
                       </span>
                     </div>
                   </td>
                   <td class="s-hide-md">
-                    <span v-if="member.position">{{ member.position }}</span>
+                    <span v-if="member.position" class="s-dept-table__type">{{
+                      member.position
+                    }}</span>
                     <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
                   </td>
                   <td>
@@ -259,9 +269,6 @@
                     >
                       {{ getStaffAccessLabel(member) }}
                     </SBadge>
-                  </td>
-                  <td class="s-hide-lg">
-                    <span class="s-table__secondary">{{ member.email }}</span>
                   </td>
                   <td>
                     <SBadge :tone="staffStatusTone(member)" dot>{{

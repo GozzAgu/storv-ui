@@ -233,6 +233,19 @@ html:has(.s-shell.ds-root) body {
   object-fit: contain;
 }
 
+/* Nav rows shrink on shorter screens so every route fits without scrolling. */
+.s-sidebar {
+  --s-nav-item-h: 36px;
+  --s-nav-section-gap: var(--s-space-1-5);
+}
+
+@media (max-height: 820px) {
+  .s-sidebar {
+    --s-nav-item-h: 32px;
+    --s-nav-section-gap: var(--s-space-1);
+  }
+}
+
 .s-sidebar__branch {
   padding: 0 var(--s-space-1) var(--s-space-1);
   flex-shrink: 0;
@@ -253,7 +266,7 @@ html:has(.s-shell.ds-root) body {
 }
 
 .s-sidebar__section + .s-sidebar__section {
-  margin-top: var(--s-space-2);
+  margin-top: var(--s-nav-section-gap);
 }
 
 .s-sidebar__section-label {
@@ -282,7 +295,7 @@ html:has(.s-shell.ds-root) body {
 
 .s-sidebar__foot {
   flex-shrink: 0;
-  padding: var(--s-space-1);
+  padding: var(--s-space-half) var(--s-space-1);
   border-top: 1px solid var(--s-border);
 }
 
@@ -304,8 +317,8 @@ html:has(.s-shell.ds-root) body {
 }
 
 .s-sidebar__collapse {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
 }
 
 .s-sidebar__version {
@@ -318,7 +331,7 @@ html:has(.s-shell.ds-root) body {
   display: flex;
   align-items: center;
   gap: var(--s-space-1-5);
-  height: 40px;
+  height: var(--s-nav-item-h);
   padding: 0 var(--s-space-1-5);
   border-radius: var(--s-radius);
   color: var(--s-text-2);
@@ -331,8 +344,8 @@ html:has(.s-shell.ds-root) body {
 
 .s-sidebar--collapsed .s-nav-item {
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: var(--s-nav-item-h);
   margin-inline: auto;
   padding: 0;
 }
@@ -537,7 +550,7 @@ html:has(.s-shell.ds-root) body {
   flex-shrink: 0;
   width: 32px;
   height: 32px;
-  border-radius: var(--s-radius);
+  border-radius: var(--s-radius-full);
   background: var(--s-btn-primary);
   box-shadow: var(--s-shadow-sm);
   color: var(--s-on-btn-primary);
@@ -547,7 +560,7 @@ html:has(.s-shell.ds-root) body {
 .s-branch__mark--sm {
   width: 28px;
   height: 28px;
-  border-radius: var(--s-radius-sm);
+  border-radius: var(--s-radius-full);
   background: var(--s-surface-2);
   box-shadow: none;
   color: var(--s-text-2);

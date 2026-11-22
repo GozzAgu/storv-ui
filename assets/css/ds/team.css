@@ -24,19 +24,6 @@
   white-space: nowrap;
 }
 
-.s-team__mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--s-radius);
-  background: var(--s-surface-2);
-  box-shadow: inset 0 0 0 1px var(--s-line);
-  color: var(--s-text-2);
-}
-
 .s-invites__head {
   display: flex;
   align-items: flex-start;
@@ -97,4 +84,109 @@
   align-items: center;
   gap: var(--s-space-half);
   margin-left: auto;
+}
+
+/* Departments and department staff tables: calmer rows, and the card ends with its last row */
+.s-page > .s-table-card.s-dept-table:not(:has(~ :is(.s-card, .s-table-card, .s-tab-panel))) {
+  flex: none;
+}
+
+.s-dept-table .s-toolbar {
+  align-items: center;
+}
+
+.s-dept-table__count {
+  margin: 0 0 0 auto;
+  color: var(--s-text-muted);
+  font: var(--s-text-small);
+  white-space: nowrap;
+}
+
+.s-dept-table .s-table th {
+  height: 34px;
+}
+
+.s-dept-table .s-table td {
+  height: 42px;
+}
+
+.s-dept-table__mark,
+.s-dept-table .s-team__cell .s-avatar {
+  width: 28px;
+  height: 28px;
+}
+
+.s-dept-table__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--s-radius-full);
+  background: var(--s-surface-2);
+  color: var(--s-text-2);
+  font: 600 0.75rem/1 var(--s-font-sans);
+  letter-spacing: 0.02em;
+}
+
+.s-dept-table .s-table__primary {
+  font-weight: 500;
+}
+
+.s-dept-table__type,
+.s-dept-table__staff {
+  color: var(--s-text-2);
+}
+
+.s-dept-table__staff {
+  white-space: nowrap;
+}
+
+.s-dept-table__manager {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-space-1);
+  white-space: nowrap;
+}
+
+.s-dept-table__manager .s-avatar,
+.s-dept-table .s-team__cell .s-avatar {
+  background: var(--s-surface-2);
+  color: var(--s-text-2);
+}
+
+/* The row menu stays quiet until the row is hovered or focused */
+@media (hover: hover) {
+  .s-dept-table tbody tr .s-table__actions .s-icon-btn {
+    opacity: 0.45;
+    transition: opacity var(--s-duration-fast) var(--s-ease);
+  }
+
+  .s-dept-table tbody tr:is(:hover, :focus-within) .s-table__actions .s-icon-btn,
+  .s-dept-table .s-table__actions .s-icon-btn[aria-expanded='true'] {
+    opacity: 1;
+  }
+}
+
+/* Inline status pickers in these tables: compact, so they read like a value, not a form field */
+.s-dept-table td .s-control--select {
+  --s-control-h: 30px;
+  width: 152px;
+  max-width: 100%;
+}
+
+.s-dept-table td .s-control--select .s-control__input {
+  font: var(--s-text-small);
+}
+
+.s-dept-table__money {
+  font-weight: 500;
+}
+
+/* Inventory product rows: the name leads, every other field reads a step quieter */
+.s-dept-table .s-cell__text {
+  color: var(--s-text-2);
+}
+
+.s-dept-table .s-cell__name {
+  font-weight: 500;
 }

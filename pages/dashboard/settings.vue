@@ -82,6 +82,7 @@
             :add-ons-available="addOnsAvailable"
             :add-ons="addOnRows"
             :add-on-prices="addOnPriceLabels"
+            :plan-prices="comparePlanPrices"
             :add-on-store-options="addOnStoreOptions"
             :add-on-busy="addOnBusy"
             :manage-on-web="Boolean(billingOnWebUrl)"
@@ -585,6 +586,7 @@ import { useFunnelAnalytics } from '~/composables/useFunnelAnalytics'
 import { openChurnSurveyModal } from '~/composables/growth-prompts-state'
 import { useBackupPreferences } from '~/composables/useBackupPreferences'
 import { useSensitiveAction } from '~/composables/useSensitiveAction'
+import { NAIRA_PRICES } from '~/composables/useMarketingPricing'
 import {
   applyEnabledCapabilitiesToStoreDetails,
   getProgressiveUnlockOptionsForPlan,
@@ -1010,6 +1012,17 @@ const addOnPriceLabels = computed(() => ({
   store: formatNaira(getAddOnAmountKobo('store') / 100),
   staff: formatNaira(getAddOnAmountKobo('staff') / 100),
 }))
+
+/** Monthly price of each plan for the comparison, from the amounts Paystack charges. */
+const comparePlanPrices = computed(() => {
+  const out: Partial<Record<SubscriptionPlan, string>> = { storvv_micro: 'Free' }
+  for (const plan of ['storvv_medium', 'storvv_enterprise'] as const) {
+    // The demo and a slow pricing call fall back to the published Nigerian price.
+    const published = NAIRA_PRICES[plan === 'storvv_medium' ? 'medium' : 'enterprise']
+    out[plan] = formatPlanPrice(plan, 'monthly') ?? `${formatNaira(published.monthly)} / month`
+  }
+  return out
+})
 
 const addOnStoreOptions = computed(() =>
   storesStore.stores.map((store) => ({ value: store.id, label: store.name || 'Unnamed store' }))

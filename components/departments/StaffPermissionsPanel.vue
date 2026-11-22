@@ -4,114 +4,78 @@
 
     <ul class="s-perm">
       <li v-for="module in modules" :key="module.key" class="s-perm__module">
-        <div class="s-perm__head">
-          <span :id="`${baseId}-${module.key}`" class="s-perm__title">{{ module.title }}</span>
-          <SBadge v-if="module.key === 'sellerLoans'" size="sm">Always on</SBadge>
-          <SBadge v-else-if="lockedModules.includes(module.key)" size="sm">{{
-            lockedBadge
-          }}</SBadge>
-        </div>
-        <p class="s-perm__hint">{{ levelHint(module) }}</p>
+        <div class="s-perm__row">
+          <div class="s-perm__text">
+            <span :id="`${baseId}-${module.key}`" class="s-perm__title">
+              {{ module.title }}
+              <SBadge v-if="lockedModules.includes(module.key)" size="sm">{{ lockedBadge }}</SBadge>
+            </span>
+            <p class="s-perm__hint">{{ levelHint(module) }}</p>
+          </div>
 
-        <div
-          v-if="module.key !== 'sellerLoans'"
-          class="s-tabs s-tabs--block s-perm__levels"
-          role="radiogroup"
-          :aria-labelledby="`${baseId}-${module.key}`"
-          @keydown="onLevelKeydown(module.key, $event)"
-        >
-          <button
-            v-for="option in levelsFor(module.key)"
-            :key="option.value"
-            type="button"
-            role="radio"
-            class="s-tabs__tab"
-            :data-level="option.value"
-            :aria-checked="levelOf(module.key) === option.value"
-            :tabindex="levelOf(module.key) === option.value ? 0 : -1"
-            :disabled="isLocked(module.key)"
-            @click="setLevel(module.key, option.value)"
+          <SBadge v-if="module.key === 'sellerLoans'" size="sm" tone="success">Always on</SBadge>
+          <div
+            v-else
+            class="s-tabs s-perm__levels"
+            role="radiogroup"
+            :aria-labelledby="`${baseId}-${module.key}`"
+            @keydown="onLevelKeydown(module.key, $event)"
           >
-            {{ option.label }}
-          </button>
+            <button
+              v-for="option in levelsFor(module.key)"
+              :key="option.value"
+              type="button"
+              role="radio"
+              class="s-tabs__tab"
+              :data-level="option.value"
+              :aria-checked="levelOf(module.key) === option.value"
+              :tabindex="levelOf(module.key) === option.value ? 0 : -1"
+              :disabled="isLocked(module.key)"
+              @click="setLevel(module.key, option.value)"
+            >
+              {{ option.label }}
+            </button>
+          </div>
         </div>
 
         <div
           v-if="showChips(module.key)"
-          class="s-perm__chips"
+          class="s-perm__actions"
           role="group"
           :aria-label="`${module.title} actions`"
         >
           <template v-if="module.key !== 'sellerLoans' && levelOf(module.key) === 'custom'">
-            <button
+            <SCheckbox
               v-for="action in crudActionsFor(module.key)"
               :key="action.key"
-              type="button"
-              class="s-perm__chip"
-              :aria-pressed="modelValue[module.key][action.key]"
+              :label="action.label"
+              :model-value="modelValue[module.key][action.key]"
               :disabled="isLocked(module.key)"
-              @click="
-                updateModule(module.key, { [action.key]: !modelValue[module.key][action.key] })
-              "
-            >
-              <Check
-                v-if="modelValue[module.key][action.key]"
-                :size="14"
-                :stroke-width="2.5"
-                aria-hidden="true"
-              />
-              {{ action.label }}
-            </button>
+              @update:model-value="(on) => updateModule(module.key, { [action.key]: on })"
+            />
           </template>
-          <button
+          <SCheckbox
             v-if="module.key === 'sellerLoans'"
-            type="button"
-            class="s-perm__chip"
-            :aria-pressed="modelValue.sellerLoans.delete"
+            label="Can delete stock loans"
+            :model-value="modelValue.sellerLoans.delete"
             :disabled="isLocked('sellerLoans')"
-            @click="updateModule('sellerLoans', { delete: !modelValue.sellerLoans.delete })"
-          >
-            <Check
-              v-if="modelValue.sellerLoans.delete"
-              :size="14"
-              :stroke-width="2.5"
-              aria-hidden="true"
+            @update:model-value="(on) => updateModule('sellerLoans', { delete: on })"
+          />
+          <template v-if="module.key === 'receipts'">
+            <SCheckbox
+              label="Refund and cancel orders"
+              :model-value="modelValue.receipts.refund"
+              :disabled="isLocked('receipts')"
+              @update:model-value="(on) => updateModule('receipts', { refund: on })"
             />
-            Can delete
-          </button>
-          <button
-            v-if="module.key === 'receipts'"
-            type="button"
-            class="s-perm__chip"
-            :aria-pressed="modelValue.receipts.refund"
-            :disabled="isLocked('receipts')"
-            @click="updateModule('receipts', { refund: !modelValue.receipts.refund })"
-          >
-            <Check
-              v-if="modelValue.receipts.refund"
-              :size="14"
-              :stroke-width="2.5"
-              aria-hidden="true"
+            <SCheckbox
+              label="Correct receipt details"
+              title="Correct customer details and notes on a sale. Every edit is recorded."
+              :model-value="modelValue.receipts.edit"
+              :disabled="isLocked('receipts')"
+              @update:model-value="(on) => updateModule('receipts', { edit: on })"
             />
-            Refund &amp; cancel orders
-          </button>
-          <button
-            v-if="module.key === 'receipts'"
-            type="button"
-            class="s-perm__chip"
-            :aria-pressed="modelValue.receipts.edit"
-            :disabled="isLocked('receipts')"
-            title="Correct customer details and notes on a sale. Every edit is recorded."
-            @click="updateModule('receipts', { edit: !modelValue.receipts.edit })"
-          >
-            <Check
-              v-if="modelValue.receipts.edit"
-              :size="14"
-              :stroke-width="2.5"
-              aria-hidden="true"
-            />
-            Edit receipts
-          </button>
+          </template>
         </div>
       </li>
     </ul>
@@ -120,8 +84,8 @@
 
 <script setup lang="ts">
 import { reactive, useId } from 'vue'
-import { Check } from '@lucide/vue'
 import SBadge from '~/components/s/SBadge.vue'
+import SCheckbox from '~/components/s/SCheckbox.vue'
 import SFormSection from '~/components/s/SFormSection.vue'
 import type {
   ModulePermission,
@@ -213,12 +177,12 @@ const modules: Array<{
   {
     key: 'sellerLoans',
     title: 'Stock loans',
-    viewHint: 'Staff can always view, create and update stock loans.',
-    manageHint: 'Staff can always view, create and update stock loans.',
+    viewHint: 'Everyone can view, create and update stock loans.',
+    manageHint: 'Everyone can view, create and update stock loans.',
   },
   {
     key: 'multiStoreSync',
-    title: 'Multi-store sync',
+    title: 'Transfers',
     viewHint: 'Branch transfers and consolidated reports.',
     manageHint: 'Request, approve, and complete transfers.',
   },

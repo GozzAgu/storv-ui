@@ -4,7 +4,11 @@ import { rethrowFirebaseAdminSetupError } from '~/server/utils/firebase-admin-er
 import { requireAuth } from '~/server/utils/store-auth'
 import { findStaffDocForLogin, resolveStaffWorkspaceOwnerId } from '~/server/utils/staff-workspace'
 import { normalizeStaffAdminGrants } from '~/utils/staff-permissions'
-import { resolveEffectiveSubscriptionPlan, type SubscriptionPlan } from '~/types/subscription'
+import {
+  planHasFeature,
+  resolveEffectiveSubscriptionPlan,
+  type SubscriptionPlan,
+} from '~/types/subscription'
 
 /**
  * List every branch under the workspace for the owner, or for a branch admin the owner
@@ -80,10 +84,10 @@ export default defineEventHandler(async (event) => {
     ? ownerSnap.data() || {}
     : (await adminDb.collection('users').doc(ownerId).get()).data() || {}
   const plan: SubscriptionPlan = resolveEffectiveSubscriptionPlan(ownerData)
-  if (plan !== 'storvv_enterprise') {
+  if (!planHasFeature(plan, 'multi_store_sync')) {
     throw createError({
       statusCode: 403,
-      message: 'Listing branches for transfers needs the Storvv Enterprise plan',
+      message: 'Listing branches for transfers needs the Storvv Medium plan or higher',
     })
   }
 

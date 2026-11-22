@@ -389,7 +389,7 @@ export async function runTransferAction(
   // Names are saved with each decision so the record says who approved it, even after renames.
   const { actor, plan, displayName } = await resolveTransferActor(db, uid, ownerId, before)
   if (!planHasFeature(plan, 'multi_store_sync')) {
-    throw createError({ statusCode: 403, message: 'Transfers need the Enterprise plan.' })
+    throw createError({ statusCode: 403, message: 'Transfers need the Medium plan or higher.' })
   }
 
   const result = await db.runTransaction(async (tx) => {

@@ -91,7 +91,7 @@
         </div>
       </dl>
 
-      <section class="s-table-card" aria-label="Departments">
+      <section class="s-table-card s-dept-table" aria-label="Departments">
         <div class="s-table-card__head">
           <STabs
             v-if="inactiveDepartmentsCount > 0"
@@ -130,6 +130,10 @@
               placeholder="Search departments"
               label="Search departments by name, type or manager"
             />
+            <p class="s-dept-table__count" aria-live="polite">
+              {{ filteredDepartments.length }}
+              {{ filteredDepartments.length === 1 ? 'department' : 'departments' }}
+            </p>
           </div>
         </div>
 
@@ -205,10 +209,10 @@
                   </th>
                   <th scope="col">Department</th>
                   <th scope="col" class="s-hide-md">Type</th>
-                  <th scope="col" class="s-table__num">Staff</th>
+                  <th scope="col">Staff</th>
                   <th scope="col" class="s-hide-md">Manager</th>
                   <th scope="col">Status</th>
-                  <th scope="col" class="s-hide-lg">Updated</th>
+                  <th scope="col" class="s-hide-lg">Last updated</th>
                   <th v-if="canManageDepartments" scope="col" class="s-table__actions">
                     <span class="ds-sr-only">Actions</span>
                   </th>
@@ -235,8 +239,8 @@
                   </td>
                   <td>
                     <div class="s-team__cell">
-                      <span class="s-team__mark" aria-hidden="true">
-                        <Building2 :size="16" :stroke-width="1.75" />
+                      <span class="s-dept-table__mark" aria-hidden="true">
+                        {{ nameInitials(department.name) }}
                       </span>
                       <span class="s-team__cell-text">
                         <span class="s-table__primary">{{ department.name }}</span>
@@ -247,19 +251,24 @@
                     </div>
                   </td>
                   <td class="s-hide-md">
-                    {{ formatDepartmentTypeLabel(department.departmentType) }}
+                    <span class="s-dept-table__type">{{
+                      formatDepartmentTypeLabel(department.departmentType)
+                    }}</span>
                   </td>
-                  <td class="s-table__num">{{ department.staffCount || 0 }}</td>
+                  <td class="s-dept-table__staff">{{ staffLabel(department) }}</td>
                   <td class="s-hide-md">
-                    <span v-if="department.manager?.trim()">{{ department.manager }}</span>
-                    <span v-else class="s-table__muted">Not assigned</span>
+                    <span v-if="department.manager?.trim()" class="s-dept-table__manager">
+                      <SAvatar :name="department.manager" size="sm" />
+                      {{ department.manager }}
+                    </span>
+                    <span v-else class="s-table__muted">Unassigned</span>
                   </td>
                   <td>
                     <SBadge :tone="department.isActive === false ? 'warning' : 'success'" dot>
                       {{ department.isActive === false ? 'Inactive' : 'Active' }}
                     </SBadge>
                   </td>
-                  <td class="s-hide-lg s-table__muted">
+                  <td class="s-hide-lg s-table__muted s-table__nowrap">
                     {{
                       formatCategoryDate(department.updatedAt) ??
                       formatCategoryDate(department.createdAt) ??
@@ -386,6 +395,8 @@ import {
   Trash2,
   TriangleAlert,
 } from '@lucide/vue'
+import SAvatar from '~/components/s/SAvatar.vue'
+import { nameInitials } from '~/utils/name-initials'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
@@ -532,7 +543,8 @@ function departmentSummary(department: Department): string {
 
 function staffLabel(department: Department): string {
   const count = department.staffCount || 0
-  return `${count} staff`
+  if (count === 0) return 'No members'
+  return `${count} ${count === 1 ? 'member' : 'members'}`
 }
 
 const filteredDepartments = computed(() => {

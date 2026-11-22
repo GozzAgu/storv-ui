@@ -118,7 +118,7 @@ const columns: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Overview', section: 'product' },
       { label: 'All features', to: '/features' },
-      { label: 'Live demo', to: '/demo/dashboard' },
+      { label: 'Book a walkthrough', to: '?walkthrough=1' },
       { label: 'Storefront', to: '/features#soon', soon: true },
     ],
   },

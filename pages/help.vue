@@ -101,8 +101,8 @@
             <SButton variant="primary" class="mk-btn" to="mailto:hello@storvv.com">
               Email hello@storvv.com
             </SButton>
-            <NuxtLink to="/demo/dashboard" class="mk-link">
-              Try the demo
+            <NuxtLink to="?walkthrough=1" class="mk-link">
+              Book a walkthrough
               <ArrowRight :size="16" aria-hidden="true" />
             </NuxtLink>
           </div>

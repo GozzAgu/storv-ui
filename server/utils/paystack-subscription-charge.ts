@@ -57,17 +57,69 @@ export function paystackPlanCodeOf(data: SubscriptionChargeData): string | undef
   return value || undefined
 }
 
-/** Map a Paystack plan code back to the Storvv plan and cycle configured for it. */
+export interface LegacyPaystackPlan {
+  planCode: string
+  planId: SubscriptionPlan
+  billingCycle: SubscriptionBillingCycle
+  amountKobo: number
+}
+
+/**
+ * Grandfathered plans from `PAYSTACK_LEGACY_PLANS`: `PLN_code:plan:cycle:amountKobo`, comma
+ * separated. After a price change the old Paystack plans stay as they are and are listed here, so
+ * subscribers on them keep renewing at their old price. Malformed entries are skipped.
+ */
+export function parseLegacyPaystackPlans(raw: unknown): LegacyPaystackPlan[] {
+  if (typeof raw !== 'string' || !raw.trim()) return []
+  const out: LegacyPaystackPlan[] = []
+  for (const entry of raw.split(',')) {
+    const [code, plan, cycle, amount] = entry.trim().split(':')
+    const planCode = (code || '').trim()
+    const planId = (plan || '').trim() as SubscriptionPlan
+    const billingCycle = (cycle || '').trim()
+    const amountKobo = Number(amount)
+    if (
+      !planCode.startsWith('PLN_') ||
+      !PAID_PLANS.includes(planId) ||
+      !isSubscriptionBillingCycle(billingCycle) ||
+      !Number.isInteger(amountKobo) ||
+      amountKobo <= 0
+    ) {
+      continue
+    }
+    out.push({ planCode, planId, billingCycle, amountKobo })
+  }
+  return out
+}
+
+/**
+ * Map a Paystack plan code back to the Storvv plan and cycle configured for it. A grandfathered
+ * code also carries the amount it renews at.
+ */
 export function planFromPaystackPlanCode(
   planCode: string,
   config: Record<string, unknown>
-): { planId: SubscriptionPlan; billingCycle: SubscriptionBillingCycle } | null {
+): {
+  planId: SubscriptionPlan
+  billingCycle: SubscriptionBillingCycle
+  legacyAmountKobo?: number
+} | null {
   for (const planId of PAID_PLANS) {
     for (const billingCycle of SUBSCRIPTION_BILLING_CYCLES) {
       const key = getPaystackPlanCodeConfigKey(planId, billingCycle)
       const configured =
         key && typeof config[key] === 'string' ? (config[key] as string).trim() : ''
       if (configured && configured === planCode) return { planId, billingCycle }
+    }
+  }
+  const legacy = parseLegacyPaystackPlans(config.paystackLegacyPlans).find(
+    (entry) => entry.planCode === planCode
+  )
+  if (legacy) {
+    return {
+      planId: legacy.planId,
+      billingCycle: legacy.billingCycle,
+      legacyAmountKobo: legacy.amountKobo,
     }
   }
   return null
@@ -137,7 +189,9 @@ export async function resolveSubscriptionCharge(
 
   let expectedAmount: number
   try {
-    expectedAmount = getExpectedPlanAmount(planId, config, billingCycle)
+    // A grandfathered plan renews at its own price; everything else at today's.
+    expectedAmount =
+      fromCode?.legacyAmountKobo ?? getExpectedPlanAmount(planId, config, billingCycle)
   } catch {
     return { ok: false, problem: 'unknown-plan', userId }
   }

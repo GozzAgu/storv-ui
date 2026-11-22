@@ -15,6 +15,7 @@ export const DEMO_LEAD_SOURCES = [
   'landing_hero',
   'landing_cta',
   'landing_menu',
+  'demo_closed',
 ] as const
 export type DemoLeadSource = (typeof DEMO_LEAD_SOURCES)[number]
 

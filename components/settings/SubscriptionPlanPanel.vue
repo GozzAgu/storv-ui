@@ -173,8 +173,13 @@
           Compare plans
         </summary>
         <dl class="s-plan__features">
-          <div v-for="(lines, id) in SUBSCRIPTION_FEATURE_SUMMARY" :key="id">
-            <dt>{{ SUBSCRIPTION_PLANS.find((p) => p.id === id)?.name }}</dt>
+          <div v-for="(lines, id) in compareLines" :key="id">
+            <dt>
+              {{ SUBSCRIPTION_PLANS.find((p) => p.id === id)?.name }}
+              <span v-if="planPrices?.[id]" class="s-plan__compare-price">{{
+                planPrices[id]
+              }}</span>
+            </dt>
             <dd>
               <ul>
                 <li v-for="(line, i) in lines" :key="i">{{ line }}</li>
@@ -253,7 +258,7 @@ import {
   getPlanLimits,
   SUBSCRIPTION_ADD_ON_PRICES_NGN,
   SUBSCRIPTION_PLANS,
-  SUBSCRIPTION_FEATURE_SUMMARY,
+  getPlanFeatureSummary,
   type SubscriptionAddOnKind,
   type SubscriptionPlan,
 } from '~/types/subscription'
@@ -292,6 +297,8 @@ const props = defineProps<{
   addOnsAvailable?: boolean
   addOns?: Array<{ id: string; label: string; detail: string; canCancel: boolean }>
   addOnPrices?: Record<SubscriptionAddOnKind, string>
+  /** Monthly price per plan from the server, e.g. "₦15,000 / month" ("Free" for Micro). */
+  planPrices?: Partial<Record<SubscriptionPlan, string>>
   addOnStoreOptions?: Array<{ value: string; label: string }>
   /** 'store' | 'staff' while starting checkout, or an add-on id while removing it. */
   addOnBusy?: string | null
@@ -305,6 +312,8 @@ const planChoiceOpen = ref(false)
 const planChoiceHidden = computed(() => Boolean(props.trialSummary) && !planChoiceOpen.value)
 
 const addOnRows = computed(() => props.addOns ?? [])
+/** Same prices as the add-on cards and checkout, so the comparison can't disagree with them. */
+const compareLines = computed(() => getPlanFeatureSummary(addOnPriceLabels.value))
 const addOnPriceLabels = computed(
   () =>
     props.addOnPrices ?? {

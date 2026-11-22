@@ -25,7 +25,7 @@ import {
  * Pinia holds one page at a time per folder; full lists use fetchItemsAllChunked (cached, not kept in state).
  */
 import { useFirestore } from '~/composables/useFirestore'
-import { resolveEffectiveSubscriptionPlan } from '~/types/subscription'
+import { planHasFeature, resolveEffectiveSubscriptionPlan } from '~/types/subscription'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useStaffStore } from './staff'
@@ -850,9 +850,9 @@ export const useInventoryStore = defineStore('inventory', {
         )
       }
       const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
-      if (plan !== 'storvv_enterprise') {
+      if (!planHasFeature(plan, 'multi_store_sync')) {
         throw new Error(
-          'Loading folder templates for another branch is available on the Storvv Enterprise plan.'
+          'Loading categories for another branch needs the Storvv Medium plan or higher.'
         )
       }
       const ownerUid = (await getQueryUserId()) ?? authStore.currentUser.uid
@@ -1808,9 +1808,9 @@ export const useInventoryStore = defineStore('inventory', {
         }
       }
       const plan = resolveEffectiveSubscriptionPlan(userStore.userData)
-      if (plan !== 'storvv_enterprise') {
+      if (!planHasFeature(plan, 'multi_store_sync')) {
         throw new Error(
-          'Loading inventory for another branch is available on the Storvv Enterprise plan.'
+          'Loading inventory for another branch needs the Storvv Medium plan or higher.'
         )
       }
 
