@@ -35,21 +35,28 @@
     </SCard>
 
     <template v-else>
-      <!-- Phone -->
+      <!-- Phone: tap a row for the full reason -->
       <SCard flush class="s-only-sm">
         <ul class="s-list">
-          <li v-for="row in visible" :key="row.key" class="s-list__item">
-            <span class="s-list__main">
-              <span class="s-list__primary">{{ row.itemName }}</span>
-              <span class="s-list__secondary">{{ row.what }} · {{ row.why }}</span>
-              <span class="s-list__secondary">{{ formatDay(row.at) }} · {{ row.by }}</span>
-            </span>
-            <span class="s-list__end">
-              <span class="s-list__value"
-                >{{ row.units }} unit{{ row.units === 1 ? '' : 's' }}</span
-              >
-              <SBadge :tone="row.tone" size="sm">{{ row.typeLabel }}</SBadge>
-            </span>
+          <li v-for="row in visible" :key="row.key">
+            <SHoverCard :label="`Why ${row.itemName} is out of stock`" :width="400">
+              <template #trigger>
+                <span class="s-list__item">
+                  <span class="s-list__main">
+                    <span class="s-list__primary">{{ row.itemName }}</span>
+                    <span class="s-list__secondary">{{ row.what }} · {{ row.why }}</span>
+                    <span class="s-list__secondary">{{ formatDay(row.at) }} · {{ row.by }}</span>
+                  </span>
+                  <span class="s-list__end">
+                    <span class="s-list__value"
+                      >{{ row.units }} unit{{ row.units === 1 ? '' : 's' }}</span
+                    >
+                    <SBadge :tone="row.tone" size="sm">{{ row.typeLabel }}</SBadge>
+                  </span>
+                </span>
+              </template>
+              <StockOutReasonCard :row="row" />
+            </SHoverCard>
           </li>
         </ul>
       </SCard>
@@ -76,8 +83,15 @@
                 <span class="s-table__secondary">{{ row.itemLine }}</span>
               </td>
               <td>
-                <SBadge :tone="row.tone" size="sm">{{ row.typeLabel }}</SBadge>
-                <span class="s-table__secondary">{{ row.what }} · {{ row.why }}</span>
+                <SHoverCard :label="`Why ${row.itemName} is out of stock`" :width="400">
+                  <template #trigger>
+                    <span class="s-log__why">
+                      <SBadge :tone="row.tone" size="sm">{{ row.typeLabel }}</SBadge>
+                      <span class="s-table__secondary">{{ row.what }} · {{ row.why }}</span>
+                    </span>
+                  </template>
+                  <StockOutReasonCard :row="row" />
+                </SHoverCard>
               </td>
               <td class="s-table__num">{{ row.units }}</td>
               <td class="s-table__num s-hide-md">
@@ -121,6 +135,9 @@ import SCard from '~/components/s/SCard.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import SSearch from '~/components/s/SSearch.vue'
 import SSelect from '~/components/s/SSelect.vue'
+import SHoverCard from '~/components/s/SHoverCard.vue'
+import StockOutReasonCard from '~/components/supplier-returns/StockOutReasonCard.vue'
+import type { StockOutEntry, StockOutEntryType } from '~/utils/stock-out-entry'
 import { useSupplierReturnsStore } from '~/stores/supplierReturns'
 import { useInspectionHoldsStore } from '~/stores/inspectionHolds'
 import { useWriteOffsStore } from '~/stores/writeOffs'
@@ -142,27 +159,6 @@ import { STOCK_REMOVAL_KIND_LABELS, STOCK_REMOVAL_REASON_LABELS } from '~/types/
  */
 defineProps<{ canRestore: boolean }>()
 
-type Tone = 'neutral' | 'warning' | 'info' | 'success' | 'error'
-type EntryType = 'supplier' | 'customer' | 'write_off' | 'deleted' | 'count'
-
-interface Entry {
-  key: string
-  type: EntryType
-  typeLabel: string
-  tone: Tone
-  at: string | null
-  itemName: string
-  itemLine: string
-  what: string
-  why: string
-  units: number
-  cost: number | null
-  by: string
-  search: string
-  restorableId: string | null
-  restored: boolean
-}
-
 const supplierReturns = useSupplierReturnsStore()
 const holds = useInspectionHoldsStore()
 const writeOffs = useWriteOffsStore()
@@ -171,7 +167,7 @@ const storesStore = useStoresStore()
 const { formatCurrency } = usePreferences()
 
 const search = ref('')
-const typeFilter = ref<'all' | EntryType>('all')
+const typeFilter = ref<'all' | StockOutEntryType>('all')
 const limit = ref(50)
 const restoringId = ref<string | null>(null)
 const error = ref('')
@@ -185,12 +181,31 @@ const typeOptions = [
   { value: 'count', label: 'Lowered counts' },
 ]
 
+function fact(label: string, value: string | number | null | undefined) {
+  return value === null || value === undefined || value === ''
+    ? []
+    : [{ label, value: String(value) }]
+}
+
+function money(value: number | null) {
+  return value === null ? null : formatCurrency(value)
+}
+
+function when(iso: string | null) {
+  if (!iso) return null
+  return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+}
+
+function itemFacts(details: Record<string, string | number | boolean>, folderName: string) {
+  return [...fact('Details', stockItemDetailSummary(details, 4)), ...fact('Category', folderName)]
+}
+
 function line(details: Record<string, string | number | boolean>, folderName: string) {
   return [stockItemDetailSummary(details, 2), folderName].filter(Boolean).join(' · ')
 }
 
-const entries = computed<Entry[]>(() => {
-  const out: Entry[] = []
+const entries = computed<StockOutEntry[]>(() => {
+  const out: StockOutEntry[] = []
   for (const r of supplierReturns.returns) {
     const status =
       r.status === 'resolved' && r.outcome
@@ -212,6 +227,24 @@ const entries = computed<Entry[]>(() => {
       search: '',
       restorableId: null,
       restored: false,
+      headline: `Sent back to ${r.supplierName || 'the supplier'} as defective`,
+      facts: [
+        ...fact('Fault', r.defect),
+        ...fact('Supplier', r.supplierName),
+        ...fact('Reference', r.supplierReference),
+        ...fact('Status', status),
+        ...(r.customerReturn
+          ? fact(
+              'Came from',
+              `Customer return #${r.customerReturn.receiptNumber} · ${r.customerReturn.customerName}`
+            )
+          : []),
+        ...fact('Units', r.item.quantity),
+        ...fact('Cost', money(r.costValue)),
+        ...itemFacts(r.item.details, r.item.folderName),
+        ...fact('Logged by', r.createdByName),
+        ...fact('When', when(r.createdAt)),
+      ],
     })
   }
   for (const h of holds.holds) {
@@ -237,6 +270,19 @@ const entries = computed<Entry[]>(() => {
       search: h.sale.receiptNumber,
       restorableId: null,
       restored: false,
+      headline: `${h.sale.customerName} brought it back · ${outcome.toLowerCase()}`,
+      facts: [
+        ...fact('Customer said', h.complaint || 'No reason given'),
+        ...fact('Sale', `#${h.sale.receiptNumber} · ${h.sale.customerName}`),
+        ...fact('Outcome', outcome),
+        ...fact('Decided by', h.closedByName),
+        ...fact('Decided', when(h.closedAt)),
+        ...fact('Units', h.item.quantity),
+        ...fact('Cost', money(h.item.unitCost === null ? null : h.item.unitCost * h.item.quantity)),
+        ...itemFacts(h.item.details, h.item.folderName),
+        ...fact('Held by', h.heldByName),
+        ...fact('Returned', when(h.heldAt)),
+      ],
     })
   }
   for (const w of writeOffs.writeOffs) {
@@ -256,6 +302,26 @@ const entries = computed<Entry[]>(() => {
       search: '',
       restorableId: null,
       restored: false,
+      headline: `Written off as a loss: ${WRITE_OFF_REASON_LABELS[w.reason].toLowerCase()}`,
+      facts: [
+        ...fact('Reason', WRITE_OFF_REASON_LABELS[w.reason]),
+        ...fact('What happened', w.note),
+        ...(w.customerReturn
+          ? fact(
+              'Came from',
+              `Customer return #${w.customerReturn.receiptNumber} · ${w.customerReturn.customerName}`
+            )
+          : []),
+        ...(w.customerReturn ? fact('Customer said', w.customerReturn.complaint) : []),
+        ...(w.supplierReturn
+          ? fact('Came from', `${w.supplierReturn.supplierName} rejected the claim`)
+          : []),
+        ...fact('Units', w.quantity),
+        ...fact('Loss at cost', money(w.costValue)),
+        ...itemFacts(w.item.details, w.item.folderName),
+        ...fact('Written off by', w.createdByName),
+        ...fact('When', when(w.createdAt)),
+      ],
     })
   }
   for (const r of removals.removals) {
@@ -279,6 +345,24 @@ const entries = computed<Entry[]>(() => {
       search: '',
       restorableId: !count && !r.restoredAt ? r.id : null,
       restored: !!r.restoredAt,
+      headline: count
+        ? `Stock count lowered from ${r.before} to ${r.after}: ${STOCK_REMOVAL_REASON_LABELS[
+            r.reason
+          ].toLowerCase()}`
+        : r.kind === 'category_deleted'
+        ? 'Removed when its category was deleted'
+        : `Deleted from inventory: ${STOCK_REMOVAL_REASON_LABELS[r.reason].toLowerCase()}`,
+      facts: [
+        ...fact('Reason', STOCK_REMOVAL_REASON_LABELS[r.reason]),
+        ...fact('Note', r.note),
+        ...(count ? fact('Count', `${r.before} → ${r.after}`) : []),
+        ...fact('Units', r.quantity),
+        ...fact('Cost', money(r.costValue)),
+        ...itemFacts(r.item.details, r.item.folderName),
+        ...fact(count ? 'Changed by' : 'Deleted by', r.createdByName),
+        ...fact('When', when(r.createdAt)),
+        ...(r.restoredAt ? fact('Restored', when(r.restoredAt)) : []),
+      ],
     })
   }
   return out.sort((a, b) => (b.at ?? '').localeCompare(a.at ?? ''))
@@ -341,6 +425,14 @@ watch(
   margin: var(--s-space-half) 0 0;
   color: var(--s-text-muted);
   font: var(--s-text-small);
+}
+
+.s-log__why {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-space-half);
+  cursor: help;
 }
 
 .s-log__muted {

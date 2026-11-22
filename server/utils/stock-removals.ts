@@ -177,7 +177,7 @@ export async function removeItems(
           ],
           lines: names.slice(0, 60).map((n) => ({ name: n || 'Item', qty: 1 })),
           linesLabel: 'Products deleted',
-          link: { label: 'Open returns', path: '/supplier-returns' },
+          link: { label: 'Open stock out log', path: '/supplier-returns?tab=log' },
         },
       })
     }
@@ -238,7 +238,7 @@ export async function removeCategoryItems(
             qty: 1,
           })),
           linesLabel: 'Products removed',
-          link: { label: 'Open returns', path: '/supplier-returns' },
+          link: { label: 'Open stock out log', path: '/supplier-returns?tab=log' },
         },
       })
     }

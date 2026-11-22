@@ -30,227 +30,239 @@
         <template #icon><Store :size="24" :stroke-width="1.75" /></template>
       </SEmptyState>
     </SCard>
-
-    <SCard v-else-if="store.loading && store.returns.length === 0" flush aria-busy="true">
-      <ul class="s-list" aria-label="Loading returns">
-        <li v-for="i in 5" :key="i" class="s-list__item" aria-hidden="true">
-          <div class="s-list__main">
-            <SSkeleton width="40%" height="14px" />
-            <SSkeleton width="25%" height="12px" />
-          </div>
-          <SSkeleton width="72px" height="14px" />
-        </li>
-      </ul>
-    </SCard>
-
-    <SCard v-else-if="store.error">
-      <SEmptyState title="Couldn't load returns" :description="store.error">
-        <template #icon><TriangleAlert :size="24" :stroke-width="1.75" /></template>
-        <template #actions>
-          <SButton @click="store.fetchReturns(true)">Try again</SButton>
-        </template>
-      </SEmptyState>
-    </SCard>
-
-    <template v-else-if="store.returns.length === 0">
-      <InspectionHoldsTable
-        v-if="holdsStore.open.length"
-        :holds="holdsStore.open"
-        :can-manage="canManage"
-        :can-write-off="canWriteOff"
-        :restocking-id="restockingId"
-        :error="inspectError"
-        @restock="restock"
-        @to-supplier="openHoldToSupplier"
-        @write-off="(hold) => openWriteOff({ hold })"
-      />
-      <SCard>
-        <SEmptyState
-          title="No returns yet"
-          description="When stock arrives defective, log it here or from the item in Inventory. It's taken out of stock and tracked until the supplier settles it."
-        >
-          <template #icon><PackageX :size="24" :stroke-width="1.75" /></template>
-          <template v-if="canManage" #actions>
-            <SButton variant="primary" @click="showLog = true">
-              <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
-              Return to supplier
-            </SButton>
-          </template>
-        </SEmptyState>
-      </SCard>
-    </template>
-
     <template v-else>
-      <dl class="s-metrics" aria-label="Returns summary">
-        <div v-for="metric in metrics" :key="metric.key" class="s-metrics__item">
-          <dt class="s-metrics__label">{{ metric.label }}</dt>
-          <dd class="s-metrics__value" :class="metric.tone && `s-metrics__value--${metric.tone}`">
-            {{ metric.value }}
-          </dd>
-        </div>
-      </dl>
+      <STabs v-model="pageTab" :tabs="pageTabs" label="Returns sections" class="s-sr-page-tabs" />
 
-      <InspectionHoldsTable
-        v-if="holdsStore.open.length"
-        :holds="holdsStore.open"
-        :can-manage="canManage"
-        :can-write-off="canWriteOff"
-        :restocking-id="restockingId"
-        :error="inspectError"
-        @restock="restock"
-        @to-supplier="openHoldToSupplier"
-        @write-off="(hold) => openWriteOff({ hold })"
-      />
+      <template v-if="pageTab === 'returns'">
+        <SCard v-if="store.loading && store.returns.length === 0" flush aria-busy="true">
+          <ul class="s-list" aria-label="Loading returns">
+            <li v-for="i in 5" :key="i" class="s-list__item" aria-hidden="true">
+              <div class="s-list__main">
+                <SSkeleton width="40%" height="14px" />
+                <SSkeleton width="25%" height="12px" />
+              </div>
+              <SSkeleton width="72px" height="14px" />
+            </li>
+          </ul>
+        </SCard>
 
-      <section class="s-table-card" aria-labelledby="sr-table-title">
-        <div class="s-table-card__head">
-          <h2 id="sr-table-title" class="s-sr-section-title">Supplier returns</h2>
-          <STabs v-model="activeTab" :tabs="tabs" label="Supplier return views" />
-          <div class="s-toolbar">
-            <SSearch
-              v-model="searchQuery"
-              class="s-toolbar__search"
-              placeholder="Search returns"
-              label="Search by item, serial number, supplier or fault"
-            />
-            <div v-if="supplierOptions.length > 2" class="s-toolbar__filter">
-              <SSelect v-model="supplierFilter" :options="supplierOptions" aria-label="Supplier" />
-            </div>
-          </div>
-        </div>
-
-        <SCard v-if="filteredReturns.length === 0">
-          <SEmptyState
-            title="No returns found"
-            description="Try another item, serial number or supplier, or switch tabs."
-          >
-            <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+        <SCard v-else-if="store.error">
+          <SEmptyState title="Couldn't load returns" :description="store.error">
+            <template #icon><TriangleAlert :size="24" :stroke-width="1.75" /></template>
             <template #actions>
-              <SButton @click="clearFilters">Clear filters</SButton>
+              <SButton @click="store.fetchReturns(true)">Try again</SButton>
             </template>
           </SEmptyState>
         </SCard>
 
-        <template v-else>
-          <!-- Phone -->
-          <SCard flush class="s-only-sm">
-            <ul class="s-list">
-              <li v-for="row in filteredReturns" :key="row.id">
-                <button
-                  type="button"
-                  class="s-list__item s-list__item--interactive"
-                  @click="openDetail(row)"
-                >
-                  <span class="s-list__main">
-                    <span class="s-list__primary">{{ row.item.name }}</span>
-                    <span class="s-list__secondary">
-                      {{ row.supplierName || 'Supplier not set' }} · {{ row.defect || 'Faulty' }}
-                    </span>
-                  </span>
-                  <span class="s-list__end">
-                    <span class="s-list__value">{{ moneyOrDash(row.costValue) }}</span>
-                    <SBadge :tone="STATUS_TONES[row.status]" size="sm" dot>
-                      {{ SUPPLIER_RETURN_STATUS_LABELS[row.status] }}
-                    </SBadge>
-                  </span>
-                </button>
-              </li>
-            </ul>
+        <template v-else-if="store.returns.length === 0">
+          <InspectionHoldsTable
+            v-if="holdsStore.open.length"
+            :holds="holdsStore.open"
+            :can-manage="canManage"
+            :can-write-off="canWriteOff"
+            :restocking-id="restockingId"
+            :error="inspectError"
+            @restock="restock"
+            @to-supplier="openHoldToSupplier"
+            @write-off="(hold) => openWriteOff({ hold })"
+          />
+          <SCard>
+            <SEmptyState
+              title="No returns yet"
+              description="When stock arrives defective, log it here or from the item in Inventory. It's taken out of stock and tracked until the supplier settles it."
+            >
+              <template #icon><PackageX :size="24" :stroke-width="1.75" /></template>
+              <template v-if="canManage" #actions>
+                <SButton variant="primary" @click="showLog = true">
+                  <template #leading
+                    ><Plus :size="16" :stroke-width="2" aria-hidden="true"
+                  /></template>
+                  Return to supplier
+                </SButton>
+              </template>
+            </SEmptyState>
           </SCard>
+        </template>
 
-          <!-- Tablet and desktop -->
-          <div class="s-table-wrap s-hide-sm">
-            <table class="s-table">
-              <thead>
-                <tr>
-                  <th scope="col">Item</th>
-                  <th scope="col" class="s-hide-md">Fault</th>
-                  <th scope="col">Supplier</th>
-                  <th scope="col" class="s-hide-lg">Returned on</th>
-                  <th scope="col" class="s-table__num">Cost</th>
-                  <th scope="col">Status</th>
-                  <th scope="col"><span class="ds-sr-only">Actions</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in filteredReturns" :key="row.id">
-                  <td>
+        <template v-else>
+          <dl class="s-metrics" aria-label="Returns summary">
+            <div v-for="metric in metrics" :key="metric.key" class="s-metrics__item">
+              <dt class="s-metrics__label">{{ metric.label }}</dt>
+              <dd
+                class="s-metrics__value"
+                :class="metric.tone && `s-metrics__value--${metric.tone}`"
+              >
+                {{ metric.value }}
+              </dd>
+            </div>
+          </dl>
+
+          <InspectionHoldsTable
+            v-if="holdsStore.open.length"
+            :holds="holdsStore.open"
+            :can-manage="canManage"
+            :can-write-off="canWriteOff"
+            :restocking-id="restockingId"
+            :error="inspectError"
+            @restock="restock"
+            @to-supplier="openHoldToSupplier"
+            @write-off="(hold) => openWriteOff({ hold })"
+          />
+
+          <section class="s-table-card" aria-labelledby="sr-table-title">
+            <div class="s-table-card__head">
+              <h2 id="sr-table-title" class="s-sr-section-title">Supplier returns</h2>
+              <STabs v-model="activeTab" :tabs="tabs" label="Supplier return views" />
+              <div class="s-toolbar">
+                <SSearch
+                  v-model="searchQuery"
+                  class="s-toolbar__search"
+                  placeholder="Search returns"
+                  label="Search by item, serial number, supplier or fault"
+                />
+                <div v-if="supplierOptions.length > 2" class="s-toolbar__filter">
+                  <SSelect
+                    v-model="supplierFilter"
+                    :options="supplierOptions"
+                    aria-label="Supplier"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <SCard v-if="filteredReturns.length === 0">
+              <SEmptyState
+                title="No returns found"
+                description="Try another item, serial number or supplier, or switch tabs."
+              >
+                <template #icon><SearchX :size="24" :stroke-width="1.75" /></template>
+                <template #actions>
+                  <SButton @click="clearFilters">Clear filters</SButton>
+                </template>
+              </SEmptyState>
+            </SCard>
+
+            <template v-else>
+              <!-- Phone -->
+              <SCard flush class="s-only-sm">
+                <ul class="s-list">
+                  <li v-for="row in filteredReturns" :key="row.id">
                     <button
                       type="button"
-                      class="s-table__primary s-link s-sr-row-link"
+                      class="s-list__item s-list__item--interactive"
                       @click="openDetail(row)"
                     >
-                      {{ row.item.name }}
+                      <span class="s-list__main">
+                        <span class="s-list__primary">{{ row.item.name }}</span>
+                        <span class="s-list__secondary">
+                          {{ row.supplierName || 'Supplier not set' }} ·
+                          {{ row.defect || 'Faulty' }}
+                        </span>
+                      </span>
+                      <span class="s-list__end">
+                        <span class="s-list__value">{{ moneyOrDash(row.costValue) }}</span>
+                        <SBadge :tone="STATUS_TONES[row.status]" size="sm" dot>
+                          {{ SUPPLIER_RETURN_STATUS_LABELS[row.status] }}
+                        </SBadge>
+                      </span>
                     </button>
-                    <span class="s-table__secondary">{{ itemLine(row) }}</span>
-                  </td>
-                  <td class="s-hide-md">
-                    <span class="s-table__primary">{{ row.defect || 'Faulty' }}</span>
-                  </td>
-                  <td>
-                    <span class="s-table__primary">{{ row.supplierName || EMPTY_CELL }}</span>
-                    <span v-if="row.supplierReference" class="s-table__secondary">{{
-                      row.supplierReference
-                    }}</span>
-                  </td>
-                  <td class="s-hide-lg s-table__nowrap">
-                    {{ formatDay(row.createdAt) }}
-                  </td>
-                  <td class="s-table__num">{{ moneyOrDash(row.costValue) }}</td>
-                  <td>
-                    <SBadge :tone="STATUS_TONES[row.status]" size="sm" dot>
-                      {{ statusText(row) }}
-                    </SBadge>
-                  </td>
-                  <td class="s-table__nowrap">
-                    <SButton
-                      v-if="canManage && row.status === 'ready'"
-                      variant="secondary"
-                      size="sm"
-                      @click="openSend(row)"
-                    >
-                      Send to supplier
-                    </SButton>
-                    <SButton
-                      v-else-if="canManage && row.status === 'with_supplier'"
-                      variant="secondary"
-                      size="sm"
-                      @click="openResolve(row)"
-                    >
-                      Resolve
-                    </SButton>
-                    <SButton
-                      v-else-if="canManage && awaitingRestock(row)"
-                      variant="secondary"
-                      size="sm"
-                      @click="openRestock(row)"
-                    >
-                      Put back in stock
-                    </SButton>
-                    <SButton
-                      v-else-if="canWriteOff && row.status === 'rejected' && !row.writeOffId"
-                      variant="secondary"
-                      size="sm"
-                      @click="openWriteOff({ supplierReturn: row })"
-                    >
-                      Write off
-                    </SButton>
-                    <SButton v-else variant="ghost" size="sm" @click="openDetail(row)">
-                      View
-                    </SButton>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </template>
-      </section>
-    </template>
+                  </li>
+                </ul>
+              </SCard>
 
-    <StockOutLog
-      v-if="canView && storesStore.currentStoreId && !store.error"
-      :can-restore="can('products', 'create')"
-    />
+              <!-- Tablet and desktop -->
+              <div class="s-table-wrap s-hide-sm">
+                <table class="s-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Item</th>
+                      <th scope="col" class="s-hide-md">Fault</th>
+                      <th scope="col">Supplier</th>
+                      <th scope="col" class="s-hide-lg">Returned on</th>
+                      <th scope="col" class="s-table__num">Cost</th>
+                      <th scope="col">Status</th>
+                      <th scope="col"><span class="ds-sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="row in filteredReturns" :key="row.id">
+                      <td>
+                        <button
+                          type="button"
+                          class="s-table__primary s-link s-sr-row-link"
+                          @click="openDetail(row)"
+                        >
+                          {{ row.item.name }}
+                        </button>
+                        <span class="s-table__secondary">{{ itemLine(row) }}</span>
+                      </td>
+                      <td class="s-hide-md">
+                        <span class="s-table__primary">{{ row.defect || 'Faulty' }}</span>
+                      </td>
+                      <td>
+                        <span class="s-table__primary">{{ row.supplierName || EMPTY_CELL }}</span>
+                        <span v-if="row.supplierReference" class="s-table__secondary">{{
+                          row.supplierReference
+                        }}</span>
+                      </td>
+                      <td class="s-hide-lg s-table__nowrap">
+                        {{ formatDay(row.createdAt) }}
+                      </td>
+                      <td class="s-table__num">{{ moneyOrDash(row.costValue) }}</td>
+                      <td>
+                        <SBadge :tone="STATUS_TONES[row.status]" size="sm" dot>
+                          {{ statusText(row) }}
+                        </SBadge>
+                      </td>
+                      <td class="s-table__nowrap">
+                        <SButton
+                          v-if="canManage && row.status === 'ready'"
+                          variant="secondary"
+                          size="sm"
+                          @click="openSend(row)"
+                        >
+                          Send to supplier
+                        </SButton>
+                        <SButton
+                          v-else-if="canManage && row.status === 'with_supplier'"
+                          variant="secondary"
+                          size="sm"
+                          @click="openResolve(row)"
+                        >
+                          Resolve
+                        </SButton>
+                        <SButton
+                          v-else-if="canManage && awaitingRestock(row)"
+                          variant="secondary"
+                          size="sm"
+                          @click="openRestock(row)"
+                        >
+                          Put back in stock
+                        </SButton>
+                        <SButton
+                          v-else-if="canWriteOff && row.status === 'rejected' && !row.writeOffId"
+                          variant="secondary"
+                          size="sm"
+                          @click="openWriteOff({ supplierReturn: row })"
+                        >
+                          Write off
+                        </SButton>
+                        <SButton v-else variant="ghost" size="sm" @click="openDetail(row)">
+                          View
+                        </SButton>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+          </section>
+        </template>
+      </template>
+
+      <StockOutLog v-else :can-restore="can('products', 'create')" />
+    </template>
 
     <!-- Detail -->
     <SDialog
@@ -589,6 +601,23 @@ const canView = computed(() => can('products', 'view'))
 /** Mirrors the server: taking stock out needs products edit or delete. */
 const canManage = computed(() => can('products', 'edit') || can('products', 'delete'))
 const showLog = ref(false)
+
+// ── Page tabs: Returns (inspect + supplier returns) and Stock out log ──
+const pageRoute = useRoute()
+const pageRouter = useRouter()
+const pageTab = ref<'returns' | 'log'>(pageRoute.query.tab === 'log' ? 'log' : 'returns')
+const pageTabs = computed(() => {
+  const open =
+    holdsStore.open.length +
+    store.returns.filter((r) => r.status === 'ready' || r.status === 'with_supplier').length
+  return [
+    { value: 'returns', label: 'Returns', ...(open ? { count: open } : {}) },
+    { value: 'log', label: 'Stock out log' },
+  ]
+})
+watch(pageTab, (tab) => {
+  void pageRouter.replace({ query: { ...pageRoute.query, tab: tab === 'log' ? 'log' : undefined } })
+})
 
 // ── To inspect: held customer returns ──
 const holdsStore = useInspectionHoldsStore()
@@ -961,6 +990,10 @@ watch(
 </script>
 
 <style scoped>
+.s-sr-page-tabs {
+  align-self: flex-start;
+}
+
 .s-sr-section-title {
   margin: 0;
   color: var(--s-text);
