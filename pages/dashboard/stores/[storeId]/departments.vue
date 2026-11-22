@@ -165,6 +165,9 @@
                       (checked) => toggleDepartmentSelection(department, checked)
                     "
                   />
+                  <span class="s-dept-table__mark" aria-hidden="true">
+                    {{ nameInitials(department.name) }}
+                  </span>
                   <button
                     type="button"
                     class="s-list__main s-list__hit"

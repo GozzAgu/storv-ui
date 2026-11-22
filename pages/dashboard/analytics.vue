@@ -586,13 +586,8 @@ import InlineStorePicker from '~/components/dashboard/InlineStorePicker.vue'
 import { useAnalyticsFeatureInsights } from '~/composables/useAnalyticsFeatureInsights'
 import { usePermissions } from '~/composables/usePermissions'
 import { useStaffStore } from '~/stores/staff'
-import {
-  truncateChartLabel,
-  safeTurnoverPercent,
-  apexTheme,
-  createChartCurrencyAxisFormatter,
-} from '~/utils/analytics-charts'
-import { formatFullMoney } from '~/utils/format-money'
+import { truncateChartLabel, safeTurnoverPercent, apexTheme } from '~/utils/analytics-charts'
+import { formatAxisMoney, formatFullMoney } from '~/utils/format-money'
 import type { InventoryItem } from '~/stores/inventory'
 import {
   formatMarginPercent,
@@ -624,21 +619,11 @@ useHead({
 
 const { formatCurrency, preferences, baseCurrency, initialize: initPreferences } = usePreferences()
 
-const chartLocale = computed(() =>
-  preferences.value.region === 'NG'
-    ? 'en-NG'
-    : preferences.value.language === 'fr'
-    ? 'fr-FR'
-    : 'en-US'
-)
-
-const chartCurrencyAxis = computed(() =>
-  createChartCurrencyAxisFormatter(
-    formatCurrency,
-    preferences.value.currency || 'USD',
-    chartLocale.value
-  )
-)
+/** Chart axes use short money ("₦200M") so long figures don't crowd the plot; tooltips stay full. */
+const chartCurrencyAxis = computed(() => {
+  const symbol = preferences.value.currencySymbol || '$'
+  return (val: number) => (Number.isFinite(val) ? formatAxisMoney(val, symbol) : '-')
+})
 const toast = useAppToast()
 const { exporting: reorderExporting, exportReorderListExcel } = useReorderListExport()
 
@@ -1455,7 +1440,10 @@ const overviewRevenueChartOptions = computed(() => ({
   },
   yaxis: {
     ...revenueChartOptions.value.yaxis,
-    labels: { ...revenueChartOptions.value.yaxis.labels, formatter: chartCurrency },
+    labels: {
+      ...revenueChartOptions.value.yaxis.labels,
+      formatter: (val: number) => chartCurrencyAxis.value(val),
+    },
   },
 }))
 
@@ -1491,7 +1479,7 @@ function donutChartOptions(config: {
     plotOptions: {
       pie: {
         donut: {
-          size: '72%',
+          size: '80%',
           labels: {
             show: true,
             name: { fontSize: '11px', offsetY: 18 },
@@ -1953,23 +1941,19 @@ const revenueChartOptions = computed(() => {
         }) || [],
       labels: {
         style: {
-          colors: isDark ? '#9CA3AF' : '#1F2937',
-          fontSize: '12px',
+          colors: isDark ? '#9CA3AF' : '#6B7280',
+          fontSize: '11px',
         },
       },
-      axisBorder: {
-        show: true,
-        color: isDark ? '#374151' : '#E5E7EB',
-      },
-      axisTicks: {
-        show: true,
-        color: isDark ? '#374151' : '#E5E7EB',
-      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      // The hover card names the period; no second boxed label under the axis.
+      tooltip: { enabled: false },
     },
     yaxis: {
       labels: {
         style: {
-          colors: isDark ? '#9CA3AF' : '#1F2937',
+          colors: isDark ? '#9CA3AF' : '#6B7280',
           fontSize: '11px',
         },
         formatter: (val: number) => chartCurrencyAxis.value(val),

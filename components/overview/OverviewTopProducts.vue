@@ -1,5 +1,5 @@
 <template>
-  <SCard title="Best selling products" flush class="s-overview-top">
+  <SCard title="Best selling products" flush class="s-overview-top s-dept-table">
     <template v-if="showRevenue" #actions>
       <SButton variant="ghost" size="sm" to="/dashboard/analytics">View report</SButton>
     </template>
@@ -23,8 +23,12 @@
             <td>
               <span class="s-table__primary s-overview-top__name">{{ item.name }}</span>
             </td>
-            <td class="s-table__num">{{ item.sales.toLocaleString('en-US') }}</td>
-            <td v-if="showRevenue" class="s-table__num">{{ formatCurrency(item.revenue) }}</td>
+            <td class="s-table__num s-dept-table__type">
+              {{ item.sales.toLocaleString('en-US') }}
+            </td>
+            <td v-if="showRevenue" class="s-table__num s-dept-table__money">
+              {{ formatCurrency(item.revenue) }}
+            </td>
             <td v-if="showRevenue" class="s-overview-top__share s-hide-sm">
               <span class="s-overview-top__meter" aria-hidden="true">
                 <span :style="{ width: `${Math.max(item.share, 2)}%` }" />

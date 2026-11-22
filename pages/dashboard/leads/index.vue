@@ -127,6 +127,9 @@
                   :to="dashPath(`/leads/${lead.id}`)"
                   class="s-list__item s-list__item--interactive"
                 >
+                  <span class="s-dept-table__mark" aria-hidden="true">
+                    {{ nameInitials(lead.customerName) }}
+                  </span>
                   <span class="s-list__main">
                     <span class="s-list__primary">{{ lead.customerName }}</span>
                     <span class="s-list__secondary">{{ lead.productName }}</span>

@@ -428,12 +428,17 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: var(--s-space-4);
-  height: var(--s-space-4);
-  border-radius: var(--s-radius);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--s-radius-full);
   background: var(--s-surface-2);
-  box-shadow: inset 0 0 0 1px var(--s-line);
-  color: var(--s-text-2);
+  color: var(--s-text-muted);
+}
+
+/* Same as the cards: tinted when the category holds stock, grey when it's empty */
+.s-category-cell__mark--stocked {
+  background: var(--s-accent-soft);
+  color: var(--s-accent);
 }
 
 .s-category-cell__text {
@@ -796,4 +801,118 @@
   color: var(--s-text-2);
   font: var(--s-text-body);
   text-align: center;
+}
+
+/* ── Category cards: calmer tiles ─────────────────────────── */
+/* One white tile per category: no grey inner panel, a soft round icon, a quiet meta line and the
+   value under a hairline. The open arrow only appears on hover. */
+.s-category-card {
+  padding: var(--s-space-2);
+  border-radius: var(--s-radius-lg);
+  box-shadow: 0 0 0 1px var(--s-divider), var(--s-card-shadow);
+}
+
+.s-category-card:hover {
+  box-shadow: 0 0 0 1px var(--s-divider), var(--s-shadow-md);
+}
+
+.s-category-card__panel {
+  min-height: 0;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.s-category-card__head {
+  min-height: 32px;
+  margin-bottom: var(--s-space-1-5);
+}
+
+.s-category-card__mark {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--s-radius-full);
+  background: var(--s-accent-soft);
+  color: var(--s-accent);
+}
+
+.s-category-card--empty .s-category-card__mark,
+.s-category-card--locked .s-category-card__mark {
+  background: var(--s-surface-2);
+  color: var(--s-text-muted);
+  box-shadow: none;
+}
+
+.s-category-card__title {
+  font: 600 0.875rem/1.35 var(--s-font-sans);
+  letter-spacing: -0.01em;
+}
+
+.s-category-card__chips {
+  gap: 0;
+  margin: 2px 0 0;
+  padding: 0;
+}
+
+.s-category-card__chip {
+  height: auto;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--s-text-muted);
+  font: 400 0.75rem/1.125rem var(--s-font-sans);
+}
+
+.s-category-card__chip + .s-category-card__chip::before {
+  margin: 0 6px;
+  color: var(--s-text-muted);
+  content: '·';
+}
+
+.s-category-card__chip--warn {
+  color: var(--s-warning);
+}
+
+/* The low-stock count keeps the plain "·" separator, not the old orange dot */
+.s-category-card__chip + .s-category-card__chip--warn::before {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+}
+
+.s-category-card__foot {
+  margin-top: var(--s-space-1-5);
+  padding: var(--s-space-1-5) 0 0;
+  border-top: 1px solid var(--s-divider);
+}
+
+.s-category-card__value {
+  font: var(--s-text-body);
+  font-weight: 600;
+}
+
+.s-category-card__go {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--s-radius-full);
+  background: none;
+  color: var(--s-text-muted);
+}
+
+@media (hover: hover) {
+  .s-category-card__go {
+    opacity: 0;
+    transition: opacity var(--s-duration-fast) var(--s-ease);
+  }
+
+  .s-category-card:hover .s-category-card__go,
+  .s-category-card:focus-within .s-category-card__go {
+    opacity: 1;
+  }
+}
+
+.s-category-card:hover .s-category-card__go {
+  background: var(--s-surface-2);
+  color: var(--s-text);
 }

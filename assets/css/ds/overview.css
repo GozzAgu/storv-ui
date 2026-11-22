@@ -285,7 +285,7 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: var(--s-radius);
+  border-radius: var(--s-radius-full);
   background: var(--s-info-soft);
   color: var(--s-info);
 }
@@ -485,4 +485,98 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: bottom;
+}
+
+/* ── Calmer overview ─────────────────────────────────────── */
+
+/* Stat icons sit quietly in the corner instead of in tinted boxes (Overview, Reports…) */
+.s-page .s-stat .s-stat__icon {
+  width: auto;
+  height: auto;
+  background: none;
+  color: var(--s-text-muted);
+}
+
+/* Chart hover card on every page: a soft floating card, no grey title bar */
+.s-page .apexcharts-tooltip.apexcharts-theme-light,
+.s-page .apexcharts-tooltip.apexcharts-theme-dark {
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--s-radius);
+  background: var(--s-surface);
+  box-shadow: var(--s-shadow-md), 0 0 0 1px var(--s-divider);
+  color: var(--s-text);
+  font-family: var(--s-font-sans);
+}
+
+.s-page .apexcharts-tooltip .apexcharts-tooltip-title {
+  margin: 0;
+  padding: var(--s-space-1) var(--s-space-1-5) 0;
+  border: 0;
+  background: none;
+  color: var(--s-text-muted);
+  font: var(--s-text-caption);
+}
+
+.s-page .apexcharts-tooltip .apexcharts-tooltip-series-group {
+  padding: 2px var(--s-space-1-5) var(--s-space-1);
+}
+
+/* The overview chart has one series, so its name and colour dot add nothing */
+.s-overview .apexcharts-tooltip .apexcharts-tooltip-marker {
+  display: none;
+}
+
+.s-page .apexcharts-tooltip .apexcharts-tooltip-text {
+  font: var(--s-text-small);
+  font-weight: 600;
+}
+
+.s-overview .apexcharts-tooltip .apexcharts-tooltip-text-y-label {
+  display: none;
+}
+
+/* Overview lists (recent sales, low stock, needs attention): one step smaller and tighter, so
+   the side panels read as summaries rather than full pages */
+.s-overview .s-list__item {
+  min-height: 48px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.s-overview .s-list__primary {
+  font: var(--s-text-small);
+  font-weight: 500;
+}
+
+.s-overview .s-list__secondary {
+  font: var(--s-text-caption);
+  font-weight: 400;
+}
+
+.s-overview .s-list__value {
+  font: var(--s-text-small);
+  font-weight: 500;
+}
+
+.s-overview .s-list .s-avatar {
+  width: 28px;
+  height: 28px;
+  background: var(--s-surface-2);
+  color: var(--s-text-2);
+  font-size: 0.6875rem;
+}
+
+.s-overview .s-overview-attention__mark {
+  width: 28px;
+  height: 28px;
+}
+
+.s-overview .s-overview-attention__mark svg {
+  width: 14px;
+  height: 14px;
+}
+
+.s-overview .s-card__title {
+  font-size: 0.8125rem;
 }

@@ -684,32 +684,46 @@
   display: flex;
   flex-direction: column;
   margin: 0;
+  padding: 0 var(--s-space-2);
+  border: 1px solid var(--s-divider);
+  border-radius: var(--s-radius-lg);
 }
 
+/* One fact per row: the label on the left, the value on the right */
 .s-inv-detail__row {
   display: flex;
-  flex-direction: column;
-  gap: var(--s-space-half);
-  padding: var(--s-space-1-5) 0;
-  border-top: 1px solid var(--s-border);
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-space-2);
+  min-height: 44px;
+  padding: 11px 0;
+  border-top: 1px solid var(--s-divider);
 }
 
 .s-inv-detail__row:first-child {
-  padding-top: 0;
   border-top: 0;
 }
 
-.s-inv-detail__row dt {
+.s-inv-detail__row > dt {
+  flex: none;
+  max-width: 45%;
   color: var(--s-text-muted);
   font: var(--s-text-small);
 }
 
-.s-inv-detail__row dd {
+.s-inv-detail__row > dd {
   min-width: 0;
   margin: 0;
   color: var(--s-text);
-  font: var(--s-text-body);
+  font: var(--s-text-small);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
   overflow-wrap: anywhere;
+}
+
+/* Price history and other nested facts stay right-aligned under their value */
+.s-inv-detail__row > dd .s-inv-detail__price {
+  justify-content: flex-end;
 }
 
 .s-inv-detail__strong {

@@ -190,3 +190,9 @@
 .s-dept-table .s-cell__name {
   font-weight: 500;
 }
+
+/* Phone lists (and the iOS app) use the same soft initials as the tables */
+.s-list__item .s-avatar:not(:has(img)) {
+  background: var(--s-surface-2);
+  color: var(--s-text-2);
+}

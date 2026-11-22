@@ -78,7 +78,7 @@
 
     <section
       v-if="!inventoryStore.loading && folders.length > 0"
-      class="s-table-card s-inventory__section"
+      class="s-table-card s-inventory__section s-dept-table"
       aria-label="Categories"
     >
       <div class="s-table-card__head">
@@ -278,12 +278,19 @@
               </td>
               <td>
                 <div class="s-category-cell">
-                  <span class="s-category-cell__mark" aria-hidden="true">
-                    <Lock v-if="isFolderLocked(folder)" :size="16" :stroke-width="1.75" />
+                  <span
+                    class="s-category-cell__mark"
+                    :class="{
+                      's-category-cell__mark--stocked':
+                        !isFolderLocked(folder) && folderDisplayStats(folder).itemCount > 0,
+                    }"
+                    aria-hidden="true"
+                  >
+                    <Lock v-if="isFolderLocked(folder)" :size="14" :stroke-width="1.75" />
                     <component
                       :is="folderKindIcon(folder)"
                       v-else
-                      :size="16"
+                      :size="14"
                       :stroke-width="1.75"
                     />
                   </span>
@@ -297,10 +304,10 @@
                 </div>
               </td>
               <td class="s-hide-sm">
-                <SBadge>{{ formatFolderTypeLabel(folder) }}</SBadge>
+                <span class="s-dept-table__type">{{ formatFolderTypeLabel(folder) }}</span>
               </td>
               <td class="s-table__num">
-                <span class="s-table__primary">{{ folderDisplayStats(folder).itemCount }}</span>
+                <span class="s-dept-table__type">{{ folderDisplayStats(folder).itemCount }}</span>
                 <span
                   v-if="folderDisplayStats(folder).lowStockCount > 0"
                   class="s-table__secondary s-table__warning"
@@ -308,7 +315,7 @@
                   {{ folderDisplayStats(folder).lowStockCount }} low stock
                 </span>
               </td>
-              <td v-if="canViewFinancials" class="s-table__num s-hide-sm">
+              <td v-if="canViewFinancials" class="s-table__num s-hide-sm s-dept-table__money">
                 {{ formatCurrency(folderDisplayStats(folder).totalValue ?? 0) }}
               </td>
               <td v-if="canViewProfitAndCost" class="s-table__num s-hide-md">
@@ -318,9 +325,9 @@
                 <span v-else class="s-table__muted">–</span>
               </td>
               <td class="s-hide-md">
-                <SBadge :tone="folder.hasSerialNumbers ? 'accent' : 'neutral'">
-                  {{ folder.hasSerialNumbers ? 'Serial' : 'Quantity' }}
-                </SBadge>
+                <span class="s-dept-table__type">{{
+                  folder.hasSerialNumbers ? 'Serial numbers' : 'Quantity'
+                }}</span>
               </td>
               <td v-if="!isStaff" class="s-hide-lg">
                 <span class="s-table__secondary">{{ folderDepartmentsSummary(folder) }}</span>

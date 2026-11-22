@@ -56,7 +56,7 @@ import {
   readDsChartPalette,
   type DsChartPalette,
 } from '~/utils/ds-apex-chart'
-import { formatFullMoney } from '~/utils/format-money'
+import { formatAxisMoney, formatFullMoney } from '~/utils/format-money'
 
 const LazyApexChart = defineAsyncComponent(
   () => import('~/components/charts/LazyApexChart.client.vue')
@@ -164,16 +164,19 @@ const options = computed(() => {
       tickPlacement: 'on',
       axisBorder: { show: false },
       axisTicks: { show: false },
+      // The hover tooltip already names the period; no second boxed label under the axis.
+      tooltip: { enabled: false },
+      crosshairs: { stroke: { color: grid, width: 1, dashArray: 0 } },
     },
     yaxis: {
       labels: {
         style: axisLabel,
-        formatter: (value: number) => formatFullMoney(value, props.currencySymbol),
+        formatter: (value: number) => formatAxisMoney(value, props.currencySymbol),
       },
     },
     grid: {
       borderColor: grid,
-      strokeDashArray: 0,
+      strokeDashArray: 3,
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: true } },
       padding: { top: 0, right: 16, bottom: 8, left: 16 },
@@ -186,7 +189,7 @@ const options = computed(() => {
     },
     colors: [line],
     legend: { show: false },
-    markers: { size: 0, hover: { size: 4 } },
+    markers: { size: 0, strokeWidth: 2, strokeColors: 'var(--s-surface)', hover: { size: 5 } },
   }
 })
 </script>
