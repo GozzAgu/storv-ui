@@ -1,5 +1,7 @@
 <template>
   <div class="ds-root s-c mk">
+    <!-- Hidden while the menu is open: the menu sheet is padded for the header alone -->
+    <MkTopBar v-show="!menuOpen" />
     <header
       class="mk-header"
       :class="{
@@ -220,6 +222,7 @@ import SIconButton from '~/components/s/SIconButton.vue'
 import MkFeatureMenu from '~/components/marketing/MkFeatureMenu.vue'
 import MkFooter from '~/components/marketing/MkFooter.vue'
 import MkProductMenu from '~/components/marketing/MkProductMenu.vue'
+import MkTopBar from '~/components/marketing/MkTopBar.vue'
 import BookWalkthroughDialog from '~/components/demo/BookWalkthroughDialog.vue'
 import { useWalkthrough } from '~/composables/useWalkthrough'
 import { useTheme } from '~/composables/useTheme'
