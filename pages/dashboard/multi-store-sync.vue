@@ -31,81 +31,150 @@
           <SCard
             v-if="activeTab === 'transfer' && canRequestTransfers"
             title="New transfer"
-            class="s-transfer"
+            class="s-transfer s-xfer"
           >
-            <form class="s-form" @submit.prevent="requestTransfer">
-              <p class="s-transfer__intro">
-                You request a transfer, the sending branch dispatches it, and an admin at the
-                receiving branch approves it on arrival. Stock only enters their inventory once they
-                approve.
-              </p>
+            <!-- How a transfer moves: three stops; stock only lands once it's approved -->
+            <ol class="s-xfer-flow" aria-label="How a transfer works">
+              <li class="s-xfer-flow__stop">
+                <span class="s-xfer-flow__icon"
+                  ><Send :size="14" :stroke-width="2" aria-hidden="true"
+                /></span>
+                <span><strong>You request</strong> the stock</span>
+              </li>
+              <li class="s-xfer-flow__stop">
+                <span class="s-xfer-flow__icon"
+                  ><Truck :size="14" :stroke-width="2" aria-hidden="true"
+                /></span>
+                <span><strong>The sender dispatches</strong> it</span>
+              </li>
+              <li class="s-xfer-flow__stop">
+                <span class="s-xfer-flow__icon"
+                  ><PackageCheck :size="14" :stroke-width="2" aria-hidden="true"
+                /></span>
+                <span><strong>An admin approves</strong> it on arrival</span>
+              </li>
+            </ol>
 
-              <div class="s-transfer__grid">
-                <SSelect
-                  :model-value="transferForm.sourceStoreId"
-                  label="From branch"
-                  placeholder="Choose a branch"
-                  :options="sourceStoreOptions"
-                  :disabled="sourceStoreLocked"
-                  required
-                  @update:model-value="onWebSourceStoreChange"
-                />
-                <SSelect
-                  :model-value="transferForm.destinationStoreId"
-                  label="To branch"
-                  :placeholder="
-                    destinationStoreOptions.length ? 'Choose a branch' : 'No other branch available'
-                  "
-                  :options="destinationStoreOptions"
-                  :disabled="!transferForm.sourceStoreId || destinationStoreOptions.length === 0"
-                  required
-                  @update:model-value="onWebDestinationStoreChange"
-                />
-              </div>
-              <p
-                v-if="transferForm.sourceStoreId && destinationStoreOptions.length === 0"
-                class="s-notice"
-              >
-                No other active branch is available to send stock to. Add another branch, or ask the
-                account owner to turn on Transfer stock to other branches for your admin login.
-              </p>
+            <form class="s-form s-xfer__form" @submit.prevent="requestTransfer">
+              <!-- 1 · Route -->
+              <section class="s-xfer-step" :class="{ 's-xfer-step--done': transferRouteChosen }">
+                <header class="s-xfer-step__head">
+                  <span class="s-xfer-step__num" aria-hidden="true">
+                    <Check v-if="transferRouteChosen" :size="12" :stroke-width="3" />
+                    <template v-else>1</template>
+                  </span>
+                  <h3 class="s-xfer-step__title">Route</h3>
+                  <p class="s-xfer-step__hint">Where the stock leaves from and where it goes.</p>
+                </header>
+                <div class="s-xfer-route">
+                  <SSelect
+                    :model-value="transferForm.sourceStoreId"
+                    label="From branch"
+                    placeholder="Choose a branch"
+                    :options="sourceStoreOptions"
+                    :disabled="sourceStoreLocked"
+                    required
+                    @update:model-value="onWebSourceStoreChange"
+                  />
+                  <span class="s-xfer-route__arrow" aria-hidden="true">
+                    <ArrowRight :size="16" :stroke-width="2" />
+                  </span>
+                  <SSelect
+                    :model-value="transferForm.destinationStoreId"
+                    label="To branch"
+                    :placeholder="
+                      destinationStoreOptions.length
+                        ? 'Choose a branch'
+                        : 'No other branch available'
+                    "
+                    :options="destinationStoreOptions"
+                    :disabled="!transferForm.sourceStoreId || destinationStoreOptions.length === 0"
+                    required
+                    @update:model-value="onWebDestinationStoreChange"
+                  />
+                </div>
+                <p
+                  v-if="transferForm.sourceStoreId && destinationStoreOptions.length === 0"
+                  class="s-notice"
+                >
+                  No other active branch is available to send stock to. Add another branch, or ask
+                  the account owner to turn on Transfer stock to other branches for your admin
+                  login.
+                </p>
+              </section>
 
-              <div
+              <!-- 2 · Categories -->
+              <section
                 v-if="transferForm.sourceStoreId || transferForm.destinationStoreId"
-                class="s-transfer__grid"
+                class="s-xfer-step"
+                :class="{ 's-xfer-step--done': transferCategoriesChosen }"
               >
-                <SField
-                  v-if="transferForm.sourceStoreId"
-                  v-slot="{ labelId }"
-                  label="Take items from category"
-                >
-                  <DashboardFolderDrillPicker
-                    :aria-labelledby="labelId"
-                    :key="`src-${transferForm.sourceStoreId}`"
-                    v-model="transferForm.folderId"
-                    :folders="sourceFolders"
-                    empty-label="This branch has no categories yet."
-                    @change="onSourceFolderChange"
-                  />
-                </SField>
-                <SField
-                  v-if="transferForm.destinationStoreId"
-                  label="Put items in category"
-                  v-slot="{ labelId, describedBy }"
-                  hint="If the category has subcategories, open it and pick where items should go."
-                >
-                  <DashboardFolderDrillPicker
-                    :aria-labelledby="labelId"
-                    :aria-describedby="describedBy"
-                    :key="`dest-${transferForm.destinationStoreId}`"
-                    v-model="transferForm.destinationFolderId"
-                    :folders="destinationFolders"
-                    empty-label="This branch has no categories yet."
-                  />
-                </SField>
-              </div>
+                <header class="s-xfer-step__head">
+                  <span class="s-xfer-step__num" aria-hidden="true">
+                    <Check v-if="transferCategoriesChosen" :size="12" :stroke-width="3" />
+                    <template v-else>2</template>
+                  </span>
+                  <h3 class="s-xfer-step__title">Categories</h3>
+                  <p class="s-xfer-step__hint">
+                    Where the items come from and where they'll be filed.
+                  </p>
+                </header>
+                <div class="s-transfer__grid">
+                  <SField
+                    v-if="transferForm.sourceStoreId"
+                    v-slot="{ labelId }"
+                    label="Take items from category"
+                  >
+                    <DashboardFolderDrillPicker
+                      :aria-labelledby="labelId"
+                      :key="`src-${transferForm.sourceStoreId}`"
+                      v-model="transferForm.folderId"
+                      :folders="sourceFolders"
+                      empty-label="This branch has no categories yet."
+                      @change="onSourceFolderChange"
+                    />
+                  </SField>
+                  <SField
+                    v-if="transferForm.destinationStoreId"
+                    label="Put items in category"
+                    v-slot="{ labelId, describedBy }"
+                    hint="If the category has subcategories, open it and pick where items should go."
+                  >
+                    <DashboardFolderDrillPicker
+                      :aria-labelledby="labelId"
+                      :aria-describedby="describedBy"
+                      :key="`dest-${transferForm.destinationStoreId}`"
+                      v-model="transferForm.destinationFolderId"
+                      :folders="destinationFolders"
+                      empty-label="This branch has no categories yet."
+                    />
+                  </SField>
+                </div>
+              </section>
 
-              <template v-if="transferForm.folderId">
+              <!-- 3 · Items -->
+              <section
+                v-if="transferForm.folderId"
+                class="s-xfer-step"
+                :class="{ 's-xfer-step--done': transferSelection.lines > 0 }"
+              >
+                <header class="s-xfer-step__head">
+                  <span class="s-xfer-step__num" aria-hidden="true">
+                    <Check v-if="transferSelection.lines > 0" :size="12" :stroke-width="3" />
+                    <template v-else>3</template>
+                  </span>
+                  <h3 class="s-xfer-step__title">Items</h3>
+                  <p class="s-xfer-step__hint">
+                    {{
+                      currentFolderHasSerialNumbers
+                        ? 'Tick each unit to send.'
+                        : 'Enter how many of each to send.'
+                    }}
+                  </p>
+                  <span v-if="transferSelection.lines > 0" class="s-xfer-step__count">
+                    {{ transferSelection.lines }} selected
+                  </span>
+                </header>
                 <ul
                   v-if="isLoadingItems && availableItems.length === 0"
                   class="s-list"
@@ -184,28 +253,51 @@
                     </tbody>
                   </table>
                 </div>
-              </template>
+              </section>
 
-              <STextarea
-                v-model="transferForm.notes"
-                label="Notes (optional)"
-                :rows="2"
-                placeholder="Anything the other branch should know"
-              />
-
-              <div class="s-transfer__actions">
-                <SButton
-                  variant="primary"
-                  type="submit"
-                  :disabled="!canTransfer"
-                  :loading="isTransferring"
-                >
-                  <template #leading
-                    ><ArrowLeftRight :size="16" :stroke-width="2" aria-hidden="true"
-                  /></template>
-                  Request transfer
-                </SButton>
-              </div>
+              <!-- Finish: what's being sent, then the button -->
+              <footer class="s-xfer-submit">
+                <STextarea
+                  v-model="transferForm.notes"
+                  label="Notes (optional)"
+                  :rows="2"
+                  placeholder="Anything the other branch should know"
+                />
+                <div class="s-xfer-submit__bar">
+                  <p class="s-xfer-submit__summary" aria-live="polite">
+                    <template v-if="transferSelection.lines > 0">
+                      <strong
+                        >{{ transferSelection.units }}
+                        {{ transferSelection.units === 1 ? 'unit' : 'units' }}</strong
+                      >
+                      · {{ transferSelection.lines }}
+                      {{ transferSelection.lines === 1 ? 'item' : 'items' }}
+                      <template v-if="transferDestinationLabel">
+                        <ArrowRight
+                          class="s-xfer-submit__arrow"
+                          :size="13"
+                          :stroke-width="2"
+                          aria-hidden="true"
+                        />
+                        <span class="ds-sr-only">to</span>
+                        {{ transferDestinationLabel }}
+                      </template>
+                    </template>
+                    <template v-else>Choose a route, categories and items to send.</template>
+                  </p>
+                  <SButton
+                    variant="primary"
+                    type="submit"
+                    :disabled="!canTransfer"
+                    :loading="isTransferring"
+                  >
+                    <template #leading
+                      ><ArrowLeftRight :size="16" :stroke-width="2" aria-hidden="true"
+                    /></template>
+                    Request transfer
+                  </SButton>
+                </div>
+              </footer>
             </form>
           </SCard>
 
@@ -238,7 +330,13 @@
               </SEmptyState>
             </SCard>
 
-            <p v-if="transfersAwaitingMe.length" class="s-notice" role="status">
+            <p v-if="transfersAwaitingMe.length" class="s-notice s-xfer-awaiting" role="status">
+              <PackageCheck
+                class="s-xfer-awaiting__icon"
+                :size="16"
+                :stroke-width="2"
+                aria-hidden="true"
+              />
               {{
                 transfersAwaitingMe.length === 1
                   ? '1 transfer is waiting for you to check it in.'
@@ -537,6 +635,7 @@
                   <thead>
                     <tr>
                       <th scope="col">Branch</th>
+                      <th scope="col" class="s-hide-md">Share of revenue</th>
                       <th scope="col" class="s-table__num">Revenue</th>
                       <th scope="col" class="s-table__num">Sales</th>
                       <th scope="col" class="s-table__num">Items sold</th>
@@ -547,11 +646,45 @@
                       <td>
                         <span class="s-table__primary">{{ store.name }}</span>
                       </td>
+                      <td class="s-hide-md">
+                        <span
+                          class="s-xfer-share"
+                          :title="`${revenueShare(store.revenue)}% of revenue`"
+                        >
+                          <span class="s-xfer-share__track" aria-hidden="true">
+                            <span
+                              class="s-xfer-share__fill"
+                              :style="{ width: `${revenueShare(store.revenue)}%` }"
+                            />
+                          </span>
+                          <span class="s-xfer-share__pct">{{ revenueShare(store.revenue) }}%</span>
+                        </span>
+                      </td>
                       <td class="s-table__num">{{ formatCurrency(store.revenue) }}</td>
                       <td class="s-table__num">{{ store.sales }}</td>
                       <td class="s-table__num">{{ store.items }}</td>
                     </tr>
                   </tbody>
+                  <tfoot class="s-table__totals">
+                    <tr>
+                      <td>
+                        <span class="s-table__totals-label">
+                          {{ consolidatedReport.storeBreakdown.length }}
+                          {{
+                            consolidatedReport.storeBreakdown.length === 1 ? 'branch' : 'branches'
+                          }}
+                        </span>
+                      </td>
+                      <td class="s-hide-md" />
+                      <td class="s-table__num">
+                        <span class="s-table__totals-value">{{
+                          formatCurrency(consolidatedReport.totalRevenue)
+                        }}</span>
+                      </td>
+                      <td class="s-table__num">{{ consolidatedReport.totalSales }}</td>
+                      <td class="s-table__num">{{ consolidatedReport.totalItems }}</td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
             </section>
@@ -693,6 +826,7 @@ import {
   ArrowLeftRight,
   ArrowRight,
   BarChart3,
+  Check,
   ChevronRight,
   CircleX,
   Download,
@@ -850,6 +984,30 @@ const currentFolderHasSerialNumbers = computed(() => {
   const folder = sourceFolders.value.find((f) => f.id === transferForm.value.folderId)
   return folder?.hasSerialNumbers || false
 })
+
+/** Progress through the new-transfer steps, for their ticks and the summary bar. */
+const transferRouteChosen = computed(() =>
+  Boolean(transferForm.value.sourceStoreId && transferForm.value.destinationStoreId)
+)
+const transferCategoriesChosen = computed(() =>
+  Boolean(transferForm.value.folderId && transferForm.value.destinationFolderId)
+)
+const transferSelection = computed(() => {
+  const quantities = Object.values(transferForm.value.items).filter((qty) => qty > 0)
+  return { lines: quantities.length, units: quantities.reduce((sum, qty) => sum + qty, 0) }
+})
+const transferDestinationLabel = computed(
+  () =>
+    storeOptions.value.find((option) => option.value === transferForm.value.destinationStoreId)
+      ?.label ?? ''
+)
+
+/** A branch's slice of total revenue in the report, rounded to a whole percent. */
+function revenueShare(revenue: number): number {
+  const total = consolidatedReport.value.totalRevenue
+  if (!total || !revenue) return 0
+  return Math.round((revenue / total) * 100)
+}
 
 const canTransfer = computed(() => {
   return (
@@ -1193,7 +1351,9 @@ const requestTransfer = async () => {
       action: 'created',
       entityType: 'transfer',
       entityId: transferRef.id,
-      entityName: `Requested transfer ${transferRefFromId(transferRef.id)}: ${sourceName} → ${destName}`,
+      entityName: `Requested transfer ${transferRefFromId(
+        transferRef.id
+      )}: ${sourceName} → ${destName}`,
       storeId: transferForm.value.sourceStoreId,
       userId,
       userDisplayName: await getCurrentUserDisplayName().catch(() => 'Unknown'),
@@ -1201,8 +1361,13 @@ const requestTransfer = async () => {
         facts: [
           { label: 'Transfer', value: transferRefFromId(transferRef.id) },
           { label: 'Status', value: 'Waiting for dispatch' },
-          { label: 'Units', value: transferredItems.reduce((n, l) => n + (Number(l.quantity) || 1), 0) },
-          ...(transferForm.value.notes ? [{ label: 'Notes', value: transferForm.value.notes }] : []),
+          {
+            label: 'Units',
+            value: transferredItems.reduce((n, l) => n + (Number(l.quantity) || 1), 0),
+          },
+          ...(transferForm.value.notes
+            ? [{ label: 'Notes', value: transferForm.value.notes }]
+            : []),
         ],
         route: {
           from: { branch: sourceName, path: paths.sourceFolderPath },
@@ -2076,7 +2241,10 @@ function transferSourceEndpoint(transfer: TransferRecord): string {
 
 /** "Port Harcourt › Cars › Sedan": where the stock entered. */
 function transferDestinationEndpoint(transfer: TransferRecord): string {
-  return formatTransferEndpoint(transferDestinationName(transfer), transferDestinationPath(transfer))
+  return formatTransferEndpoint(
+    transferDestinationName(transfer),
+    transferDestinationPath(transfer)
+  )
 }
 
 /** Both ends for the details panel's route. */

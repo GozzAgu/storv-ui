@@ -21,7 +21,11 @@
             <span class="s-list__primary">{{ hold.item.name }}</span>
             <span class="s-list__secondary">“{{ hold.complaint || 'No reason given' }}”</span>
             <span class="s-list__secondary">
-              {{ hold.sale.customerName }} · #{{ hold.sale.receiptNumber }} · waiting
+              <span v-if="isWalkInCustomer(hold.sale.customerName)" class="s-walk-in">Walk-in</span
+              ><template v-else>{{ hold.sale.customerName }}</template> · #{{
+                hold.sale.receiptNumber
+              }}
+              · waiting
               {{ waitingFor(hold.heldAt) }}
             </span>
           </span>
@@ -72,10 +76,15 @@
             <td>
               <span class="s-table__primary">“{{ hold.complaint || 'No reason given' }}”</span>
             </td>
-            <td class="s-hide-md">
-              <span class="s-table__primary">{{ hold.sale.customerName }}</span>
+            <td class="s-hide-md" :title="formatSaleWhen(hold.heldAt).title">
+              <span class="s-table__primary">
+                <span v-if="isWalkInCustomer(hold.sale.customerName)" class="s-walk-in"
+                  >Walk-in</span
+                >
+                <template v-else>{{ hold.sale.customerName }}</template>
+              </span>
               <span class="s-table__secondary">
-                #{{ hold.sale.receiptNumber }} · {{ formatDay(hold.heldAt) }}
+                #{{ hold.sale.receiptNumber }} · {{ formatSaleWhen(hold.heldAt).label }}
               </span>
             </td>
             <td class="s-hide-lg s-table__nowrap">{{ waitingFor(hold.heldAt) }}</td>
@@ -123,6 +132,7 @@ import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { stockItemDetailSummary } from '~/utils/stock-item-details'
+import { formatSaleWhen, isWalkInCustomer } from '~/utils/sale-display'
 import type { InspectionHold } from '~/types/inspection-holds'
 
 /** Customer returns waiting for a decision, oldest first, as a table in the page body. */
@@ -155,11 +165,6 @@ function waitingFor(iso: string | null) {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000)
   if (days <= 0) return 'Today'
   return days === 1 ? '1 day' : `${days} days`
-}
-
-function formatDay(iso: string | null) {
-  if (!iso) return EMPTY_CELL
-  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' })
 }
 </script>
 

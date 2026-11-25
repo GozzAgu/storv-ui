@@ -2,8 +2,8 @@
   <div class="ds-root s-c s-page">
     <SPageHeader title="Activity">
       <template #description>
-        Everything that happens in this branch: who did it, when, and exactly what changed. Point
-        at an entry (or tap it) for the full details.
+        Everything that happens in this branch: who did it, when, and exactly what changed. Point at
+        an entry (or tap it) for the full details.
       </template>
     </SPageHeader>
 
@@ -107,8 +107,12 @@
                       <SAvatar :name="log.userDisplayName" size="sm" />
                       <span class="s-list__main">
                         <span class="s-list__primary">{{ displayEntityName(log) }}</span>
-                        <span class="s-list__secondary">
-                          {{ log.userDisplayName }} · {{ relativeTime(log.createdAt) }}
+                        <span
+                          class="s-list__secondary"
+                          :title="formatSaleWhen(toDate(log.createdAt)).title"
+                        >
+                          {{ log.userDisplayName }} ·
+                          {{ formatSaleWhen(toDate(log.createdAt)).label }}
                         </span>
                       </span>
                       <span class="s-list__end">
@@ -155,7 +159,9 @@
                             <span class="s-table__secondary s-activity-table__meta">
                               <span
                                 class="s-activity-table__action"
-                                :class="`s-activity-table__action--${activityActionTone(log.action)}`"
+                                :class="`s-activity-table__action--${activityActionTone(
+                                  log.action
+                                )}`"
                                 >{{ activityActionLabel(log.action) }}</span
                               >
                               <span aria-hidden="true">·</span>
@@ -245,6 +251,7 @@ import {
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { isCapacitorNative } from '~/utils/capacitor-env'
+import { formatSaleWhen } from '~/utils/sale-display'
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()

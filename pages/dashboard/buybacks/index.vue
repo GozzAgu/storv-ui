@@ -118,11 +118,15 @@
                   <span class="s-list__main">
                     <span class="s-list__primary">{{ row.itemSummary }}</span>
                     <span class="s-list__secondary"
-                      >{{ row.customerName }} · {{ formatDay(row.createdAt) }}</span
+                      >{{ row.customerName }} · {{ formatSaleWhen(row.createdAt).label }}</span
                     >
                   </span>
                   <span class="s-list__end">
-                    <span class="s-list__value">{{ formatCurrency(row.purchasePrice) }}</span>
+                    <span
+                      class="s-list__value"
+                      :class="{ 's-amount--void': row.status === 'cancelled' }"
+                      >{{ formatCurrency(row.purchasePrice) }}</span
+                    >
                   </span>
                 </NuxtLink>
               </li>
@@ -155,11 +159,41 @@
                       row.customerPhone
                     }}</span>
                   </td>
-                  <td class="s-table__num">{{ formatCurrency(row.purchasePrice) }}</td>
-                  <td class="s-hide-md">{{ row.paymentMethod || EMPTY_CELL }}</td>
-                  <td class="s-table__nowrap">{{ formatDay(row.createdAt) }}</td>
+                  <td
+                    class="s-table__num"
+                    :class="{ 's-amount--void': row.status === 'cancelled' }"
+                    :title="row.status === 'cancelled' ? 'Cancelled: not counted' : undefined"
+                  >
+                    {{ formatCurrency(row.purchasePrice) }}
+                  </td>
+                  <td class="s-hide-md">
+                    <PaymentMethodLabel v-if="row.paymentMethod" :method="row.paymentMethod" />
+                    <template v-else>{{ EMPTY_CELL }}</template>
+                  </td>
+                  <td class="s-table__nowrap" :title="formatSaleWhen(row.createdAt).title">
+                    {{ formatSaleWhen(row.createdAt).label }}
+                  </td>
                 </tr>
               </tbody>
+              <!-- What everything matching the search adds up to (not just this page) -->
+              <tfoot class="s-table__totals">
+                <tr>
+                  <td>
+                    <span class="s-table__totals-label">
+                      {{ filteredBuybacks.length }}
+                      {{ filteredBuybacks.length === 1 ? 'trade-in' : 'trade-ins' }}
+                    </span>
+                  </td>
+                  <td />
+                  <td class="s-table__num">
+                    <span class="s-table__totals-value">{{
+                      formatCurrency(filteredTotalPaid)
+                    }}</span>
+                  </td>
+                  <td class="s-hide-md" />
+                  <td />
+                </tr>
+              </tfoot>
             </table>
           </div>
 
@@ -194,6 +228,8 @@ import { useInventoryStore } from '~/stores/inventory'
 import { useStoresStore } from '~/stores/stores'
 import { usePreferences } from '~/composables/usePreferences'
 import { EMPTY_CELL } from '~/utils/ui-empty'
+import { formatSaleWhen } from '~/utils/sale-display'
+import PaymentMethodLabel from '~/components/receipts/PaymentMethodLabel.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -226,6 +262,14 @@ const filteredBuybacks = computed(() => {
   )
 })
 
+/** Paid across every trade-in matching the search; cancelled ones are struck through, not counted. */
+const filteredTotalPaid = computed(() =>
+  filteredBuybacks.value.reduce(
+    (sum, row) => (row.status === 'cancelled' ? sum : sum + (row.purchasePrice ?? 0)),
+    0
+  )
+)
+
 const paginatedBuybacks = computed(() => {
   const start = (currentPage.value - 1) * PAGE_SIZE
   return filteredBuybacks.value.slice(start, start + PAGE_SIZE)
@@ -239,15 +283,6 @@ const showCreateModal = ref(false)
 
 function folderName(folderId: string) {
   return inventoryStore.getFolderById(folderId)?.name || 'Inventory'
-}
-
-function formatDay(v: Date | undefined) {
-  if (!v) return EMPTY_CELL
-  try {
-    return v.toLocaleDateString(undefined, { dateStyle: 'medium' })
-  } catch {
-    return EMPTY_CELL
-  }
 }
 
 function inventoryItemLink(row: CustomerBuyback) {

@@ -17,80 +17,159 @@
       <SEmptyState :title="emptyTitle" :description="emptyDescription" />
     </SCard>
 
-    <div v-else class="s-table-wrap">
-      <table class="s-table">
-        <thead>
-          <tr>
-            <th scope="col">Product</th>
-            <th scope="col" class="s-hide-sm">Category</th>
-            <th scope="col" class="s-hide-md">Date in</th>
-            <th v-if="canViewProfitAndCost" scope="col" class="s-table__num">Cost price</th>
-            <th v-if="canViewFinancials" scope="col" class="s-table__num">Unit price</th>
-            <th scope="col">Status</th>
-            <th v-if="canManageInventoryItems" scope="col" class="s-table__actions">
-              <span class="ds-sr-only">Actions</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="item in paginatedItems"
-            :key="item.id"
-            class="s-table__row--interactive"
-            tabindex="0"
-            @click="openItem(item)"
-            @keydown.enter.self="openItem(item)"
-          >
-            <td>
-              <div class="s-swap-ins__name">
-                <span class="s-table__primary">{{ getInventoryItemDisplayName(item) }}</span>
-                <span v-if="itemSerial(item)" class="s-table__secondary">
-                  Serial: {{ itemSerial(item) }}
+    <template v-else>
+      <!-- Phone: one row per swap-in -->
+      <SCard flush class="s-only-sm">
+        <ul class="s-list">
+          <li v-for="item in paginatedItems" :key="item.id">
+            <div class="s-list__item">
+              <button type="button" class="s-list__main s-list__hit" @click="openItem(item)">
+                <span class="s-list__primary">{{ getInventoryItemDisplayName(item) }}</span>
+                <span class="s-list__secondary">
+                  {{ folderName(item.folderId) }}
+                  <template v-if="itemDate(item)">
+                    · {{ formatSaleWhen(itemDate(item)).label }}</template
+                  >
+                  <template v-if="itemSerial(item)"> · {{ itemSerial(item) }}</template>
                 </span>
+              </button>
+              <div class="s-list__end">
+                <template v-if="canViewFinancials">
+                  <SBadge v-if="!hasSaleUnitPrice(item)" tone="warning">No price</SBadge>
+                  <span v-else class="s-list__value">{{
+                    formatCurrency(Number(item.price) || 0)
+                  }}</span>
+                </template>
+                <SBadge :tone="item.dateOut ? 'neutral' : 'success'">
+                  {{ item.dateOut ? 'Sold' : 'In stock' }}
+                </SBadge>
               </div>
-            </td>
-            <td class="s-hide-sm">{{ folderName(item.folderId) }}</td>
-            <td class="s-hide-md s-table__muted">
-              {{ formatDate(item.dateIn ?? item.createdAt) }}
-            </td>
-            <td v-if="canViewProfitAndCost" class="s-table__num">
-              <template v-if="resolveItemUnitCost(item) !== undefined">
-                {{ formatCurrency(resolveItemUnitCost(item)!) }}
+              <template v-if="canManageInventoryItems">
+                <SButton
+                  v-if="swapInNeedsPrice(item)"
+                  size="sm"
+                  :aria-label="`Set a price for ${getInventoryItemDisplayName(item)}`"
+                  @click="openSetPrice(item)"
+                >
+                  Set price
+                </SButton>
+                <SButton
+                  v-else-if="!item.dateOut"
+                  variant="secondary"
+                  size="sm"
+                  :to="itemLink(item, true)"
+                  :aria-label="`Edit ${getInventoryItemDisplayName(item)}`"
+                >
+                  Edit
+                </SButton>
               </template>
-              <span v-else class="s-table__muted">–</span>
-            </td>
-            <td v-if="canViewFinancials" class="s-table__num">
-              <SBadge v-if="!hasSaleUnitPrice(item)" tone="warning">No price</SBadge>
-              <template v-else>{{ formatCurrency(Number(item.price) || 0) }}</template>
-            </td>
-            <td>
-              <SBadge :tone="item.dateOut ? 'neutral' : 'success'">
-                {{ item.dateOut ? 'Sold' : 'In stock' }}
-              </SBadge>
-            </td>
-            <td v-if="canManageInventoryItems" class="s-table__actions" @click.stop>
-              <SButton
-                v-if="swapInNeedsPrice(item)"
-                size="sm"
-                :aria-label="`Set a price for ${getInventoryItemDisplayName(item)}`"
-                @click="openSetPrice(item)"
-              >
-                Set price
-              </SButton>
-              <SButton
-                v-else-if="!item.dateOut"
-                variant="secondary"
-                size="sm"
-                :to="itemLink(item, true)"
-                :aria-label="`Edit ${getInventoryItemDisplayName(item)}`"
-              >
-                Edit
-              </SButton>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            </div>
+          </li>
+        </ul>
+      </SCard>
+
+      <!-- Tablet and desktop: table -->
+      <div class="s-table-wrap s-hide-sm">
+        <table class="s-table">
+          <thead>
+            <tr>
+              <th scope="col">Product</th>
+              <th scope="col" class="s-hide-sm">Category</th>
+              <th scope="col" class="s-hide-md">Date in</th>
+              <th v-if="canViewProfitAndCost" scope="col" class="s-table__num">Cost price</th>
+              <th v-if="canViewFinancials" scope="col" class="s-table__num">Unit price</th>
+              <th scope="col">Status</th>
+              <th v-if="canManageInventoryItems" scope="col" class="s-table__actions">
+                <span class="ds-sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="item in paginatedItems"
+              :key="item.id"
+              class="s-table__row--interactive"
+              tabindex="0"
+              @click="openItem(item)"
+              @keydown.enter.self="openItem(item)"
+            >
+              <td>
+                <div class="s-swap-ins__name">
+                  <span class="s-table__primary">{{ getInventoryItemDisplayName(item) }}</span>
+                  <span v-if="itemSerial(item)" class="s-table__secondary">
+                    Serial: {{ itemSerial(item) }}
+                  </span>
+                </div>
+              </td>
+              <td class="s-hide-sm">{{ folderName(item.folderId) }}</td>
+              <td class="s-hide-md s-table__muted">
+                <span v-if="itemDate(item)" :title="formatSaleWhen(itemDate(item)).title">{{
+                  formatSaleWhen(itemDate(item)).label
+                }}</span>
+                <template v-else>–</template>
+              </td>
+              <td v-if="canViewProfitAndCost" class="s-table__num">
+                <template v-if="resolveItemUnitCost(item) !== undefined">
+                  {{ formatCurrency(resolveItemUnitCost(item)!) }}
+                </template>
+                <span v-else class="s-table__muted">–</span>
+              </td>
+              <td v-if="canViewFinancials" class="s-table__num">
+                <SBadge v-if="!hasSaleUnitPrice(item)" tone="warning">No price</SBadge>
+                <template v-else>{{ formatCurrency(Number(item.price) || 0) }}</template>
+              </td>
+              <td>
+                <SBadge :tone="item.dateOut ? 'neutral' : 'success'">
+                  {{ item.dateOut ? 'Sold' : 'In stock' }}
+                </SBadge>
+              </td>
+              <td v-if="canManageInventoryItems" class="s-table__actions" @click.stop>
+                <SButton
+                  v-if="swapInNeedsPrice(item)"
+                  size="sm"
+                  :aria-label="`Set a price for ${getInventoryItemDisplayName(item)}`"
+                  @click="openSetPrice(item)"
+                >
+                  Set price
+                </SButton>
+                <SButton
+                  v-else-if="!item.dateOut"
+                  variant="secondary"
+                  size="sm"
+                  :to="itemLink(item, true)"
+                  :aria-label="`Edit ${getInventoryItemDisplayName(item)}`"
+                >
+                  Edit
+                </SButton>
+              </td>
+            </tr>
+          </tbody>
+          <!-- What every swap-in matching the filters adds up to (not just this page) -->
+          <tfoot v-if="canViewProfitAndCost || canViewFinancials" class="s-table__totals">
+            <tr>
+              <td>
+                <span class="s-table__totals-label">
+                  {{ filteredItems.length }}
+                  {{ filteredItems.length === 1 ? 'swap-in' : 'swap-ins' }}
+                </span>
+              </td>
+              <td class="s-hide-sm" />
+              <td class="s-hide-md" />
+              <td v-if="canViewProfitAndCost" class="s-table__num">
+                <span class="s-table__totals-value">{{ formatCurrency(filteredTotals.cost) }}</span>
+              </td>
+              <td v-if="canViewFinancials" class="s-table__num">
+                <span class="s-table__totals-value">{{
+                  formatCurrency(filteredTotals.price)
+                }}</span>
+              </td>
+              <td />
+              <td v-if="canManageInventoryItems" class="s-table__actions" />
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </template>
 
     <SPagination
       v-if="!loading && filteredItems.length > PAGE_SIZE"
@@ -164,6 +243,7 @@ import { resolveItemUnitCost } from '~/utils/inventory-item-cost'
 import { hasSaleUnitPrice, swapInNeedsPrice } from '~/utils/inventory-item-price'
 import type { SwapInStatusFilter } from '~/utils/swap-in-credit'
 import { useSwapInItems } from '~/composables/useSwapInItems'
+import { formatSaleWhen } from '~/utils/sale-display'
 import { useAppToast } from '~/composables/useAppToast'
 
 const PAGE_SIZE = 20
@@ -274,6 +354,18 @@ watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
 })
 
+/** Cost and Unit Price of every swap-in matching the filters; items without one add nothing. */
+const filteredTotals = computed(() =>
+  filteredItems.value.reduce(
+    (sum, item) => {
+      sum.cost += resolveItemUnitCost(item) ?? 0
+      if (hasSaleUnitPrice(item)) sum.price += Number(item.price) || 0
+      return sum
+    },
+    { cost: 0, price: 0 }
+  )
+)
+
 const paginatedItems = computed(() =>
   filteredItems.value.slice((currentPage.value - 1) * PAGE_SIZE, currentPage.value * PAGE_SIZE)
 )
@@ -305,16 +397,17 @@ function openItem(item: InventoryItem) {
   void navigateTo(itemLink(item))
 }
 
-function formatDate(value: unknown): string {
-  if (!value) return '–'
+/** When the swap-in came in (Firestore timestamps included), or null when unknown. */
+function itemDate(item: InventoryItem): Date | null {
+  const value: unknown = item.dateIn ?? item.createdAt
+  if (!value) return null
   const date =
     value instanceof Date
       ? value
       : typeof (value as { toDate?: () => Date }).toDate === 'function'
       ? (value as { toDate: () => Date }).toDate()
       : new Date(value as string)
-  if (!Number.isFinite(date.getTime())) return '–'
-  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+  return Number.isFinite(date.getTime()) ? date : null
 }
 </script>
 

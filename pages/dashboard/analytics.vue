@@ -380,49 +380,86 @@
                 <p v-if="topProducts.length === 0" class="s-report__empty s-report__empty--pad">
                   No product sales in this period.
                 </p>
-                <table v-else class="s-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Product</th>
-                      <th scope="col" class="s-table__num">Sold</th>
-                      <th scope="col" class="s-table__num">Revenue</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="product in topProducts" :key="product.id">
-                      <td>
-                        <span class="s-table__primary">{{ product.name }}</span>
-                      </td>
-                      <td class="s-table__num">{{ product.quantity }}</td>
-                      <td class="s-table__num">{{ formatCurrency(product.revenue) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <template v-else>
+                  <!-- Phone: one row per product -->
+                  <ul class="s-list s-only-sm">
+                    <li v-for="product in topProducts" :key="product.id">
+                      <div class="s-list__item">
+                        <div class="s-list__main">
+                          <span class="s-list__primary">{{ product.name }}</span>
+                          <span class="s-list__secondary">{{ product.quantity }} sold</span>
+                        </div>
+                        <div class="s-list__end">
+                          <span class="s-list__value">{{ formatCurrency(product.revenue) }}</span>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                  <table class="s-table s-hide-sm">
+                    <thead>
+                      <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col" class="s-table__num">Sold</th>
+                        <th scope="col" class="s-table__num">Revenue</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="product in topProducts" :key="product.id">
+                        <td>
+                          <span class="s-table__primary">{{ product.name }}</span>
+                        </td>
+                        <td class="s-table__num">{{ product.quantity }}</td>
+                        <td class="s-table__num">{{ formatCurrency(product.revenue) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </template>
               </SCard>
 
               <SCard title="Top customers" flush>
                 <p v-if="topCustomers.length === 0" class="s-report__empty s-report__empty--pad">
                   No customers in this period.
                 </p>
-                <table v-else class="s-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Customer</th>
-                      <th scope="col" class="s-table__num">Sales</th>
-                      <th scope="col" class="s-table__num">Spent</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="customer in topCustomers" :key="customer.email">
-                      <td>
-                        <span class="s-table__primary">{{ customer.name }}</span>
-                        <span class="s-table__secondary">{{ customer.email }}</span>
-                      </td>
-                      <td class="s-table__num">{{ customer.orders }}</td>
-                      <td class="s-table__num">{{ formatCurrency(customer.totalSpent) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <template v-else>
+                  <!-- Phone: one row per customer -->
+                  <ul class="s-list s-only-sm">
+                    <li v-for="customer in topCustomers" :key="customer.email">
+                      <div class="s-list__item">
+                        <div class="s-list__main">
+                          <span class="s-list__primary">{{ customer.name }}</span>
+                          <span class="s-list__secondary">
+                            {{ customer.orders }} {{ customer.orders === 1 ? 'sale' : 'sales' }}
+                            <template v-if="customer.email"> · {{ customer.email }}</template>
+                          </span>
+                        </div>
+                        <div class="s-list__end">
+                          <span class="s-list__value">{{
+                            formatCurrency(customer.totalSpent)
+                          }}</span>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                  <table class="s-table s-hide-sm">
+                    <thead>
+                      <tr>
+                        <th scope="col">Customer</th>
+                        <th scope="col" class="s-table__num">Sales</th>
+                        <th scope="col" class="s-table__num">Spent</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="customer in topCustomers" :key="customer.email">
+                        <td>
+                          <span class="s-table__primary">{{ customer.name }}</span>
+                          <span class="s-table__secondary">{{ customer.email }}</span>
+                        </td>
+                        <td class="s-table__num">{{ customer.orders }}</td>
+                        <td class="s-table__num">{{ formatCurrency(customer.totalSpent) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </template>
               </SCard>
             </div>
 
@@ -431,25 +468,48 @@
                 <p v-if="recentReturns.length === 0" class="s-report__empty s-report__empty--pad">
                   No returns in this period.
                 </p>
-                <table v-else class="s-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Sale</th>
-                      <th scope="col">Reason</th>
-                      <th scope="col" class="s-table__num">Refunded</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="ret in recentReturns" :key="ret.id">
-                      <td>
-                        <span class="s-table__primary">{{ ret.receiptNumber }}</span>
-                        <span class="s-table__secondary">{{ formatReturnDate(ret.date) }}</span>
-                      </td>
-                      <td>{{ ret.reason }}</td>
-                      <td class="s-table__num">−{{ formatCurrency(ret.amount) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <template v-else>
+                  <!-- Phone: one row per return -->
+                  <ul class="s-list s-only-sm">
+                    <li v-for="ret in recentReturns" :key="ret.id">
+                      <div class="s-list__item">
+                        <div class="s-list__main">
+                          <span class="s-list__primary">{{ ret.receiptNumber }}</span>
+                          <span class="s-list__secondary">
+                            {{ formatSaleWhen(ret.date).label }}
+                            <template v-if="ret.reason"> · {{ ret.reason }}</template>
+                          </span>
+                        </div>
+                        <div class="s-list__end">
+                          <span class="s-list__value">−{{ formatCurrency(ret.amount) }}</span>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                  <table class="s-table s-hide-sm">
+                    <thead>
+                      <tr>
+                        <th scope="col">Sale</th>
+                        <th scope="col">Reason</th>
+                        <th scope="col" class="s-table__num">Refunded</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="ret in recentReturns" :key="ret.id">
+                        <td>
+                          <span class="s-table__primary">{{ ret.receiptNumber }}</span>
+                          <span
+                            class="s-table__secondary"
+                            :title="formatSaleWhen(ret.date).title"
+                            >{{ formatSaleWhen(ret.date).label }}</span
+                          >
+                        </td>
+                        <td>{{ ret.reason }}</td>
+                        <td class="s-table__num">−{{ formatCurrency(ret.amount) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </template>
               </SCard>
 
               <SCard title="Low stock" flush>
@@ -543,6 +603,7 @@ import STabs from '~/components/s/STabs.vue'
 import PlanGate from '~/components/subscription/PlanGate.vue'
 import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { EMPTY_CELL } from '~/utils/ui-empty'
+import { formatSaleWhen } from '~/utils/sale-display'
 import {
   DS_CHART_PALETTE_FALLBACK,
   mergeDsApexChartTheme,
@@ -642,6 +703,7 @@ const displayCurrencyDeps = computed(
   () => `${preferences.value.currency}|${preferences.value.region}|${baseCurrency.value}`
 )
 
+/** Full date and time for the exported report (the on-screen tables use formatSaleWhen). */
 function formatReturnDate(date: Date): string {
   return date.toLocaleDateString('en-US', {
     month: 'short',
@@ -651,6 +713,7 @@ function formatReturnDate(date: Date): string {
     minute: '2-digit',
   })
 }
+
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
 const customersStore = useCustomersStore()

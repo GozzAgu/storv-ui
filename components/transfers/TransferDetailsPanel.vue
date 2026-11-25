@@ -561,4 +561,159 @@ function chipsFor(row: StockItemRow) {
     grid-row: 2;
   }
 }
+
+/* ── Clean, modern finish: tone instead of outlines, brand-blue progress ─ */
+
+.s-transfer-panel__section + .s-transfer-panel__section {
+  border-top: 0;
+  background: linear-gradient(90deg, var(--s-divider), transparent 90%) top left / 100% 1px
+    no-repeat;
+}
+
+.s-transfer-panel__title {
+  color: var(--s-text-muted);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.s-transfer-panel__count {
+  background: var(--s-chip-bg, var(--s-overlay-tint));
+}
+
+/* Route: two soft endpoint cards joined by a brand-blue arrow badge */
+.s-transfer-panel__end {
+  gap: 8px;
+  padding: var(--s-space-1-5) var(--s-space-2);
+  border-radius: 12px;
+  background: var(--s-surface-2);
+}
+
+.s-transfer-panel__end-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.s-transfer-panel__branch {
+  font-size: 0.9375rem;
+}
+
+.s-transfer-panel__branch svg {
+  box-sizing: content-box;
+  padding: 5px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--s-accent) 12%, transparent);
+  color: var(--s-accent);
+}
+
+.s-transfer-panel__route-arrow {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  background: var(--s-btn-primary, var(--s-accent));
+  background-image: var(--s-btn-primary-sheen, none);
+  color: var(--s-on-btn-primary, #fff);
+  box-shadow: 0 0 0 4px var(--s-surface);
+}
+
+/* Timeline: dots in brand blue, pulse on the step in progress */
+.s-transfer-panel__dot {
+  border-width: 0;
+  background: var(--s-chip-bg, var(--s-surface-2));
+}
+
+.s-transfer-panel__step--done .s-transfer-panel__dot {
+  background: var(--s-btn-primary, var(--s-accent));
+  color: var(--s-on-btn-primary, #fff);
+}
+
+.s-transfer-panel__step--current .s-transfer-panel__dot {
+  background: color-mix(in srgb, var(--s-accent) 18%, transparent);
+  box-shadow: inset 0 0 0 5px var(--s-surface), inset 0 0 0 9px var(--s-accent);
+}
+
+.s-transfer-panel__step--done:not(:last-child)::after {
+  background: var(--s-btn-primary, var(--s-accent));
+}
+
+@media (min-width: 641px) {
+  /* Dots and lines on one row, labels underneath, so nothing has to mask the line */
+  .s-transfer-panel__step {
+    grid-template-columns: 1fr;
+    row-gap: 4px;
+    padding-right: var(--s-space-1-5);
+  }
+
+  .s-transfer-panel__dot {
+    grid-row: auto;
+    margin-bottom: 6px;
+  }
+
+  .s-transfer-panel__step:not(:last-child)::after {
+    top: 8.5px;
+    left: 28px;
+    right: 10px;
+    height: 2px;
+    border-radius: 2px;
+  }
+
+  .s-transfer-panel__step-label {
+    padding-right: 0;
+    background: none;
+  }
+
+  .s-transfer-panel__step-meta,
+  .s-transfer-panel__step-by {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-transfer-panel__step--current .s-transfer-panel__dot {
+    animation: s-transfer-pulse 2s ease-out infinite;
+  }
+}
+
+@keyframes s-transfer-pulse {
+  0% {
+    box-shadow: inset 0 0 0 5px var(--s-surface), inset 0 0 0 9px var(--s-accent),
+      0 0 0 0 color-mix(in srgb, var(--s-accent) 40%, transparent);
+  }
+
+  100% {
+    box-shadow: inset 0 0 0 5px var(--s-surface), inset 0 0 0 9px var(--s-accent),
+      0 0 0 8px transparent;
+  }
+}
+
+/* Items: no outlined box; detail chips are quiet and the values are monospace */
+.s-transfer-panel__table {
+  border: 0;
+  border-radius: 12px;
+  background: var(--s-surface-2);
+}
+
+.s-transfer-panel__head {
+  border-bottom-color: transparent;
+}
+
+.s-transfer-panel__item {
+  border-bottom-color: var(--s-divider);
+}
+
+.s-transfer-panel__chip {
+  background: var(--s-chip-bg, var(--s-surface));
+  font-family: var(--s-font-mono);
+  font-size: 0.75rem;
+}
+
+.s-transfer-panel__chip-label {
+  font-family: var(--s-font-sans);
+  font-size: 0.6875rem;
+}
+
+.s-transfer-panel__qty {
+  font-variant-numeric: tabular-nums;
+}
 </style>

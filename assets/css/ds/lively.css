@@ -1,0 +1,1222 @@
+/*
+ * Lively layer for the Storvv app.
+ *
+ * Loaded last in ds/index.css. It changes how things feel, never what they show:
+ * - primary actions use the Storvv logo blue (with a faint top sheen), so the main
+ *   action on every screen is easy to find
+ * - buttons, icon buttons and switches respond with a small spring when pressed
+ * - tabs, checkboxes, menus and pages move with one shared, quick easing
+ * Everything that moves sits behind prefers-reduced-motion: no-preference.
+ */
+
+/* ── Tokens ─────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Overshoots a touch, so a released button settles back like something physical */
+  --s-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Fast out, long soft landing: entrances, menus, the tab highlight */
+  --s-ease-emph: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Primary = logo blue. White text on #3d63f2 meets WCAG AA (4.9:1). */
+  --s-btn-primary: #3d63f2;
+  --s-btn-primary-hover: #3359ec;
+  --s-btn-primary-active: #2849c4;
+  --s-on-btn-primary: #ffffff;
+  --s-btn-primary-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0) 60%);
+  --s-btn-primary-edge: inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.08);
+  --s-btn-primary-lift: 0 1px 2px rgb(40 73 196 / 0.24), 0 4px 10px -6px rgb(61 99 242 / 0.5);
+
+  /* Secondary: white with a hairline edge */
+  /* Secondary on the grey page: white, lifted only by the same soft shadow cards use */
+  --s-btn-sec-bg: #ffffff;
+  --s-btn-sec-bg-hover: #fbfbfb;
+  --s-btn-sec-bg-active: #f4f4f5;
+  --s-btn-sec-edge: 0 0 0 1px rgb(16 18 24 / 0.03), 0 1px 2px rgb(16 18 24 / 0.06);
+  --s-btn-sec-edge-hover: 0 0 0 1px rgb(16 18 24 / 0.04), 0 2px 6px -2px rgb(16 18 24 / 0.1);
+  /* Secondary inside white panels (cards, drawers, menus): a soft grey fill, no edge at all */
+  --s-btn-sec-in-panel: #f2f2f3;
+  --s-btn-sec-in-panel-hover: #e9e9eb;
+  --s-btn-sec-in-panel-active: #e2e2e4;
+  /* Neutral chip fill for badges and spec chips */
+  --s-chip-bg: rgb(16 18 24 / 0.05);
+}
+
+html.dark {
+  /* The lighter logo blue with dark ink reads better on the dark canvas than white on deep blue */
+  --s-btn-primary: #8ea2ff;
+  --s-btn-primary-hover: #a3b3ff;
+  --s-btn-primary-active: #7a91fb;
+  --s-on-btn-primary: #0b1033;
+  --s-btn-primary-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.18), rgb(255 255 255 / 0) 60%);
+  --s-btn-primary-edge: inset 0 1px 0 rgb(255 255 255 / 0.28);
+  --s-btn-primary-lift: 0 1px 2px rgb(0 0 0 / 0.4);
+
+  --s-btn-sec-bg: rgb(255 255 255 / 0.07);
+  --s-btn-sec-bg-hover: rgb(255 255 255 / 0.11);
+  --s-btn-sec-bg-active: rgb(255 255 255 / 0.14);
+  --s-btn-sec-edge: none;
+  --s-btn-sec-edge-hover: none;
+  /* Fields: filled by tone at rest, like light mode; the edge appears only on focus */
+  --s-field-border: transparent;
+  --s-field-bg: rgb(255 255 255 / 0.08);
+  --s-field-bg-hover: rgb(255 255 255 / 0.11);
+  --s-btn-sec-in-panel: rgb(255 255 255 / 0.07);
+  --s-chip-bg: rgb(255 255 255 / 0.075);
+  --s-btn-sec-in-panel-hover: rgb(255 255 255 / 0.11);
+  --s-btn-sec-in-panel-active: rgb(255 255 255 / 0.14);
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+
+.s-btn--primary,
+.s-btn--danger {
+  background-image: var(--s-btn-primary-sheen);
+  box-shadow: var(--s-btn-primary-edge), var(--s-btn-primary-lift);
+}
+
+.s-btn--danger {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+.s-btn--primary:hover:not(:disabled, [aria-disabled='true']) {
+  background-color: var(--s-btn-primary-hover);
+}
+
+.s-btn--primary:active:not(:disabled) {
+  background-color: var(--s-btn-primary-active);
+}
+
+/* Keep the focus ring visible on top of the button's own edge */
+.s-btn:is(.s-btn--primary, .s-btn--danger):focus-visible {
+  box-shadow: var(--s-focus-ring), var(--s-btn-primary-edge);
+}
+
+/*
+ * Secondary buttons (and secondary icon buttons) blend by tone, never by an outline: white with
+ * a card-soft shadow on the grey page, and a soft grey fill inside white panels (below).
+ */
+:is(.s-btn--secondary, .s-icon-btn--secondary) {
+  background: var(--s-btn-sec-bg);
+  box-shadow: var(--s-btn-sec-edge);
+  color: var(--s-text);
+}
+
+:is(.s-btn--secondary, .s-icon-btn--secondary):hover:not(:disabled, [aria-disabled='true']) {
+  background: var(--s-btn-sec-bg-hover);
+  box-shadow: var(--s-btn-sec-edge-hover);
+}
+
+:is(.s-btn--secondary, .s-icon-btn--secondary):active:not(:disabled, [aria-disabled='true']) {
+  background: var(--s-btn-sec-bg-active);
+}
+
+.s-btn--secondary[aria-expanded='true'] {
+  box-shadow: 0 0 0 1px var(--s-accent);
+  color: var(--s-accent);
+}
+
+:is(.s-btn--secondary, .s-icon-btn--secondary):focus-visible {
+  box-shadow: var(--s-focus-ring), var(--s-btn-sec-edge);
+}
+
+/* ── Selected fills share the primary's sheen ──────────────────────────── */
+
+:is(.s-nav-item--active, .s-sidebar__lens, .s-bottomnav__tile--active .s-bottomnav__tile-icon) {
+  background-image: var(--s-btn-primary-sheen);
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Press: a quick squeeze, then a springy release */
+  .s-btn,
+  .s-icon-btn {
+    transition: background-color var(--s-duration-fast) var(--s-ease),
+      box-shadow var(--s-duration-fast) var(--s-ease), color var(--s-duration-fast) var(--s-ease),
+      scale 420ms var(--s-spring);
+  }
+
+  .s-btn:active:not(:disabled, [aria-disabled='true']) {
+    transform: none;
+    scale: 0.96;
+    transition-duration: var(--s-duration-fast), var(--s-duration-fast), var(--s-duration-fast),
+      90ms;
+  }
+
+  .s-icon-btn:active:not(:disabled) {
+    scale: 0.9;
+    transition-duration: var(--s-duration-fast), var(--s-duration-fast), var(--s-duration-fast),
+      90ms;
+  }
+
+  /* Nav: the icon leans in on hover */
+  .s-nav-item__icon {
+    transition: translate 300ms var(--s-spring);
+  }
+
+  .s-nav-item:hover .s-nav-item__icon {
+    translate: 2px 0;
+  }
+
+  /* Tabs: one highlight glides between tabs (STabs adds .s-tabs--sliding once measured) */
+  .s-tabs__indicator {
+    transition: transform 380ms var(--s-ease-emph), width 380ms var(--s-ease-emph),
+      height 380ms var(--s-ease-emph);
+  }
+
+  /* Checkbox: the tick pops in */
+  .s-check__input:checked + .s-check__box svg {
+    animation: s-tick-pop 320ms var(--s-spring);
+  }
+
+  /* Switch: the thumb springs across and stretches a little while pressed */
+  .s-switch__track::after {
+    transition: transform 360ms var(--s-spring), width 200ms var(--s-ease);
+  }
+
+  .s-check:active .s-check__input:not(:disabled) + .s-switch__track::after {
+    width: 20px;
+  }
+
+  .s-check:active .s-check__input:checked:not(:disabled) + .s-switch__track::after {
+    transform: translateX(12px);
+  }
+
+  /* Menus and popovers open from where they are anchored, with a soft landing */
+  .s-pop-enter-active {
+    transition: opacity var(--s-duration-fast) var(--s-ease-out), transform 260ms var(--s-ease-emph);
+  }
+
+  .s-pop-enter-from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+
+  /* Pages: the page fades up, and its first sections follow one after another */
+  .s-shell__page {
+    animation: s-page-in 320ms var(--s-ease-emph);
+  }
+
+  .s-shell__page .s-page > * {
+    animation: s-rise 420ms var(--s-ease-emph) both;
+  }
+
+  .s-shell__page .s-page > :nth-child(2) {
+    animation-delay: 40ms;
+  }
+
+  .s-shell__page .s-page > :nth-child(3) {
+    animation-delay: 80ms;
+  }
+
+  .s-shell__page .s-page > :nth-child(4) {
+    animation-delay: 120ms;
+  }
+
+  .s-shell__page .s-page > :nth-child(n + 5) {
+    animation-delay: 160ms;
+  }
+
+  /* Stat numbers settle into place */
+  .s-stat__value {
+    animation: s-rise 480ms var(--s-ease-emph) both;
+    animation-delay: 80ms;
+  }
+}
+
+@keyframes s-tick-pop {
+  from {
+    scale: 0.3;
+    opacity: 0;
+  }
+}
+
+@keyframes s-rise {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+/* ── Tabs: sliding highlight ───────────────────────────────────────────── */
+
+.s-tabs--sliding {
+  position: relative;
+}
+
+.s-tabs__indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--ind-w);
+  height: var(--ind-h);
+  border-radius: var(--s-radius-sm);
+  background: var(--s-surface);
+  box-shadow: var(--s-shadow-sm);
+  transform: translate(var(--ind-x), var(--ind-y));
+  pointer-events: none;
+}
+
+.s-tabs--sliding .s-tabs__tab:is([aria-selected='true'], [aria-checked='true']) {
+  background: transparent;
+  box-shadow: none;
+}
+
+.s-tabs--sliding .s-tabs__tab:focus-visible {
+  box-shadow: var(--s-focus-ring);
+}
+
+/* ── Choice cards: the selected option matches every other selected state ─ */
+
+:is(.s-choice[aria-checked='true'], .s-choice--selected, .s-choice--selected:hover) {
+  border-color: var(--s-btn-primary);
+  background: color-mix(in srgb, var(--s-btn-primary) 5%, var(--s-surface));
+  box-shadow: 0 0 0 1px var(--s-btn-primary);
+}
+
+.s-choice[aria-checked='true'] .s-choice__radio {
+  border-color: var(--s-btn-primary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-choice {
+    transition: background-color var(--s-duration-fast) var(--s-ease),
+      border-color var(--s-duration-fast) var(--s-ease),
+      box-shadow var(--s-duration-fast) var(--s-ease);
+  }
+
+  .s-choice[aria-checked='true'] .s-choice__radio {
+    animation: s-tick-pop 320ms var(--s-spring);
+  }
+}
+
+/* ── Inside white panels: tone instead of outlines ─────────────────────── */
+
+:is(.s-dialog, .s-card, .s-table-card, .s-popover, .s-banner)
+  :is(.s-btn--secondary, .s-icon-btn--secondary, .s-dialog__close.s-icon-btn) {
+  background: var(--s-btn-sec-in-panel);
+  box-shadow: none;
+}
+
+:is(.s-dialog, .s-card, .s-table-card, .s-popover, .s-banner)
+  :is(.s-btn--secondary, .s-icon-btn--secondary, .s-dialog__close.s-icon-btn):hover:not(
+    :disabled,
+    [aria-disabled='true']
+  ) {
+  background: var(--s-btn-sec-in-panel-hover);
+  box-shadow: none;
+}
+
+:is(.s-dialog, .s-card, .s-table-card, .s-popover, .s-banner)
+  :is(.s-btn--secondary, .s-icon-btn--secondary, .s-dialog__close.s-icon-btn):active:not(
+    :disabled,
+    [aria-disabled='true']
+  ) {
+  background: var(--s-btn-sec-in-panel-active);
+}
+
+:is(.s-dialog, .s-card, .s-table-card, .s-popover, .s-banner)
+  :is(.s-btn--secondary, .s-icon-btn--secondary, .s-dialog__close.s-icon-btn):focus-visible {
+  box-shadow: var(--s-focus-ring);
+}
+
+/* Dialogs and drawers: the header and footer separate by space and tone, not by rules */
+.s-dialog__head {
+  border-bottom-color: transparent;
+}
+
+.s-dialog__foot {
+  border-top-color: transparent;
+}
+
+/* Steppers: filled markers instead of outlined circles; progress in the primary blue */
+.s-steps__item {
+  border-top-color: var(--s-btn-sec-in-panel);
+}
+
+:is(.s-steps__item--done, .s-steps__item--current) {
+  border-top-color: var(--s-btn-primary);
+}
+
+.s-steps__marker {
+  border-color: transparent;
+  background: var(--s-btn-sec-in-panel);
+  color: var(--s-text-muted);
+}
+
+.s-steps__item--current .s-steps__marker {
+  border-color: transparent;
+  background: var(--s-btn-primary);
+  background-image: var(--s-btn-primary-sheen);
+  color: var(--s-on-btn-primary);
+}
+
+.s-steps__item--done .s-steps__marker {
+  border-color: transparent;
+  background: var(--s-accent-soft);
+  color: var(--s-accent-soft-text);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-steps__item {
+    transition: border-color 300ms var(--s-ease-emph);
+  }
+
+  .s-steps__item--current .s-steps__marker {
+    animation: s-tick-pop 320ms var(--s-spring);
+  }
+}
+
+/* Dialog footers sit on a faint tinted band, like the page: buttons there use the page style */
+.s-dialog .s-dialog__foot :is(.s-btn--secondary, .s-icon-btn--secondary) {
+  background: var(--s-btn-sec-bg);
+  box-shadow: var(--s-btn-sec-edge);
+}
+
+.s-dialog
+  .s-dialog__foot
+  :is(.s-btn--secondary, .s-icon-btn--secondary):hover:not(:disabled, [aria-disabled='true']) {
+  background: var(--s-btn-sec-bg-hover);
+  box-shadow: var(--s-btn-sec-edge-hover);
+}
+
+.s-dialog .s-dialog__foot :is(.s-btn--secondary, .s-icon-btn--secondary):focus-visible {
+  box-shadow: var(--s-focus-ring), var(--s-btn-sec-edge);
+}
+
+/* ── Inventory category cards: sleek, glassy, same layout ──────────────── */
+
+.s-category-card {
+  isolation: isolate;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0) 42%),
+    var(--s-surface);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 0 0 1px rgb(16 18 24 / 0.03),
+    0 1px 2px rgb(16 18 24 / 0.04), 0 8px 24px -16px rgb(16 18 24 / 0.14);
+}
+
+html.dark .s-category-card {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0) 46%),
+    var(--s-surface);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 1px 2px rgb(0 0 0 / 0.4),
+    0 10px 28px -18px rgb(0 0 0 / 0.8);
+}
+
+/* A thin brand-blue edge that lights up on hover, drawn as a masked ring so it never shifts layout */
+.s-category-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--s-accent) 70%, transparent),
+    color-mix(in srgb, var(--s-accent) 12%, transparent) 45%,
+    transparent 75%
+  );
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.s-category-card:hover {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 0 0 1px rgb(16 18 24 / 0.02),
+    0 12px 28px -14px rgb(16 18 24 / 0.18);
+}
+
+html.dark .s-category-card:hover {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 14px 32px -16px rgb(0 0 0 / 0.85);
+}
+
+.s-category-card:hover::before,
+.s-category-card--selected::before {
+  opacity: 1;
+}
+
+.s-category-card--selected,
+.s-category-card--selected:hover {
+  background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--s-accent) 7%, transparent),
+      transparent 55%
+    ),
+    var(--s-surface);
+  box-shadow: 0 0 0 1.5px var(--s-btn-primary);
+}
+
+/* Icon: a rounded-square tile in a soft brand gradient instead of a grey circle */
+.s-category-card__mark {
+  border-radius: 10px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--s-accent) 24%, var(--s-surface)),
+    color-mix(in srgb, var(--s-accent) 8%, var(--s-surface))
+  );
+  color: var(--s-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--s-accent) 18%, transparent);
+}
+
+.s-category-card--empty .s-category-card__mark,
+.s-category-card--locked .s-category-card__mark {
+  background: var(--s-surface-2);
+  color: var(--s-text-muted);
+  box-shadow: none;
+}
+
+/* The value sits under a hairline that fades out, rather than a full rule */
+.s-category-card__foot {
+  border-top: 0;
+  background: linear-gradient(90deg, var(--s-divider), transparent 85%) top left / 100% 1px
+    no-repeat;
+}
+
+.s-category-card__value {
+  font: 650 0.9375rem / 1.35 var(--s-font-sans);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.s-category-card--empty .s-category-card__value {
+  font-weight: 500;
+}
+
+/* Open arrow: fills with the primary blue on hover */
+.s-category-card:hover .s-category-card__go {
+  background: var(--s-btn-primary);
+  background-image: var(--s-btn-primary-sheen);
+  color: var(--s-on-btn-primary);
+}
+
+.s-category-card--locked:hover .s-category-card__go {
+  background: var(--s-surface-2);
+  color: var(--s-text-muted);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-category-card {
+    transition: box-shadow 260ms var(--s-ease-emph), transform 260ms var(--s-ease-emph),
+      background-color var(--s-duration) var(--s-ease);
+  }
+
+  .s-category-card::before {
+    transition: opacity 260ms var(--s-ease-emph);
+  }
+
+  .s-category-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .s-category-card__mark {
+    transition: scale 320ms var(--s-spring);
+  }
+
+  .s-category-card:hover .s-category-card__mark {
+    scale: 1.06;
+  }
+
+  .s-category-card__go {
+    transition: opacity var(--s-duration-fast) var(--s-ease),
+      background-color var(--s-duration) var(--s-ease), translate 300ms var(--s-spring);
+  }
+
+  .s-category-card:hover .s-category-card__go {
+    translate: 1px -1px;
+  }
+
+  /* The grid's cards rise in one after another */
+  .s-category-grid > * {
+    animation: s-rise 420ms var(--s-ease-emph) both;
+  }
+
+  .s-category-grid > :nth-child(2) {
+    animation-delay: 30ms;
+  }
+
+  .s-category-grid > :nth-child(3) {
+    animation-delay: 60ms;
+  }
+
+  .s-category-grid > :nth-child(4) {
+    animation-delay: 90ms;
+  }
+
+  .s-category-grid > :nth-child(5) {
+    animation-delay: 120ms;
+  }
+
+  .s-category-grid > :nth-child(6) {
+    animation-delay: 150ms;
+  }
+
+  .s-category-grid > :nth-child(n + 7) {
+    animation-delay: 180ms;
+  }
+}
+
+/* Light mode: the card grid sits on a soft grey well, so the white cards lift clearly off it */
+html:not(.dark) :is(.s-table-card > .s-category-grid, .s-table-card > .s-product-grid) {
+  border-radius: 0 0 var(--s-radius-lg) var(--s-radius-lg);
+  background: var(--s-bg);
+}
+
+html:not(.dark) .s-category-card:not(.s-category-card--selected) {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 0 0 1px rgb(16 18 24 / 0.05),
+    0 1px 2px rgb(16 18 24 / 0.06), 0 8px 20px -12px rgb(16 18 24 / 0.16);
+}
+
+html:not(.dark) .s-category-card:not(.s-category-card--selected):hover {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 0 0 1px rgb(16 18 24 / 0.04),
+    0 14px 30px -14px rgb(16 18 24 / 0.2);
+}
+
+/* ── Badges, tags and spec chips: neutral chips, colour only in a small dot ─ */
+/*
+ * Status reads from a 6px dot in the tone colour on a quiet neutral chip, instead of a
+ * candy-coloured fill. Same height and spacing as before, so tables and drawers keep their rhythm.
+ */
+
+.s-badge {
+  --badge-tone: var(--s-text-muted);
+  border-radius: 6px;
+  background: var(--s-chip-bg);
+  color: var(--s-text-2);
+  font-weight: 500;
+  letter-spacing: 0.005em;
+}
+
+.s-badge--accent {
+  --badge-tone: var(--s-accent);
+}
+
+.s-badge--success {
+  --badge-tone: var(--s-success);
+}
+
+.s-badge--warning {
+  --badge-tone: var(--s-warning);
+}
+
+.s-badge--error {
+  --badge-tone: var(--s-error);
+}
+
+.s-badge--info {
+  --badge-tone: var(--s-info);
+}
+
+:is(.s-badge--accent, .s-badge--success, .s-badge--warning, .s-badge--error, .s-badge--info) {
+  background: var(--s-chip-bg);
+  color: var(--s-text);
+}
+
+/* Every coloured badge gets its dot; badges that already render one keep just that */
+:is(.s-badge--accent, .s-badge--success, .s-badge--warning, .s-badge--error, .s-badge--info):not(
+    :has(.s-badge__dot)
+  )::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--s-radius-full);
+  background: var(--badge-tone);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--badge-tone) 18%, transparent);
+}
+
+.s-badge__dot {
+  background: var(--badge-tone);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--badge-tone) 18%, transparent);
+}
+
+/* Spec chips on sale lines (SN, Engine Number, Chassis Number): label quiet, value in mono */
+.s-line-item__spec {
+  border-radius: 6px;
+  background: var(--s-chip-bg);
+  box-shadow: none;
+  color: var(--s-text);
+  font-family: var(--s-font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.s-line-item__spec-label {
+  color: var(--s-text-muted);
+  font-family: var(--s-font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Discount tag: just the green text, no tinted fill */
+.s-line-item__discount {
+  padding: 0;
+  background: none;
+}
+
+/* ── Data tables: easier to scan ───────────────────────────────────────── */
+
+/* A refunded amount is struck through and muted, so the eye never adds it to revenue */
+.s-amount--void,
+.s-table td.s-amount--void {
+  color: var(--s-text-muted);
+  font-weight: 400;
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--s-text-muted) 70%, transparent);
+  text-decoration-thickness: 1px;
+}
+
+/* Walk-in customers: a quiet label, no avatar, lined up with the named customers' text */
+.s-walk-in {
+  color: var(--s-text-muted);
+  font-weight: 400;
+}
+
+.s-table td > .s-walk-in {
+  display: inline-block;
+  padding-inline-start: 40px;
+}
+
+/* Items: the first item, then a small "+N more" chip that never gets clipped */
+.s-items-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.s-items-cell__more {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--s-chip-bg);
+  color: var(--s-text-2);
+  font: 500 0.6875rem / 1rem var(--s-font-sans);
+  white-space: nowrap;
+}
+
+/* Payment method: an icon before the name, quicker to scan than words alone */
+.s-pay-method {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.s-pay-method__icon {
+  flex: none;
+  color: var(--s-text-muted);
+}
+
+/* Totals row: what the filtered rows add up to */
+.s-table__totals td {
+  height: 44px;
+  border-top: 1px solid var(--s-divider);
+  border-bottom: 0;
+  background: var(--s-table-sticky-bg);
+  color: var(--s-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.s-table__totals-label {
+  color: var(--s-text-2);
+  font-weight: 600;
+}
+
+.s-table__totals-value {
+  font-weight: 700;
+}
+
+.s-table__totals-note {
+  color: var(--s-text-muted);
+  white-space: nowrap;
+}
+
+/*
+ * Sticky header (and totals), pinned to the PAGE: only the page scrolls, so the table never
+ * fights it. The header sticks under the top bar and the totals row to the bottom of the screen
+ * (above the phone tab bar on tablets) while the table is in view. A table that is wider than its
+ * card scrolls sideways instead and its header simply isn't pinned (browsers can't do both);
+ * plugins/08.table-fit.client.ts marks the tables that fit with .s-table-wrap--fits.
+ */
+:root {
+  --s-table-sticky-bg: var(--s-surface);
+  --s-table-sticky-top: var(--s-topbar-h);
+  --s-table-sticky-bottom: calc(
+    var(--s-bottomnav-h) + var(--s-bottomnav-offset) + var(--s-space-1)
+  );
+}
+
+html.dark {
+  /* The table card is translucent glass over the canvas; this is the colour it settles to */
+  --s-table-sticky-bg: #141414;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --s-table-sticky-bottom: 0px;
+  }
+}
+
+@media (min-width: 640px) {
+  .s-shell__page .s-table-wrap.s-table-wrap--fits {
+    overflow: visible;
+  }
+
+  .s-shell__page .s-table-wrap--fits thead th {
+    position: sticky;
+    top: var(--s-table-sticky-top);
+    z-index: 3;
+    background: var(--s-table-sticky-bg);
+    box-shadow: inset 0 -1px 0 var(--s-divider);
+  }
+
+  .s-shell__page .s-table-wrap--fits tfoot td {
+    position: sticky;
+    bottom: var(--s-table-sticky-bottom);
+    z-index: 3;
+    box-shadow: inset 0 1px 0 var(--s-divider);
+  }
+}
+
+.s-table__totals-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--s-warning);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.s-table__totals-link:hover {
+  text-decoration: underline;
+}
+
+.s-table__totals-link:focus-visible {
+  border-radius: var(--s-radius-sm);
+  outline: none;
+  box-shadow: var(--s-focus-ring);
+}
+
+/* ── Profile menu: tone instead of outlines, icon tiles, brand accents ─── */
+
+.s-user-menu {
+  width: 304px;
+  border-radius: 16px;
+}
+
+/* Identity card: a soft panel with a faint brand wash, no ring */
+.s-user-menu__head {
+  border-radius: 12px;
+  background: radial-gradient(
+      120% 140% at 0% 0%,
+      color-mix(in srgb, var(--s-accent) 9%, transparent),
+      transparent 60%
+    ),
+    var(--s-overlay-tint);
+  box-shadow: none;
+}
+
+.s-user-menu__head .s-avatar {
+  box-shadow: 0 0 0 2px var(--s-surface),
+    0 0 0 3.5px color-mix(in srgb, var(--s-accent) 45%, transparent);
+}
+
+.s-user-menu__name {
+  letter-spacing: -0.01em;
+}
+
+.s-user-menu__tags .s-badge {
+  background: var(--s-chip-bg);
+  box-shadow: none;
+  color: var(--s-text-2);
+}
+
+/* Groups separate with a hairline that fades out, not a full rule */
+.s-user-menu :is(.s-popover__group, .s-popover__foot) {
+  border-top: 0;
+  background: linear-gradient(90deg, var(--s-divider), transparent 90%) top left / 100% 1px
+    no-repeat;
+}
+
+/* Rows: each icon sits in a small soft tile */
+.s-user-menu .s-menu-row {
+  gap: 12px;
+  min-height: 38px;
+  padding: 5px 8px;
+}
+
+.s-user-menu .s-menu-row__icon {
+  box-sizing: content-box;
+  padding: 5px;
+  border-radius: 8px;
+  background: var(--s-chip-bg);
+  color: var(--s-text-2);
+}
+
+.s-user-menu .s-menu-row:is(:hover, :focus-visible) {
+  background: var(--s-btn-sec-in-panel);
+}
+
+.s-user-menu .s-menu-row:is(:hover, :focus-visible) .s-menu-row__icon {
+  background: color-mix(in srgb, var(--s-accent) 14%, transparent);
+  color: var(--s-accent);
+}
+
+/* The page you're on: a blue tile, no grey band */
+.s-user-menu .s-menu-row--active {
+  background: transparent;
+  font-weight: 500;
+}
+
+.s-user-menu .s-menu-row--active .s-menu-row__icon {
+  background: var(--s-btn-primary);
+  background-image: var(--s-btn-primary-sheen);
+  color: var(--s-on-btn-primary);
+}
+
+.s-user-menu .s-menu-row--active:is(:hover, :focus-visible) {
+  background: var(--s-btn-sec-in-panel);
+}
+
+/* Appearance: the selected option lifts on a soft shadow instead of an outline */
+.s-user-menu__theme.s-tabs {
+  border-radius: 12px;
+  background: var(--s-chip-bg);
+}
+
+.s-user-menu__theme .s-tabs__tab {
+  border-radius: 9px;
+}
+
+.s-user-menu__theme .s-tabs__tab[aria-checked='true'] {
+  background: var(--s-overlay-thumb);
+  box-shadow: 0 1px 2px rgb(16 18 24 / 0.08), 0 2px 8px -4px rgb(16 18 24 / 0.16);
+}
+
+html.dark .s-user-menu__theme .s-tabs__tab[aria-checked='true'] {
+  background: rgb(255 255 255 / 0.12);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+/* Sign out: quiet until hovered, then red with a red-tinted tile */
+.s-user-menu .s-menu-row--danger:is(:hover, :focus-visible) {
+  background: var(--s-error-soft);
+  color: var(--s-error);
+}
+
+.s-user-menu .s-menu-row--danger:is(:hover, :focus-visible) .s-menu-row__icon {
+  background: color-mix(in srgb, var(--s-error) 14%, transparent);
+  color: var(--s-error);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-user-menu .s-menu-row__icon {
+    transition: background-color var(--s-duration-fast) var(--s-ease),
+      color var(--s-duration-fast) var(--s-ease), scale 280ms var(--s-spring);
+  }
+
+  .s-user-menu .s-menu-row:hover .s-menu-row__icon {
+    scale: 1.06;
+  }
+
+  .s-user-menu .s-user-menu__theme .s-tabs__tab {
+    transition: background-color 200ms var(--s-ease-emph), box-shadow 200ms var(--s-ease-emph),
+      color var(--s-duration-fast) var(--s-ease);
+  }
+}
+
+/* ── Transfers: a guided, clean flow ───────────────────────────────────── */
+
+/* How a transfer moves: three stops on one line */
+.s-xfer-flow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-space-1);
+  margin: 0 0 var(--s-space-3);
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.s-xfer-flow__stop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--s-btn-sec-in-panel);
+  color: var(--s-text-2);
+  font: var(--s-text-small);
+}
+
+.s-xfer-flow__stop strong {
+  color: var(--s-text);
+  font-weight: 600;
+}
+
+.s-xfer-flow__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--s-accent) 12%, transparent);
+  color: var(--s-accent);
+}
+
+@media (max-width: 767px) {
+  .s-xfer-flow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Numbered steps that tick off as they're filled */
+.s-xfer__form {
+  gap: 0;
+}
+
+.s-xfer-step {
+  display: grid;
+  gap: var(--s-space-2);
+  padding: var(--s-space-3) 0;
+  background: linear-gradient(90deg, var(--s-divider), transparent 90%) top left / 100% 1px
+    no-repeat;
+}
+
+.s-xfer-step:first-child {
+  padding-top: 0;
+  background: none;
+}
+
+.s-xfer-step__head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 2px;
+}
+
+.s-xfer-step__num {
+  display: grid;
+  grid-row: span 2;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--s-radius-full);
+  background: var(--s-btn-sec-in-panel);
+  color: var(--s-text-2);
+  font: 600 0.8125rem / 1 var(--s-font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.s-xfer-step--done .s-xfer-step__num {
+  background: var(--s-btn-primary);
+  background-image: var(--s-btn-primary-sheen);
+  color: var(--s-on-btn-primary);
+}
+
+.s-xfer-step__title {
+  margin: 0;
+  color: var(--s-text);
+  font: var(--s-text-heading);
+}
+
+.s-xfer-step__hint {
+  grid-column: 2;
+  margin: 0;
+  color: var(--s-text-muted);
+  font: var(--s-text-small);
+}
+
+.s-xfer-step__count {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  padding: 2px 10px;
+  border-radius: var(--s-radius-full);
+  background: color-mix(in srgb, var(--s-accent) 12%, transparent);
+  color: var(--s-accent);
+  font: 600 0.75rem / 1.25rem var(--s-font-sans);
+}
+
+/* Route: From → To on one row, joined by a round arrow */
+.s-xfer-route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: var(--s-space-1-5);
+}
+
+.s-xfer-route__arrow {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 4px;
+  border-radius: var(--s-radius-full);
+  background: color-mix(in srgb, var(--s-accent) 12%, transparent);
+  color: var(--s-accent);
+}
+
+@media (max-width: 639px) {
+  .s-xfer-route {
+    grid-template-columns: 1fr;
+  }
+
+  .s-xfer-route__arrow {
+    justify-self: center;
+    margin: 0;
+    rotate: 90deg;
+  }
+}
+
+/* Items list sits on a soft well */
+.s-xfer .s-transfer__items {
+  max-height: none;
+  border-radius: 12px;
+  background: var(--s-surface-2);
+}
+
+/* Finish: notes, a live summary and the button on one bar */
+.s-xfer-submit {
+  display: grid;
+  gap: var(--s-space-2);
+  padding-top: var(--s-space-3);
+  background: linear-gradient(90deg, var(--s-divider), transparent 90%) top left / 100% 1px
+    no-repeat;
+}
+
+.s-xfer-submit__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-space-1-5);
+  padding: 10px 10px 10px 16px;
+  border-radius: 14px;
+  background: var(--s-btn-sec-in-panel);
+}
+
+.s-xfer-submit__summary {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--s-text-2);
+  font: var(--s-text-small);
+}
+
+.s-xfer-submit__summary strong {
+  color: var(--s-text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.s-xfer-submit__arrow {
+  color: var(--s-accent);
+}
+
+@media (max-width: 639px) {
+  .s-xfer-submit__bar .s-btn {
+    width: 100%;
+  }
+}
+
+/* "Waiting for you" becomes a callout with an icon */
+.s-xfer-awaiting {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--s-accent) 8%, var(--s-surface));
+  color: var(--s-text);
+}
+
+.s-xfer-awaiting__icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--s-accent);
+}
+
+/* History table: lighter rows, the reference in mono, a softer arrow */
+.s-transfer-table .s-transfer-table__arrow svg {
+  color: var(--s-accent);
+}
+
+.s-transfer-table tr.s-table__row--expanded td {
+  background: color-mix(in srgb, var(--s-accent) 4%, transparent);
+}
+
+.s-transfer-table td.s-transfer-table__nested {
+  background: color-mix(in srgb, var(--s-accent) 2%, transparent);
+}
+
+/* Branch reports: revenue share as a slim bar */
+.s-xfer-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 220px;
+}
+
+.s-xfer-share__track {
+  flex: 1;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--s-radius-full);
+  background: var(--s-chip-bg);
+}
+
+.s-xfer-share__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--s-btn-primary),
+    color-mix(in srgb, var(--s-btn-primary) 60%, white)
+  );
+}
+
+.s-xfer-share__pct {
+  min-width: 3ch;
+  color: var(--s-text-2);
+  font: 500 0.75rem / 1 var(--s-font-sans);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-xfer-step {
+    animation: s-rise 380ms var(--s-ease-emph) both;
+  }
+
+  .s-xfer-step__num {
+    transition: background-color 240ms var(--s-ease-emph), color 240ms var(--s-ease-emph);
+  }
+
+  .s-xfer-step--done .s-xfer-step__num svg {
+    animation: s-tick-pop 320ms var(--s-spring);
+  }
+
+  .s-xfer-share__fill {
+    animation: s-xfer-grow 700ms var(--s-ease-emph) both;
+    transform-origin: left center;
+  }
+}
+
+@keyframes s-xfer-grow {
+  from {
+    scale: 0 1;
+  }
+}

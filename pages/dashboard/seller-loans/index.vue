@@ -129,8 +129,8 @@
                   >
                     <span class="s-list__primary">{{ loan.partyName }}</span>
                     <span class="s-list__secondary s-loan__items">{{ loanItemNames(loan) }}</span>
-                    <span class="s-list__secondary"
-                      >{{ unitLabel(loan) }} · {{ formatDay(loan.createdAt) }}</span
+                    <span class="s-list__secondary" :title="formatSaleWhen(loan.createdAt).title"
+                      >{{ unitLabel(loan) }} · {{ formatSaleWhen(loan.createdAt).label }}</span
                     >
                     <span v-if="loanDecision(loan)" class="s-list__secondary">{{
                       loanDecision(loan)
@@ -226,9 +226,16 @@
                         />
                       </button>
                     </td>
-                    <td class="s-table__nowrap">{{ formatDay(loan.createdAt) }}</td>
-                    <td class="s-hide-md s-table__nowrap">
-                      <span v-if="loanClosedAt(loan)">{{ formatDay(loanClosedAt(loan)) }}</span>
+                    <td class="s-table__nowrap" :title="formatSaleWhen(loan.createdAt).title">
+                      {{ formatSaleWhen(loan.createdAt).label }}
+                    </td>
+                    <td
+                      class="s-hide-md s-table__nowrap"
+                      :title="formatSaleWhen(loanClosedAt(loan)).title || undefined"
+                    >
+                      <span v-if="loanClosedAt(loan)">{{
+                        formatSaleWhen(loanClosedAt(loan)).label
+                      }}</span>
                       <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
                     </td>
                     <td>
@@ -453,6 +460,7 @@ import { useStockItemDetailsLookup } from '~/composables/useStockItemDetailsLook
 import { groupedItemNames, type StockItemRow } from '~/utils/stock-item-details'
 import { formatSellerLoanStatusLabel } from '~/utils/status-labels'
 import { EMPTY_CELL } from '~/utils/ui-empty'
+import { formatSaleWhen } from '~/utils/sale-display'
 import { useSellerLoanOutsStore, type SellerLoanOut } from '~/stores/sellerLoanOuts'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
@@ -671,15 +679,6 @@ watch(
     }
   }
 )
-
-function formatDay(v: Date | undefined) {
-  if (!v) return EMPTY_CELL
-  try {
-    return v.toLocaleDateString(undefined, { dateStyle: 'medium' })
-  } catch {
-    return EMPTY_CELL
-  }
-}
 
 watch(
   () => storesStore.currentStoreId,

@@ -63,7 +63,33 @@
           </p>
         </SCard>
 
-        <section class="s-table-card" aria-label="Write-offs">
+        <!-- Phone: one row per write-off -->
+        <SCard flush class="s-only-sm" aria-label="Write-offs">
+          <ul class="s-list">
+            <li v-for="row in inPeriod" :key="row.id">
+              <div class="s-list__item">
+                <div class="s-list__main">
+                  <span class="s-list__primary">{{ row.item.name }}</span>
+                  <span class="s-list__secondary">
+                    {{ WRITE_OFF_REASON_LABELS[row.reason] }} · {{ row.quantity }}
+                    {{ row.quantity === 1 ? 'unit' : 'units' }}
+                    <template v-if="row.createdAt">
+                      · {{ formatSaleWhen(row.createdAt).label }}</template
+                    >
+                  </span>
+                </div>
+                <div class="s-list__end">
+                  <span class="s-list__value">{{
+                    row.costValue === null ? EMPTY_CELL : formatCurrency(row.costValue)
+                  }}</span>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </SCard>
+
+        <!-- Tablet and desktop: table -->
+        <section class="s-table-card s-hide-sm" aria-label="Write-offs">
           <div class="s-table-wrap">
             <table class="s-table">
               <thead>
@@ -97,11 +123,33 @@
                     {{ row.costValue === null ? EMPTY_CELL : formatCurrency(row.costValue) }}
                   </td>
                   <td class="s-hide-sm s-table__nowrap">
-                    {{ formatDay(row.createdAt) }}
+                    <span v-if="row.createdAt" :title="formatSaleWhen(row.createdAt).title">{{
+                      formatSaleWhen(row.createdAt).label
+                    }}</span>
+                    <template v-else>{{ EMPTY_CELL }}</template>
                     <span class="s-table__secondary">{{ row.createdByName }}</span>
                   </td>
                 </tr>
               </tbody>
+              <!-- What every write-off in the period adds up to -->
+              <tfoot class="s-table__totals">
+                <tr>
+                  <td>
+                    <span class="s-table__totals-label">
+                      {{ inPeriod.length }} {{ inPeriod.length === 1 ? 'write-off' : 'write-offs' }}
+                    </span>
+                  </td>
+                  <td />
+                  <td class="s-hide-md" />
+                  <td class="s-table__num">
+                    <span class="s-table__totals-value">{{ unitsLost }}</span>
+                  </td>
+                  <td class="s-table__num">
+                    <span class="s-table__totals-value">{{ formatCurrency(totalLoss) }}</span>
+                  </td>
+                  <td class="s-hide-sm" />
+                </tr>
+              </tfoot>
             </table>
           </div>
         </section>
@@ -121,6 +169,7 @@ import { useStoresStore } from '~/stores/stores'
 import { usePreferences } from '~/composables/usePreferences'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { stockItemDetailSummary } from '~/utils/stock-item-details'
+import { formatSaleWhen } from '~/utils/sale-display'
 import {
   WRITE_OFF_REASON_LABELS,
   WRITE_OFF_SOURCE_LABELS,
@@ -182,11 +231,6 @@ function sourceDetail(row: StockWriteOff) {
   }
   if (row.supplierReturn) return row.supplierReturn.supplierName
   return ''
-}
-
-function formatDay(iso: string | null) {
-  if (!iso) return EMPTY_CELL
-  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' })
 }
 
 watch(
