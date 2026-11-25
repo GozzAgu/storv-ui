@@ -256,6 +256,9 @@
 </template>
 
 <script setup lang="ts">
+import { breadcrumbJsonLd, faqJsonLd, softwareJsonLd } from '~/utils/marketing-seo'
+import { marketingSoftwareOffers } from '~/composables/useMarketingPricing'
+import { useMarketingSeo } from '~/composables/useMarketingSeo'
 import type { Component } from 'vue'
 import {
   Boxes,
@@ -482,15 +485,16 @@ const billingFaq = computed<MkFaqItem[]>(() => [
   },
 ])
 
-useHead({
-  title: 'Pricing - Storvv',
-  meta: [
-    {
-      name: 'description',
-      content:
-        (trialOffer ? `${trialOffer.headline} on every new account. ` : '') +
-        'Storvv pricing: Micro is free forever for one store. Medium adds analytics, sales leads, and a second branch. Enterprise covers 5 stores with 10 staff each, plus stock transfers and stock loans, and you can add stores or staff seats any time. Cancel anytime.',
-    },
+useMarketingSeo({
+  title: 'Pricing · Storvv',
+  description:
+    (trialOffer ? `${trialOffer.headline} on every new account. ` : '') +
+    'Storvv pricing: Micro is free forever for one store. Medium adds analytics, sales leads, and a second branch. Enterprise covers 5 stores with 10 staff each, plus stock transfers and stock loans, and you can add stores or staff seats any time. Cancel anytime.',
+  path: '/pricing',
+  jsonLd: () => [
+    breadcrumbJsonLd('Pricing', '/pricing'),
+    softwareJsonLd(marketingSoftwareOffers()),
+    faqJsonLd(billingFaq.value),
   ],
 })
 </script>

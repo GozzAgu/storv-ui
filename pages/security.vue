@@ -159,6 +159,8 @@
 </template>
 
 <script setup lang="ts">
+import { breadcrumbJsonLd, faqJsonLd } from '~/utils/marketing-seo'
+import { useMarketingSeo } from '~/composables/useMarketingSeo'
 import type { Component } from 'vue'
 import { computed, ref } from 'vue'
 import {
@@ -351,14 +353,11 @@ const detailItems: MkFaqItem[] = [
   },
 ]
 
-useHead({
-  title: 'Security & Trust - Storvv',
-  meta: [
-    {
-      name: 'description',
-      content:
-        'How Storvv protects your retail business: secure sign-in, role-based permissions, activity logs, and data ownership, explained plainly for owners and procurement teams.',
-    },
-  ],
+useMarketingSeo({
+  title: 'Security and trust · Storvv',
+  description:
+    'How Storvv protects your retail business: secure sign-in, role-based permissions, activity logs, and data ownership, explained plainly for owners and procurement teams.',
+  path: '/security',
+  jsonLd: [breadcrumbJsonLd('Security', '/security'), faqJsonLd(detailItems)],
 })
 </script>

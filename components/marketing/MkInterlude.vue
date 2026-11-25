@@ -113,9 +113,10 @@
           />
         </circle>
         <rect class="mkl__branch" x="-74" y="-28" width="148" height="56" rx="18" />
-        <Store x="-56" y="-11" :size="22" :stroke-width="1.75" class="mkl__branch-icon" />
-        <text class="mkl__branch-name" x="-26" y="-1">{{ branch.name }}</text>
-        <text class="mkl__branch-meta" x="-26" y="16">{{ branch.meta }}</text>
+        <rect class="mkl__branch-badge" x="-62" y="-17" width="34" height="34" rx="10" />
+        <Store x="-55" y="-10" :size="20" :stroke-width="2" class="mkl__branch-icon" />
+        <text class="mkl__branch-name" x="-18" y="-1">{{ branch.name }}</text>
+        <text class="mkl__branch-meta" x="-18" y="16">{{ branch.meta }}</text>
       </g>
     </svg>
   </div>

@@ -5,6 +5,10 @@ import {
   CAPACITOR_BOOT_SPLASH_SCRIPT,
   CAPACITOR_SHELL_INLINE_SCRIPT,
 } from './utils/capacitor-shell-inline'
+import { writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { CLIENT_ONLY_ROUTE_PATTERNS, MARKETING_PAGE_PATHS } from './utils/marketing-paths'
+import { buildSitemapXml } from './utils/sitemap'
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   // Off by default so the Nuxt badge never shows on screen; run with NUXT_DEVTOOLS=true to use it.
@@ -19,8 +23,12 @@ export default defineNuxtConfig({
     // Avoid dev-time fetch to /_nuxt/builds/meta/dev.json (breaks E2E and static shells).
     appManifest: false,
   },
-  // For Capacitor: Generate static site
-  ssr: false,
+  /*
+   * Web builds render the marketing pages to real HTML, so search engines and link previews
+   * (WhatsApp, LinkedIn, X) see the content. App routes stay client-only via routeRules below.
+   * Capacitor builds set NUXT_SPA=1 (see the cap:* scripts) and stay a pure client app.
+   */
+  ssr: process.env.NUXT_SPA !== '1',
   nitro: {
     // On Vercel, force the serverless output so `/api/*` is a real function (not SPA fallback).
     ...(process.env.VERCEL ? { preset: 'vercel' as const } : {}),
@@ -43,8 +51,17 @@ export default defineNuxtConfig({
    * NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN is set to the app host (e.g. app.storvv.com).
    */
   routeRules: {
+    // Marketing pages: rendered once at build time and served as static HTML.
+    ...Object.fromEntries(
+      MARKETING_PAGE_PATHS.filter(
+        (path) => !(CLIENT_ONLY_ROUTE_PATTERNS as readonly string[]).includes(path)
+      ).map((path) => [path, { prerender: true }])
+    ),
+    // The app stays a client-only SPA: Firebase auth, IndexedDB and the dashboard need the browser.
+    ...Object.fromEntries(CLIENT_ONLY_ROUTE_PATTERNS.map((path) => [path, { ssr: false }])),
     // Payer pages carry a bearer token in the path: never cached, framed or sent as a referrer.
     '/pay/**': {
+      ssr: false,
       headers: {
         'Cache-Control': 'no-store',
         'Referrer-Policy': 'no-referrer',
@@ -147,8 +164,8 @@ export default defineNuxtConfig({
     public: {
       /** Optional calendar link (Cal.com, Calendly…) offered after a walkthrough request. */
       bookingUrl: process.env.NUXT_PUBLIC_BOOKING_URL || '',
-      /** Optional sales WhatsApp number in international format, e.g. 2348030000000. */
-      salesWhatsapp: process.env.NUXT_PUBLIC_SALES_WHATSAPP || '',
+      /** Sales WhatsApp number in international format (digits only). */
+      salesWhatsapp: process.env.NUXT_PUBLIC_SALES_WHATSAPP || '2349163070964',
       /**
        * The demo is closed to the public. The Storvv team opens it with /demo?access=<this key>
        * (remembered per browser). Unset: only local development can open it.
@@ -278,6 +295,11 @@ export default defineNuxtConfig({
         }
       }
       pages.push(...mirrored)
+    },
+    /** sitemap.xml is written as a static file at build time, dated with the build. */
+    async 'nitro:build:public-assets'(nitro) {
+      const xml = buildSitemapXml(new Date().toISOString().slice(0, 10))
+      await writeFile(join(nitro.options.output.publicDir, 'sitemap.xml'), xml)
     },
   },
 })

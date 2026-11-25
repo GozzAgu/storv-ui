@@ -10,10 +10,10 @@
           <CalendarDays :size="15" :stroke-width="1.75" aria-hidden="true" />
           Book a walkthrough
         </button>
-        <NuxtLink to="/help" class="mk-topbar__link">
-          <LifeBuoy :size="15" :stroke-width="1.75" aria-hidden="true" />
-          Help centre
-        </NuxtLink>
+        <a :href="whatsappUrl" target="_blank" rel="noopener" class="mk-topbar__link">
+          <MessageCircle :size="15" :stroke-width="1.75" aria-hidden="true" />
+          Chat on WhatsApp
+        </a>
         <NuxtLink v-if="offer" :to="signupUrl" class="mk-topbar__offer">
           <Gift :size="14" :stroke-width="2" aria-hidden="true" />
           {{ offer.headline }}
@@ -30,17 +30,17 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { ArrowRight, CalendarDays, Gift, LifeBuoy, X } from '@lucide/vue'
+import { ArrowRight, CalendarDays, Gift, MessageCircle, X } from '@lucide/vue'
 import { useWalkthrough } from '~/composables/useWalkthrough'
 import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 import { getTrialOffer } from '~/utils/trial-offer'
-
-/** Bump when the bar's message changes, so visitors who closed the old one see the new one. */
-const DISMISS_KEY = 'storvv:mk-topbar-dismissed:v1'
+import { storvvWhatsappLink } from '~/utils/storvv-whatsapp'
+import { TOP_BAR_DISMISS_KEY as DISMISS_KEY } from '~/utils/marketing-top-bar'
 
 const walkthrough = useWalkthrough()
 const signupUrl = useMarketingSignupUrl()
 const offer = getTrialOffer()
+const whatsappUrl = storvvWhatsappLink('Hi Storvv, I have a question about Storvv.')
 const visible = ref(true)
 
 onMounted(() => {
@@ -53,6 +53,7 @@ onMounted(() => {
 
 function dismiss() {
   visible.value = false
+  document.documentElement.classList.add('mk-topbar-off')
   try {
     localStorage.setItem(DISMISS_KEY, '1')
   } catch {

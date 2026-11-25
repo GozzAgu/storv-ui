@@ -36,13 +36,9 @@
         <Transition name="mk-fade" mode="out-in">
           <div :key="current.id" class="mku__inner">
             <div class="mku__copy">
-              <component
-                :is="current.icon"
-                :size="32"
-                :stroke-width="1.5"
-                class="mku__icon"
-                aria-hidden="true"
-              />
+              <span class="mku__icon" aria-hidden="true">
+                <component :is="current.icon" :size="24" :stroke-width="2" />
+              </span>
               <h3 class="mku__title">{{ current.title }}</h3>
               <p class="mku__text">{{ current.text }}</p>
               <ul class="mku__points">

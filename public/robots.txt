@@ -1,2 +1,15 @@
-User-Agent: *
-Disallow:
+# www.storvv.com: the marketing pages are public; the app and private links are not for search.
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /signin
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /auth/
+Disallow: /demo
+Disallow: /dev/
+Disallow: /api/
+Disallow: /pay/
+Disallow: /r/
+
+Sitemap: https://www.storvv.com/sitemap.xml

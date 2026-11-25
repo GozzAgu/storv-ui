@@ -18,6 +18,8 @@
 
     <MkInterlude variant="branches" />
 
+    <MkTestimonials />
+
     <!-- Pricing teaser -->
     <section id="pricing" class="mk-section" aria-labelledby="home-pricing-title">
       <div class="mk-container">
@@ -107,6 +109,10 @@
 </template>
 
 <script setup lang="ts">
+import MkTestimonials from '~/components/marketing/MkTestimonials.vue'
+import { faqJsonLd, organizationJsonLd, softwareJsonLd, websiteJsonLd } from '~/utils/marketing-seo'
+import { marketingSoftwareOffers } from '~/composables/useMarketingPricing'
+import { useMarketingSeo } from '~/composables/useMarketingSeo'
 import { ref } from 'vue'
 import { ArrowRight } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
@@ -176,14 +182,16 @@ const faq: MkFaqItem[] = [
   },
 ]
 
-useHead({
-  title: 'Storvv - The retail operating system for modern businesses',
-  meta: [
-    {
-      name: 'description',
-      content:
-        'Storvv: inventory, sales, analytics, and multi-store tools for retailers. Web dashboard today, iOS and Android apps coming soon.',
-    },
+useMarketingSeo({
+  title: 'Storvv · Point of sale and inventory for shops in every branch',
+  description:
+    'Point of sale and inventory software for gadget stores, supermarkets, pharmacies and dealers in Nigeria. Sell, track stock across branches and send receipts on WhatsApp. Free for one store.',
+  path: '/',
+  jsonLd: [
+    organizationJsonLd(),
+    websiteJsonLd(),
+    softwareJsonLd(marketingSoftwareOffers()),
+    faqJsonLd(faq),
   ],
 })
 </script>

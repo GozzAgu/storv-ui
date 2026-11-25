@@ -17,8 +17,6 @@ function mountHero() {
     global: {
       stubs: {
         NuxtLink: { props: ['to'], template: '<a :href="to"><slot /></a>' },
-        MkFrame: { template: '<img />' },
-        Transition: { template: '<slot />' },
       },
     },
   })
@@ -41,15 +39,38 @@ describe('MkHero', () => {
     expect(primary[0]!.attributes('href')).toBe('https://app.storvv.com/signup')
   })
 
-  it('hides the duplicate marquee rows from screen readers', () => {
+  it('lists every sector Storvv supports, as a labelled list', () => {
     const wrapper = mountHero()
-    const rows = wrapper.findAll('.mkh__row')
-    expect(rows.map((row) => row.attributes('aria-hidden'))).toEqual([
-      'false',
-      'true',
-      'false',
-      'true',
-    ])
+    const list = wrapper.find('.mkh__trades')
+    expect(list.attributes('aria-labelledby')).toBe('mkh-proof-label')
+    const names = list.findAll('.mkh__trade-name').map((name) => name.text())
+    expect(names).toHaveLength(12)
+    expect(names).toContain('Phones & gadgets')
+    expect(names).toContain('Pharmacy & health')
+    expect(names).toContain('Wholesale & procurement')
+    expect(list.findAll('.mkh__trade-line').every((line) => line.text().length > 0)).toBe(true)
+  })
+
+  it('keeps the decorative hub away from screen readers but describes it in text', () => {
+    const wrapper = mountHero()
+    expect(wrapper.find('.mkh__hub-canvas').attributes('aria-hidden')).toBe('true')
+    expect(wrapper.find('.mkh__hub .ds-sr-only').text()).toContain('every branch')
+  })
+
+  it('places every tool tile inside the hub', () => {
+    const wrapper = mountHero()
+    const tiles = wrapper.findAll('.mkh__tile')
+    expect(tiles.length).toBeGreaterThan(4)
+    for (const tile of tiles) {
+      const style = tile.attributes('style') ?? ''
+      const [left, top] = [/left: ([\d.]+)%/, /top: ([\d.]+)%/].map((re) =>
+        Number(style.match(re)?.[1])
+      )
+      expect(left).toBeGreaterThan(0)
+      expect(left).toBeLessThan(100)
+      expect(top).toBeGreaterThan(0)
+      expect(top).toBeLessThan(100)
+    }
   })
 
   it('pauses and resumes everything that moves', async () => {

@@ -1,0 +1,556 @@
+/*
+ * Marketing site: the "future" layer.
+ *
+ * Loaded after marketing.css and marketing-home.css. It adds depth and motion on top of the
+ * existing components and never changes their content: the logo's two blues as the one accent
+ * gradient, gradient hairlines and a cursor spotlight
+ * on cards, solid icon tiles, a lit primary button, a navy closing band and a scroll progress line.
+ */
+
+/* ── Tokens ─────────────────────────────────────────────────────────────── */
+
+.mk {
+  /* The two blues of the Storvv mark */
+  --mk-logo-deep: #3d63f2;
+  --mk-logo-light: #8ea2ff;
+  --mk-grad: linear-gradient(100deg, var(--mk-logo-deep) 10%, var(--mk-logo-light) 95%);
+  --mk-grad-btn: linear-gradient(135deg, #4a6ef5 0%, #3d63f2 45%, #2f52e0 100%);
+  --mk-hairline: color-mix(in srgb, var(--mk-logo-deep) 22%, var(--s-line));
+  --mk-spot-color: rgb(142 162 255 / 0.16);
+  --mk-navy-panel: linear-gradient(180deg, #16245e 0%, #0c1438 100%);
+}
+
+html.dark .mk {
+  /* Lifted a step so the deep blue still reads on the dark page */
+  --mk-logo-deep: #6f8cff;
+  --mk-logo-light: #b4c2ff;
+  --mk-hairline: color-mix(in srgb, #8ea2ff 26%, var(--s-line));
+  --mk-spot-color: rgb(142 162 255 / 0.1);
+}
+
+/* ── Type: accent phrases and eyebrows ─────────────────────────────────── */
+
+/* The second phrase of every heading now carries the logo gradient instead of grey */
+:is(h1, h2, .mk-h1, .mk-h2) .mk-accent {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: inherit;
+  padding-bottom: 0.06em;
+  background: var(--mk-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mk-head--center :is(h1, h2, .mk-h1, .mk-h2) .mk-accent,
+.mk-hero__copy :is(h1, .mk-h1) .mk-accent,
+.mk-cta :is(h2, .mk-h2) .mk-accent {
+  margin-inline: auto;
+}
+
+/* Eyebrows become a small glass pill with a lit dot */
+.mk-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 10px;
+  border-radius: var(--s-radius-full);
+  background: color-mix(in srgb, var(--s-surface) 70%, transparent);
+  box-shadow: inset 0 0 0 1px var(--mk-hairline);
+  color: var(--s-text-2);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.mk-eyebrow::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mk-grad);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--mk-logo-deep) 16%, transparent);
+}
+
+/* ── Cards: gradient hairline, spotlight, lift ─────────────────────────── */
+
+:is(.mk-card, .mk-plan, .mk-contact-card, .mkf__card, .mkc__card, .mko__card) {
+  position: relative;
+  background-image: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, -20%),
+    var(--mk-spot, transparent),
+    transparent 65%
+  );
+  transition: background-color var(--s-duration) var(--s-ease), box-shadow 300ms var(--s-ease-out),
+    translate 300ms var(--s-ease-out);
+}
+
+/* A 1px ring that brightens toward the cursor */
+:is(.mk-card, .mk-plan, .mk-contact-card, .mkf__card, .mkc__card, .mko__card)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+      260px circle at var(--mx, 50%) var(--my, -20%),
+      var(--mk-ring, transparent),
+      transparent 70%
+    ),
+    linear-gradient(160deg, var(--mk-hairline), transparent 60%);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(.mk-card, .mk-plan, .mk-contact-card, .mkf__card, .mkc__card, .mko__card):hover {
+    --mk-spot: var(--mk-spot-color);
+    --mk-ring: color-mix(in srgb, var(--mk-logo-light) 90%, transparent);
+  }
+
+  /* No lift or drop shadow on hover: the lit edge is the only response */
+  .mk-card--hover:hover {
+    box-shadow: none;
+  }
+}
+
+/* The featured plan glows in the brand gradient */
+.mk-plan--featured {
+  box-shadow: 0 0 0 1.5px var(--mk-logo-deep),
+    0 30px 60px -30px color-mix(in srgb, var(--mk-logo-deep) 55%, transparent), var(--mk-lift);
+}
+
+.mk-plan__badge {
+  background: var(--mk-grad-btn);
+  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--mk-logo-deep) 70%, transparent);
+}
+
+/* ── Icons: solid tiles in the logo gradient ───────────────────────────── */
+
+.mk-card__icon,
+.mk-feature__icon {
+  position: relative;
+  border-radius: 12px;
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.3), transparent 55%), var(--mk-grad-btn);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35), inset 0 -2px 0 rgb(0 0 0 / 0.12),
+    0 10px 20px -10px color-mix(in srgb, var(--mk-logo-deep) 75%, transparent);
+}
+
+.mk-card__icon {
+  width: 44px;
+  height: 44px;
+}
+
+.mk-feature__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.mk-card__icon svg,
+.mk-feature__icon svg {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.18));
+}
+
+.mku__icon {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.32), transparent 55%), var(--mk-grad-btn);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4), inset 0 -2px 0 rgb(0 0 0 / 0.12),
+    0 0 0 6px color-mix(in srgb, var(--mk-logo-deep) 10%, transparent),
+    0 16px 28px -14px color-mix(in srgb, var(--mk-logo-deep) 70%, transparent);
+}
+
+.mku__icon svg {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.2));
+}
+
+/* The feature points beside it pick up the brand blue */
+.mku__points svg {
+  color: var(--mk-logo-deep);
+}
+
+/* ── Primary button: gradient, glow, a sheen on hover ──────────────────── */
+
+.mk-cta-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--mk-grad-btn);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 1px 2px rgb(16 24 40 / 0.12);
+  transition: border-radius 300ms var(--s-ease-out);
+}
+
+.mk-cta-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgb(255 255 255 / 0.28) 48%,
+    transparent 66%
+  );
+  translate: -120% 0;
+  pointer-events: none;
+}
+
+.mk-cta-btn:hover {
+  background: var(--mk-grad-btn);
+}
+
+.mk-cta-btn:active {
+  background: var(--mk-grad-btn);
+}
+
+.mk-cta-btn:focus-visible {
+  box-shadow: var(--s-focus-ring);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mk-cta-btn:hover::after {
+    translate: 120% 0;
+    transition: translate 800ms var(--s-ease-out);
+  }
+}
+
+/* ── Closing band: deep navy panel ─────────────────────── */
+
+.mk-cta {
+  position: relative;
+  isolation: isolate;
+  background: var(--mk-navy-panel);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 40px 80px -40px rgb(10 18 48 / 0.6);
+}
+
+.mk-cta .mk-h2 {
+  color: #ffffff;
+}
+
+.mk-cta :is(h2, .mk-h2) .mk-accent {
+  background: linear-gradient(100deg, #b4c2ff 10%, #e0e6ff 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.mk-cta .mk-lede,
+.mk-cta .mk-walk {
+  color: rgb(255 255 255 / 0.78);
+}
+
+.mk-cta__note {
+  color: rgb(255 255 255 / 0.6);
+}
+
+.mk-cta__link,
+.mk-cta .mk-walk__btn {
+  color: #ffffff;
+  text-decoration-color: rgb(255 255 255 / 0.4);
+}
+
+.mk-cta__link:focus-visible,
+.mk-cta .mk-walk__btn:focus-visible {
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+.mk-cta .mk-cta-btn {
+  background: #ffffff;
+  color: #1b2d7a;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+}
+
+.mk-cta .mk-cta-btn::after {
+  background: linear-gradient(105deg, transparent 30%, rgb(61 99 242 / 0.14) 48%, transparent 66%);
+}
+
+.mk-cta .mk-cta-btn:focus-visible {
+  box-shadow: 0 0 0 3px #0a1030, 0 0 0 5px #ffffff;
+}
+
+.mk-cta__shot {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.12), 0 -20px 60px -20px rgb(61 99 242 / 0.6);
+}
+
+/* ── Header: gradient edge and a scroll progress line ──────────────────── */
+
+.mk-header--scrolled {
+  box-shadow: 0 1px 0 var(--mk-hairline);
+}
+
+@supports (animation-timeline: scroll()) {
+  .mk-header::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    background: var(--mk-grad);
+    transform-origin: 0 50%;
+    scale: 0 1;
+    pointer-events: none;
+    animation: mk-progress linear both;
+    animation-timeline: scroll(root);
+  }
+
+  @keyframes mk-progress {
+    to {
+      scale: 1 1;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-header::after {
+    display: none;
+  }
+}
+
+/* ── Sections: hairline edges on alternate bands ───────────────────────── */
+
+.mk-section--alt {
+  background: linear-gradient(90deg, transparent, var(--mk-hairline), transparent) top / 100% 1px
+      no-repeat,
+    linear-gradient(90deg, transparent, var(--mk-hairline), transparent) bottom / 100% 1px no-repeat,
+    var(--mk-alt);
+}
+
+/* Availability pill: its dot breathes */
+@media (prefers-reduced-motion: no-preference) {
+  .mk-pill__dot {
+    animation: mk-breathe 2.4s ease-out infinite;
+  }
+}
+
+@keyframes mk-breathe {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--s-success) 45%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+}
+
+/* ── Reveals: a short blur-in, so sections arrive rather than appear ───── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .mk-reveal {
+    filter: blur(8px);
+    transition: opacity 700ms var(--s-ease-out), transform 700ms var(--s-ease-out),
+      filter 700ms var(--s-ease-out);
+  }
+
+  .mk-reveal[data-revealed] {
+    filter: none;
+  }
+}
+
+/* ── Footer: lit top edge and a brand-tinted wordmark ──────────────────── */
+
+.mk-footer {
+  border-top-color: transparent;
+}
+
+.mk-footer::before {
+  display: block;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--mk-logo-deep),
+    var(--mk-logo-light),
+    transparent
+  );
+  opacity: 0.6;
+}
+
+.mk-footer__word {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--mk-logo-deep) 16%, transparent) 0%,
+    transparent 85%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* ── Interludes: livelier activity chips and branch map ────────────────── */
+
+/* A vivid partner for each pastel family, used only inside these two illustrations */
+.mkl .mk-tint--sand {
+  --tint-pop: #d97706;
+}
+
+.mkl .mk-tint--peach {
+  --tint-pop: #ea580c;
+}
+
+.mkl .mk-tint--rose {
+  --tint-pop: #e11d48;
+}
+
+.mkl .mk-tint--sage {
+  --tint-pop: #16a34a;
+}
+
+.mkl .mk-tint--sky {
+  --tint-pop: #2563eb;
+}
+
+.mkl .mk-tint--lilac {
+  --tint-pop: #7c3aed;
+}
+
+html.dark .mkl .mk-tint--sand {
+  --tint-pop: #f59e0b;
+}
+
+html.dark .mkl .mk-tint--peach {
+  --tint-pop: #fb923c;
+}
+
+html.dark .mkl .mk-tint--rose {
+  --tint-pop: #fb7185;
+}
+
+html.dark .mkl .mk-tint--sage {
+  --tint-pop: #22c55e;
+}
+
+html.dark .mkl .mk-tint--sky {
+  --tint-pop: #3b82f6;
+}
+
+html.dark .mkl .mk-tint--lilac {
+  --tint-pop: #8b5cf6;
+}
+
+/* Activity chips: a flat coloured icon on a plain card */
+.mkl--notes .mkl__note {
+  box-shadow: 0 0 0 1px var(--s-line);
+}
+
+.mkl--notes .mkl__note-icon {
+  background: var(--tint-pop);
+  color: #ffffff;
+}
+
+/* Branch map: plain shop cards, quiet routes, flat coloured parcels */
+.mkl--branches .mkl__track {
+  stroke: color-mix(in srgb, var(--mk-logo-deep) 35%, transparent);
+  stroke-dasharray: 2 8;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mkl--branches .mkl__track {
+    animation: mkl-flow 2s linear infinite;
+  }
+
+  .mkl--branches.is-still .mkl__track {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes mkl-flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.mkl--branches .mkl__pill {
+  fill: var(--tint-pop);
+  stroke: none;
+}
+
+.mkl--branches .mkl__ink {
+  color: #ffffff;
+}
+
+.mkl--branches .mkl__branch {
+  filter: none;
+}
+
+.mkl__branch-badge {
+  fill: var(--mk-logo-deep);
+}
+
+.mkl--branches .mkl__branch-icon {
+  color: #ffffff;
+}
+
+.mkl--branches .mkl__ping {
+  stroke: color-mix(in srgb, var(--mk-logo-deep) 40%, transparent);
+}
+
+/* ── How it works: neutral step cards ──────────────────────────────────── */
+
+.mkf__card {
+  background-color: var(--mk-card);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+}
+
+.mkf__body .mk-tag {
+  background: var(--s-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+}
+
+.mkf__shot {
+  box-shadow: 0 0 0 1px var(--s-line);
+}
+
+/* ── Journey: white pills with a coloured icon ─────────────────────────── */
+
+.mkl--journey .mkl__pill {
+  fill: var(--s-surface);
+  stroke: var(--s-line);
+  stroke-width: 1;
+}
+
+.mkl--journey .mkl__ink {
+  color: var(--tint-pop);
+}
+
+.mkl--journey .mkl__label {
+  font-weight: 600;
+}
+
+.mkl--journey .mkl__track {
+  opacity: 0.5;
+}
+
+/* ── Before hydration: theme-correct logo and a hidden dismissed top bar ─ */
+
+html.dark :is(.mk-header__logo, .mkx__logo) {
+  content: url('/brand/storvv-logo-reversed.png');
+}
+
+html.mk-topbar-off .mk-topbar {
+  display: none;
+}
+
+/* Footer bottom bar: copyright with the legal links beside it */
+.mk-footer__legal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+}

@@ -238,15 +238,14 @@
 </template>
 
 <script setup lang="ts">
+import { breadcrumbJsonLd } from '~/utils/marketing-seo'
+import { useMarketingSeo } from '~/composables/useMarketingSeo'
 definePageMeta({ layout: 'marketing' })
 
-useHead({
-  title: 'Terms of Service - Storvv',
-  meta: [
-    {
-      name: 'description',
-      content: 'Terms of Service for Storvv retail and store operations software',
-    },
-  ],
+useMarketingSeo({
+  title: 'Terms of service · Storvv',
+  description: 'The terms that apply when you use Storvv retail and store operations software.',
+  path: '/terms',
+  jsonLd: [breadcrumbJsonLd('Terms of service', '/terms')],
 })
 </script>

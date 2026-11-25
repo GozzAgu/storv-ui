@@ -36,11 +36,27 @@ onMounted(() => {
 })
 
 // Global error handler for unhandled promise rejections
+/**
+ * Text of a console call, for the filters below. Vue passes Symbols (e.g. Fragment) in some
+ * warnings, and `Array.join` throws on those, which would crash the app from inside a log call.
+ */
+function consoleMessageText(args: unknown[]): string {
+  return args
+    .map((arg) => {
+      try {
+        return String(arg)
+      } catch {
+        return ''
+      }
+    })
+    .join(' ')
+}
+
 if (import.meta.client) {
   // Suppress Vercel Analytics zustand deprecation warning
   const originalWarn = console.warn
-  console.warn = (...args: any[]) => {
-    const message = args.join(' ')
+  console.warn = (...args: unknown[]) => {
+    const message = consoleMessageText(args)
     // Filter out Vercel Analytics zustand deprecation warning
     if (
       message.includes('[DEPRECATED] Default export is deprecated') &&
@@ -54,8 +70,8 @@ if (import.meta.client) {
 
   // Suppress console.error for browser extension and Vercel feedback widget errors
   const originalError = console.error
-  console.error = (...args: any[]) => {
-    const message = args.join(' ')
+  console.error = (...args: unknown[]) => {
+    const message = consoleMessageText(args)
     // Filter out browser extension and Vercel feedback widget errors
     if (
       message.includes('message channel closed') ||

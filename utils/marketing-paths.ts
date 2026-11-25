@@ -11,6 +11,7 @@ export const MARKETING_PAGE_PATHS = [
   '/help',
   '/privacy',
   '/terms',
+  '/about',
   '/subscribe',
 ] as const
 
@@ -22,3 +23,24 @@ export function isMarketingPath(path: string): boolean {
   if (normalized === '/pay' || normalized.startsWith('/pay/')) return true
   return false
 }
+
+/**
+ * App routes that must never render on the server: they need Firebase auth, IndexedDB or a
+ * payment token in the browser. Anything not listed here (marketing pages, unknown URLs) is
+ * server-rendered, which is also what lets unknown URLs answer with a real 404.
+ */
+export const CLIENT_ONLY_ROUTE_PATTERNS = [
+  '/dashboard',
+  '/dashboard/**',
+  '/signin',
+  '/signup',
+  '/forgot-password',
+  '/auth/**',
+  '/demo',
+  '/demo/**',
+  '/dev/**',
+  '/r/**',
+  '/store',
+  '/store/**',
+  '/subscribe',
+] as const

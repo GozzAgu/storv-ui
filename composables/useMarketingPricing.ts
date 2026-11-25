@@ -146,3 +146,17 @@ export function useMarketingPricing() {
 
   return { cycle, currency, planPrice, planListPrice, addOnPrice, periodSuffix, renewLabel }
 }
+
+/** The three plans as schema.org offers (monthly naira prices), for search engines. */
+export function marketingSoftwareOffers() {
+  const byId = Object.fromEntries(MARKETING_PLANS.map((plan) => [plan.id, plan]))
+  return [
+    { name: 'Micro', price: 0, description: byId.micro!.for },
+    { name: 'Medium', price: NAIRA_PRICES.medium.monthly, description: byId.medium!.for },
+    {
+      name: 'Enterprise',
+      price: NAIRA_PRICES.enterprise.monthly,
+      description: byId.enterprise!.for,
+    },
+  ]
+}

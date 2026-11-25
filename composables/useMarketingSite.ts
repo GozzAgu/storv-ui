@@ -21,11 +21,27 @@ export function useMarketingSigninUrl() {
   return computed(() => `${appUrl.value.replace(/\/$/, '')}/signin`)
 }
 
-/** Wordmark that contrasts the current theme. */
+/**
+ * True once the page has mounted. Marketing pages are server-rendered in the light theme, so
+ * anything that depends on the visitor's theme waits for this before switching, or hydration
+ * would keep the server's (light) markup.
+ */
+export function useHydrated() {
+  const hydrated = ref(false)
+  onMounted(() => {
+    hydrated.value = true
+  })
+  return hydrated
+}
+
+/** Wordmark that contrasts the current theme (CSS swaps it before first paint, see marketing-future.css). */
 export function useMarketingLogo() {
   const themeStore = useThemeStore()
+  const hydrated = useHydrated()
   return computed(() =>
-    themeStore.actualTheme === 'dark' ? '/brand/storvv-logo-reversed.png' : '/brand/storvv-logo.png'
+    hydrated.value && themeStore.actualTheme === 'dark'
+      ? '/brand/storvv-logo-reversed.png'
+      : '/brand/storvv-logo.png'
   )
 }
 

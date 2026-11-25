@@ -142,6 +142,8 @@
 </template>
 
 <script setup lang="ts">
+import { breadcrumbJsonLd } from '~/utils/marketing-seo'
+import { useMarketingSeo } from '~/composables/useMarketingSeo'
 import type { Component } from 'vue'
 import { computed, ref, watch } from 'vue'
 import {
@@ -354,14 +356,11 @@ const comingSoon: { icon: Component; title: string }[] = [
   },
 ]
 
-useHead({
-  title: 'Features - Storvv retail OS',
-  meta: [
-    {
-      name: 'description',
-      content:
-        'Explore Storvv features: inventory, sales and receipts, analytics, team permissions, and multi-branch tools in one web dashboard. iOS and Android apps are coming soon.',
-    },
-  ],
+useMarketingSeo({
+  title: 'Features · Storvv',
+  description:
+    'Explore Storvv features: inventory, sales and receipts, analytics, team permissions, and multi-branch tools in one web dashboard. iOS and Android apps are coming soon.',
+  path: '/features',
+  jsonLd: [breadcrumbJsonLd('Features', '/features')],
 })
 </script>

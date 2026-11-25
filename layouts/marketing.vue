@@ -150,7 +150,7 @@
                   type="button"
                   role="radio"
                   class="mk-segmented__option"
-                  :aria-checked="theme === option.value"
+                  :aria-checked="hydrated && theme === option.value"
                   :aria-label="option.label"
                   @click="setTheme(option.value)"
                 >
@@ -215,6 +215,7 @@
 <script setup lang="ts">
 import '~/assets/css/marketing.css'
 import '~/assets/css/marketing-home.css'
+import '~/assets/css/marketing-future.css'
 import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'vue'
 import { ArrowRight, ArrowUp, CalendarDays, ChevronRight, Monitor, Moon, Sun } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
@@ -223,11 +224,15 @@ import MkFeatureMenu from '~/components/marketing/MkFeatureMenu.vue'
 import MkFooter from '~/components/marketing/MkFooter.vue'
 import MkProductMenu from '~/components/marketing/MkProductMenu.vue'
 import MkTopBar from '~/components/marketing/MkTopBar.vue'
+import { TOP_BAR_DISMISS_KEY } from '~/utils/marketing-top-bar'
 import BookWalkthroughDialog from '~/components/demo/BookWalkthroughDialog.vue'
 import { useWalkthrough } from '~/composables/useWalkthrough'
 import { useTheme } from '~/composables/useTheme'
 import { useSectionScroll } from '~/composables/useSectionScroll'
+import { useSmoothScroll } from '~/composables/useSmoothScroll'
+import { useCardSpotlight } from '~/composables/useCardSpotlight'
 import {
+  useHydrated,
   useMarketingLogo,
   useMarketingReveal,
   usePagePrimaryInView,
@@ -263,6 +268,23 @@ const logoSrc = useMarketingLogo()
 const { scrollToSection, scrollToTop, goToSection } = useSectionScroll()
 const { theme, actualTheme, setTheme, initTheme, applyTheme } = useTheme()
 useMarketingReveal()
+
+/*
+ * Before first paint: apply the saved theme and hide a dismissed top bar, so server-rendered
+ * pages never flash light-then-dark or show a bar the visitor already closed.
+ */
+useHead({
+  script: [
+    {
+      key: 'mk-prepaint',
+      tagPosition: 'head',
+      innerHTML: `(function(){try{var h=document.documentElement,t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);if(d){h.classList.add('dark');h.style.colorScheme='dark'}if(localStorage.getItem('${TOP_BAR_DISMISS_KEY}'))h.classList.add('mk-topbar-off')}catch(e){}})();`,
+    },
+  ],
+})
+
+const smoothScroll = useSmoothScroll()
+useCardSpotlight()
 const primaryInView = usePagePrimaryInView()
 
 const pageLinks = [
@@ -272,7 +294,8 @@ const pageLinks = [
   { label: 'Help', to: '/help' },
 ]
 
-const isDark = computed(() => actualTheme.value === 'dark')
+const hydrated = useHydrated()
+const isDark = computed(() => hydrated.value && actualTheme.value === 'dark')
 const themeLabel = computed(() => (isDark.value ? 'Switch to light mode' : 'Switch to dark mode'))
 
 function toggleTheme() {
@@ -373,6 +396,8 @@ watch(
 
 watch(menuOpen, (open, wasOpen) => {
   document.body.style.overflow = open ? 'hidden' : ''
+  if (open) smoothScroll.lock()
+  else smoothScroll.unlock()
   if (!open && wasOpen && menuEl.value?.contains(document.activeElement)) {
     void nextTick(() => burgerEl.value?.focus({ preventScroll: true }))
   }

@@ -11,367 +11,301 @@
 /* ── Hero ───────────────────────────────────────────────────────────────── */
 
 .mkh {
-  padding-top: calc(var(--mk-header-h) + clamp(var(--s-space-6), 7vw, 104px));
-  padding-bottom: clamp(var(--s-space-6), 7vw, 96px);
+  overflow: hidden;
+  padding-top: calc(var(--mk-header-h) + clamp(var(--s-space-6), 8vw, 112px));
+  padding-bottom: clamp(var(--s-space-6), 6vw, 88px);
 }
 
 .mkh__copy {
   display: grid;
   justify-items: center;
   gap: var(--s-space-3);
-  max-width: 900px;
+  max-width: 880px;
   margin-inline: auto;
   text-align: center;
 }
 
-.mkh__announce {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: var(--s-touch);
-  padding-inline: 18px 14px;
-  border-radius: var(--s-radius-full);
-  background: var(--s-surface);
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06);
-  font: 500 0.875rem / 1.25rem var(--s-font-sans);
-  color: var(--s-text);
-  text-decoration: none;
-  transition: box-shadow var(--s-duration) var(--s-ease-out);
-}
-
-html.dark .mkh__announce {
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1);
-}
-
-.mkh__announce:hover {
-  box-shadow: 0 0 0 1px var(--s-border-strong);
-}
-
-.mkh__announce:focus-visible {
-  outline: none;
-  box-shadow: var(--s-focus-ring);
-}
-
 .mkh__title {
-  margin-top: var(--s-space-1);
-  font: 800 clamp(2.625rem, 6.2vw, 4.75rem) / 1.08 var(--s-font-sans);
-  letter-spacing: -0.03em;
+  font: 800 clamp(2.5rem, 6vw, 4.5rem) / 1.08 var(--s-font-sans);
+  letter-spacing: -0.035em;
   color: var(--s-text);
-  text-wrap: balance;
 }
 
-.mkh__line {
+.mkh__title-line {
   display: block;
+  white-space: nowrap;
 }
 
-.mkh__line--soft {
-  color: var(--mk-soft);
+/* The cycling word: brand gradient, a marker swash under it, width eased between words */
+.mkh__word {
+  /* The two blues of the Storvv mark */
+  --mkh-logo-deep: #3d63f2;
+  --mkh-logo-light: #8ea2ff;
+  --mkh-grad: linear-gradient(100deg, var(--mkh-logo-deep) 10%, var(--mkh-logo-light) 95%);
+  position: relative;
+  display: inline-block;
+  vertical-align: bottom;
+  text-align: left;
+  transition: width 500ms var(--mk-spring);
+}
+
+html.dark .mkh__word {
+  /* Lifted a step so the deep blue still reads on the dark page */
+  --mkh-logo-deep: #6f8cff;
+  --mkh-logo-light: #b4c2ff;
+}
+
+.mkh__word-text {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.08em;
+  white-space: nowrap;
+  background: var(--mkh-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mkh__word-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.mkh__word-measure .mkh__word-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.mkh__swash {
+  position: absolute;
+  left: 0;
+  bottom: -0.06em;
+  width: calc(100% - 0.3em);
+  height: 0.22em;
+  overflow: visible;
+}
+
+.mkh__swash path {
+  fill: none;
+  stroke: var(--mkh-logo-light);
+  stroke-width: 6;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.9;
+}
+
+.mkh-word-enter-active {
+  transition: opacity 320ms var(--s-ease-out), transform 450ms var(--mk-spring),
+    filter 320ms var(--s-ease-out);
+}
+
+.mkh-word-leave-active {
+  transition: opacity 180ms var(--s-ease-in, ease-in), transform 180ms var(--s-ease-in, ease-in),
+    filter 180ms var(--s-ease-in, ease-in);
+}
+
+.mkh-word-enter-from {
+  opacity: 0;
+  transform: translateY(0.45em);
+  filter: blur(6px);
+}
+
+.mkh-word-leave-to {
+  opacity: 0;
+  transform: translateY(-0.45em);
+  filter: blur(6px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mkh__swash path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: mkh-draw 700ms 150ms var(--s-ease-out) forwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mkh__word {
+    transition: none;
+  }
+}
+
+@keyframes mkh-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Three words in the lede get a soft highlighter stroke */
+.mkh__lede mark {
+  padding-inline: 1px;
+  border-radius: 3px;
+  background: linear-gradient(transparent 58%, color-mix(in srgb, #8ea2ff 38%, transparent) 58%);
+  color: var(--s-text);
+  font-weight: 600;
+}
+
+html.dark .mkh__lede mark {
+  background: linear-gradient(transparent 58%, color-mix(in srgb, #8ea2ff 28%, transparent) 58%);
+}
+
+/* Phones: the cycling word gets a line of its own, so the headline never reflows as it changes */
+@media (max-width: 639px) {
+  .mkh__title {
+    font-size: clamp(2rem, 9.2vw, 2.5rem);
+  }
+
+  .mkh__word {
+    display: block;
+    margin-inline: auto;
+  }
 }
 
 .mkh__lede {
-  max-width: 600px;
-  font: 400 clamp(1.0625rem, 1.5vw, 1.1875rem) / 1.6 var(--s-font-sans);
+  max-width: 560px;
+  font: 400 clamp(1rem, 1.4vw, 1.125rem) / 1.6 var(--s-font-sans);
   color: var(--s-text-2);
   text-wrap: pretty;
 }
 
 .mkh__actions {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: center;
-  gap: var(--s-space-1) var(--s-space-3);
-  margin-top: var(--s-space-2);
+  margin-top: var(--s-space-1);
 }
 
-.mkh__demo {
+.mkh__walk {
+  margin-top: calc(var(--s-space-2) * -1);
+  font: 400 0.875rem / 1.25rem var(--s-font-sans);
+  color: var(--s-text-muted);
+}
+
+.mkh__walk button {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   min-height: var(--s-touch);
-  padding-inline: var(--s-space-1);
+  padding-inline: 4px;
+  border: 0;
   border-radius: var(--s-radius);
-  font: 600 1rem / 1.25rem var(--s-font-sans);
+  background: none;
+  font: 600 0.875rem / 1.25rem var(--s-font-sans);
   color: var(--s-text);
-  text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--s-text) 35%, transparent);
-  text-underline-offset: 5px;
+  cursor: pointer;
 }
 
-.mkh__demo:hover {
-  text-decoration-color: currentColor;
+.mkh__walk button svg {
+  transition: translate var(--s-duration) var(--s-ease-out);
 }
 
-.mkh__demo:focus-visible {
+.mkh__walk button:hover svg {
+  translate: 2px 0;
+}
+
+.mkh__walk button:focus-visible {
   outline: none;
   box-shadow: var(--s-focus-ring);
 }
 
-.mkh__stage {
+/* The hub: Storvv in the middle, lines fanning out to the tools a shop uses */
+.mkh__hub {
   position: relative;
-  isolation: isolate;
-  max-width: 1120px;
-  margin: clamp(var(--s-space-6), 6vw, 88px) auto 0;
+  margin-top: clamp(var(--s-space-4), 5vw, 64px);
+  /* Wider than the container so the lines run off both edges */
+  margin-inline: calc(var(--mk-gutter) * -1);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
 }
 
-/* Four soft pastel pools behind the product, blurred so they read as light, not shapes */
-.mkh__aura {
+.mkh__hub-canvas {
+  position: relative;
+  /* Never narrower than 880px, so phones see the middle of the hub at a readable size */
+  width: max(100%, 880px);
+  left: 50%;
+  translate: -50% 0;
+  aspect-ratio: 1200 / 460;
+}
+
+.mkh__lines {
   position: absolute;
-  inset: -8% -6% -4%;
-  z-index: -1;
-  pointer-events: none;
-  filter: blur(60px);
-  opacity: 0.9;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  color: var(--s-accent);
 }
 
-.mkh__aura span {
+.mkh__line {
+  fill: none;
+  stroke: url(#mkh-line);
+  stroke-width: 1;
+}
+
+.mkh__pulse {
+  fill: none;
+  stroke: var(--s-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 0 1.12;
+  opacity: 0;
+}
+
+.mkh__core,
+.mkh__tile {
   position: absolute;
-  width: 46%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--tint);
-}
-
-.mkh__aura span:nth-child(1) {
-  top: 0;
-  left: 0;
-}
-
-.mkh__aura span:nth-child(2) {
-  top: -4%;
-  right: 2%;
-}
-
-.mkh__aura span:nth-child(3) {
-  bottom: 0;
-  left: 26%;
-}
-
-.mkh__aura span:nth-child(4) {
-  right: -2%;
-  bottom: 8%;
-  width: 34%;
-}
-
-html.dark .mkh__aura {
-  opacity: 0.7;
-}
-
-/* Small app-style notes resting on the edges of the product */
-.mkh__note {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 18px 12px 12px;
-  border-radius: 16px;
-  background: var(--s-surface);
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.05), 0 18px 40px -16px rgb(0 0 0 / 0.28);
-  font-size: 0.875rem;
-}
-
-html.dark .mkh__note {
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08), 0 18px 40px -16px rgb(0 0 0 / 0.8);
-}
-
-.mkh__note--sale {
-  bottom: 16%;
-  left: -40px;
-  --float-delay: 0s;
-}
-
-.mkh__note--stock {
-  top: 16%;
-  right: -36px;
-  --float-delay: -2s;
-}
-
-.mkh__note--receipt {
-  right: 8%;
-  bottom: -28px;
-  --float-delay: -4s;
-}
-
-.mkh__note-icon {
   display: grid;
   place-items: center;
-  flex: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--tint);
-  color: var(--tint-ink);
+  translate: -50% -50%;
 }
 
-.mkh__note-stack {
-  display: grid;
-  min-width: 230px;
+.mkh__core {
+  z-index: 2;
+  width: 88px;
+  height: 88px;
+  border-radius: 24px;
+  background: var(--s-surface);
+  box-shadow: 0 0 0 1px var(--s-line),
+    0 18px 40px -12px color-mix(in srgb, var(--s-accent) 45%, transparent),
+    0 0 0 10px color-mix(in srgb, var(--s-accent) 8%, transparent);
 }
 
-.mkh__note-stack > * {
-  grid-area: 1 / 1;
+.mkh__core img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
 }
 
-.mkh__note-body {
-  display: grid;
+.mkh__tile {
+  z-index: 1;
+  width: var(--tile-size, 54px);
+  height: var(--tile-size, 54px);
+  border-radius: calc(var(--tile-size, 54px) * 0.3);
+  rotate: var(--tilt, 0deg);
+  /* Solid colour with a light top edge, like a real app icon */
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.28), transparent 55%), var(--tile);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35), inset 0 -2px 0 rgb(0 0 0 / 0.12),
+    0 12px 24px -10px color-mix(in srgb, var(--tile) 70%, transparent);
 }
 
-.mkh__note-title {
-  font-weight: 700;
-  color: var(--s-text);
-  white-space: nowrap;
-}
-
-.mkh__note-text {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--s-text-2);
-  white-space: nowrap;
-}
-
-.mkh__ticks {
-  color: var(--mk-ink-sky);
-}
-
-.mkh-swap-enter-active,
-.mkh-swap-leave-active {
-  transition: opacity 400ms var(--s-ease), transform 500ms var(--mk-spring);
-}
-
-.mkh-swap-enter-from {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.mkh-swap-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .mkh__note {
-    animation: mkh-float 7s ease-in-out infinite;
-    animation-delay: var(--float-delay, 0s);
-  }
-
-  .mkh__announce-dot {
-    animation: mkh-pulse 2.4s ease-out infinite;
-  }
-}
-
-@keyframes mkh-float {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-
-  50% {
-    translate: 0 -8px;
-  }
-}
-
-@media (max-width: 1240px) {
-  .mkh__note--sale {
-    left: 12px;
-  }
-
-  .mkh__note--stock {
-    right: 12px;
-  }
-}
-
-@media (max-width: 760px) {
-  .mkh__note {
-    display: none;
-  }
-}
-
-/* Live dot in the announcement */
-.mkh__announce-dot {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  margin-left: -2px;
-  border-radius: 50%;
-  background: var(--mk-ink-sage);
-}
-
-@keyframes mkh-pulse {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--mk-ink-sage) 45%, transparent);
-  }
-
-  100% {
-    box-shadow: 0 0 0 8px transparent;
-  }
-}
-
-/* Who it's for and how they get paid: two slow rows drifting in opposite directions */
-.mkh__proof {
-  display: grid;
-  justify-items: center;
-  gap: var(--s-space-2);
-  margin-top: clamp(var(--s-space-8), 8vw, 112px);
-}
-
-.mkh__proof-label {
-  font: 600 0.8125rem / 1.25rem var(--s-font-sans);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--s-text-muted);
-}
-
-.mkh__proof-label:not(:first-child) {
-  margin-top: var(--s-space-3);
-}
-
-.mkh__marquee {
-  display: flex;
-  width: 100%;
-  max-width: 1040px;
-  overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
-}
-
-.mkh__row {
-  display: flex;
-  flex: none;
-  justify-content: space-around;
-  gap: var(--s-space-1);
-  min-width: 100%;
-  padding: 4px var(--s-space-1) 4px 0;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .mkh__row {
-    animation: mkh-drift 40s linear infinite;
-  }
-
-  .mkh__marquee--reverse .mkh__row {
-    animation-direction: reverse;
-    animation-duration: 48s;
-  }
-
-  .mkh__marquee:hover .mkh__row,
-  .mkh.is-paused .mkh__row,
-  .mkh.is-paused .mkh__note {
-    animation-play-state: paused;
-  }
-}
-
-@keyframes mkh-drift {
-  to {
-    transform: translateX(-100%);
-  }
+.mkh__tile svg {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.18));
 }
 
 .mkh__pause {
+  position: absolute;
+  right: var(--mk-gutter);
+  bottom: 0;
+  z-index: 3;
   display: grid;
   place-items: center;
   width: var(--s-touch);
   height: var(--s-touch);
-  margin-top: 4px;
   border: 0;
   border-radius: 50%;
   background: transparent;
@@ -389,58 +323,192 @@ html.dark .mkh__note {
   box-shadow: var(--s-focus-ring);
 }
 
-/* Without motion, show one centred, wrapping row instead */
+@media (prefers-reduced-motion: no-preference) {
+  .mkh__tile {
+    animation: mkh-float 6s ease-in-out infinite;
+    animation-delay: var(--float-delay, 0s);
+  }
+
+  .mkh__pulse {
+    animation: mkh-spark 3.6s linear infinite;
+    animation-delay: var(--pulse-delay, 0s);
+  }
+
+  .mkh.is-paused .mkh__tile,
+  .mkh.is-paused .mkh__pulse {
+    animation-play-state: paused;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .mkh__marquee {
-    justify-content: center;
-    mask-image: none;
-    -webkit-mask-image: none;
-  }
-
-  .mkh__row {
-    flex-wrap: wrap;
-    justify-content: center;
-    flex: 1;
-  }
-
-  .mkh__row[aria-hidden='true'],
   .mkh__pause {
     display: none;
   }
 }
 
-.mkh__chip {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 18px;
-  border-radius: var(--s-radius-full);
-  background: var(--s-surface);
-  box-shadow: inset 0 0 0 1px var(--s-line);
-  font: 600 0.9375rem / 1.25rem var(--s-font-sans);
-  color: var(--s-text);
-  white-space: nowrap;
-}
+@keyframes mkh-float {
+  0%,
+  100% {
+    translate: -50% -50%;
+  }
 
-.mkh__chip--trade {
-  padding: 10px 20px 10px 12px;
-  background: var(--tint);
-  box-shadow: none;
-}
-
-.mkh__chip--trade svg {
-  color: var(--tint-ink);
-}
-
-@media (max-width: 639px) {
-  .mkh__actions {
-    flex-direction: column;
-    width: 100%;
+  50% {
+    translate: -50% calc(-50% - 6px);
   }
 }
 
-/* Load-in: copy and product rise in one after another */
+/* A short dash that travels in along the line from the edge to Storvv */
+@keyframes mkh-spark {
+  0% {
+    stroke-dasharray: 0.12 1;
+    stroke-dashoffset: 0.12;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.9;
+  }
+
+  85% {
+    opacity: 0.9;
+  }
+
+  100% {
+    stroke-dasharray: 0.12 1;
+    stroke-dashoffset: 1.12;
+    opacity: 0;
+  }
+}
+
+/* Phones: the middle of the hub only, with the outer tools cropped away */
+@media (max-width: 639px) {
+  .mkh__tile--outer {
+    display: none;
+  }
+
+  .mkh__hub-canvas {
+    width: max(100%, 580px);
+  }
+
+  .mkh__core {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+  }
+
+  .mkh__core img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .mkh__tile {
+    scale: 0.85;
+  }
+}
+
+/* Who it's for: one quiet row, like a logo strip */
+.mkh__proof {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-space-3);
+  margin-top: clamp(var(--s-space-6), 6vw, 80px);
+}
+
+.mkh__proof-label {
+  font: 600 0.8125rem / 1.25rem var(--s-font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--s-text-muted);
+}
+
+.mkh__trades {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  /* The 1px gaps show this colour, drawing hairlines between the cells */
+  background: var(--s-line);
+  box-shadow: 0 0 0 1px var(--s-line);
+  list-style: none;
+}
+
+.mkh__trade {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 24px;
+  background: var(--mk-page);
+  text-align: left;
+  transition: background-color var(--s-duration) var(--s-ease);
+}
+
+.mkh__trade-icon {
+  margin-bottom: 12px;
+  color: var(--s-text-2);
+  transition: color var(--s-duration) var(--s-ease);
+}
+
+.mkh__trade-name {
+  font: 600 0.9375rem / 1.4 var(--s-font-sans);
+  color: var(--s-text);
+}
+
+.mkh__trade-line {
+  font: 400 0.875rem / 1.5 var(--s-font-sans);
+  color: var(--s-text-muted);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mkh__trade:hover {
+    background: color-mix(in srgb, var(--s-accent) 4%, var(--mk-page));
+  }
+
+  .mkh__trade:hover .mkh__trade-icon {
+    color: var(--s-accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mkh__trade,
+  .mkh__trade-icon {
+    transition: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .mkh__trades {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .mkh__trades {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mkh__trade {
+    padding: 20px 16px;
+  }
+}
+
+@media (max-width: 339px) {
+  .mkh__trades {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@keyframes mkh-drift {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* Load-in: copy and hub rise in one after another */
 @media (prefers-reduced-motion: no-preference) {
   .mkh-in {
     animation: mkh-rise 800ms var(--mk-spring) both;

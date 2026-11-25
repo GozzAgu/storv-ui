@@ -34,7 +34,13 @@
                   {{ link.label }}
                   <span v-if="link.soon" class="mk-tag">Soon</span>
                 </NuxtLink>
-                <a v-else :href="link.href" class="mk-footer__link">{{ link.label }}</a>
+                <a
+                  v-else
+                  :href="link.href"
+                  class="mk-footer__link"
+                  v-bind="link.external ? { target: '_blank', rel: 'noopener' } : {}"
+                  >{{ link.label }}</a
+                >
               </li>
             </ul>
           </div>
@@ -44,8 +50,21 @@
       <p class="mk-footer__word" aria-hidden="true">Storvv</p>
 
       <div class="mk-footer__bar">
-        <p>&copy; {{ year }} Storvv. All rights reserved.</p>
+        <p class="mk-footer__legal">
+          <span>&copy; {{ year }} Storvv. All rights reserved.</span>
+          <NuxtLink to="/privacy" class="mk-footer__link">Privacy</NuxtLink>
+          <NuxtLink to="/terms" class="mk-footer__link">Terms</NuxtLink>
+        </p>
         <div class="mk-footer__social">
+          <a
+            :href="whatsappUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="s-c s-icon-btn"
+            aria-label="Chat with Storvv on WhatsApp"
+          >
+            <MessageCircle :size="16" aria-hidden="true" />
+          </a>
           <a
             href="mailto:hello@storvv.com"
             class="s-c s-icon-btn"
@@ -96,7 +115,9 @@
 </template>
 
 <script setup lang="ts">
-import { Mail } from '@lucide/vue'
+import { Mail, MessageCircle } from '@lucide/vue'
+import { STORVV_CONTACT } from '~/utils/marketing-seo'
+import { storvvWhatsappLink } from '~/utils/storvv-whatsapp'
 import { useSectionScroll } from '~/composables/useSectionScroll'
 import { useMarketingLogo } from '~/composables/useMarketingSite'
 
@@ -110,7 +131,11 @@ interface FooterLink {
   section?: string
   href?: string
   soon?: boolean
+  /** Opens in a new tab (WhatsApp). */
+  external?: boolean
 }
+
+const whatsappUrl = storvvWhatsappLink('Hi Storvv, I have a question.')
 
 const columns: { title: string; links: FooterLink[] }[] = [
   {
@@ -125,19 +150,20 @@ const columns: { title: string; links: FooterLink[] }[] = [
   {
     title: 'Company',
     links: [
+      { label: 'About', to: '/about' },
       { label: 'Pricing', to: '/pricing' },
       { label: 'Security', to: '/security' },
       { label: 'Help centre', to: '/help' },
       { label: 'FAQ', section: 'faq' },
-      { label: 'Contact', section: 'contact' },
     ],
   },
   {
-    title: 'Legal',
+    title: 'Contact',
     links: [
-      { label: 'Privacy', to: '/privacy' },
-      { label: 'Terms', to: '/terms' },
-      { label: 'hello@storvv.com', href: 'mailto:hello@storvv.com' },
+      { label: 'Chat on WhatsApp', href: whatsappUrl, external: true },
+      { label: STORVV_CONTACT.phoneDisplay, href: `tel:${STORVV_CONTACT.phone}` },
+      { label: STORVV_CONTACT.email, href: `mailto:${STORVV_CONTACT.email}` },
+      { label: 'All contact options', to: '/about#contact' },
     ],
   },
 ]

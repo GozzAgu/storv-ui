@@ -95,11 +95,23 @@
         <div class="mk-contact-card mk-help__contact">
           <div>
             <h2 id="help-contact-title" class="mk-h3">Still need help?</h2>
-            <p class="mk-card__text">Email us and a real person will reply.</p>
+            <p class="mk-card__text">
+              Chat with us on WhatsApp, call {{ STORVV_CONTACT.phoneDisplay }} or email
+              {{ STORVV_CONTACT.email }}. A real person will reply.
+            </p>
           </div>
           <div class="mk-actions">
-            <SButton variant="primary" class="mk-btn" to="mailto:hello@storvv.com">
-              Email hello@storvv.com
+            <SButton
+              variant="primary"
+              class="mk-btn"
+              :to="whatsappUrl"
+              target="_blank"
+              rel="noopener"
+            >
+              Chat on WhatsApp
+            </SButton>
+            <SButton variant="secondary" class="mk-btn" :to="`mailto:${STORVV_CONTACT.email}`">
+              Email us
             </SButton>
             <NuxtLink to="?walkthrough=1" class="mk-link">
               Book a walkthrough
@@ -113,6 +125,9 @@
 </template>
 
 <script setup lang="ts">
+import { STORVV_CONTACT, breadcrumbJsonLd, faqJsonLd } from '~/utils/marketing-seo'
+import { storvvWhatsappLink } from '~/utils/storvv-whatsapp'
+import { useMarketingSeo } from '~/composables/useMarketingSeo'
 import { computed, ref } from 'vue'
 import { ArrowRight, Search } from '@lucide/vue'
 import SButton from '~/components/s/SButton.vue'
@@ -147,14 +162,16 @@ function faqItems(topic: HelpTopic): MkFaqItem[] {
   )
 }
 
-useHead({
+const whatsappUrl = storvvWhatsappLink('Hi Storvv, I need help with something.')
+
+useMarketingSeo({
   title: 'Help centre · Storvv',
-  meta: [
-    {
-      name: 'description',
-      content:
-        'Answers about Storvv inventory, sales, customers, reports, staff, branches and plans.',
-    },
+  description:
+    'Answers about Storvv inventory, sales, customers, reports, staff, branches and plans.',
+  path: '/help',
+  jsonLd: [
+    breadcrumbJsonLd('Help centre', '/help'),
+    faqJsonLd(HELP_TOPICS.flatMap((topic) => topic.answers)),
   ],
 })
 </script>
