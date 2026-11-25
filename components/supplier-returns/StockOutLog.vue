@@ -45,7 +45,9 @@
                   <span class="s-list__main">
                     <span class="s-list__primary">{{ row.itemName }}</span>
                     <span class="s-list__secondary">{{ row.what }} · {{ row.why }}</span>
-                    <span class="s-list__secondary">{{ formatDay(row.at) }} · {{ row.by }}</span>
+                    <span class="s-list__secondary"
+                      >{{ formatSaleWhen(row.at).label }} · {{ row.by }}</span
+                    >
                   </span>
                   <span class="s-list__end">
                     <span class="s-list__value"
@@ -101,8 +103,10 @@
                   <StockOutReasonCard :row="row" />
                 </SHoverCard>
               </td>
-              <td class="s-table__num">{{ row.units }}</td>
-              <td class="s-table__num s-hide-md">
+              <td class="s-table__num" :class="{ 's-amount--void': row.restored }">
+                {{ row.units }}
+              </td>
+              <td class="s-table__num s-hide-md" :class="{ 's-amount--void': row.restored }">
                 {{ row.cost === null ? EMPTY_CELL : formatCurrency(row.cost) }}
               </td>
               <td class="s-hide-lg">
@@ -112,7 +116,9 @@
                 </span>
                 <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
               </td>
-              <td class="s-table__nowrap s-table__muted">{{ formatDay(row.at) }}</td>
+              <td class="s-table__nowrap s-table__muted" :title="formatSaleWhen(row.at).title">
+                {{ formatSaleWhen(row.at).label }}
+              </td>
               <td class="s-table__nowrap">
                 <SButton
                   v-if="row.restorableId && canRestore"
@@ -128,6 +134,28 @@
               </td>
             </tr>
           </tbody>
+          <!-- What everything matching the search and type adds up to (not just what's shown) -->
+          <tfoot class="s-table__totals">
+            <tr>
+              <td>
+                <span class="s-table__totals-label">
+                  {{ filteredTotals.count }} {{ filteredTotals.count === 1 ? 'entry' : 'entries' }}
+                </span>
+              </td>
+              <td />
+              <td class="s-table__num">
+                <span class="s-table__totals-value">{{ filteredTotals.units }}</span>
+              </td>
+              <td class="s-table__num s-hide-md">
+                <span class="s-table__totals-value">{{
+                  filteredTotals.cost === null ? EMPTY_CELL : formatCurrency(filteredTotals.cost)
+                }}</span>
+              </td>
+              <td class="s-hide-lg" />
+              <td />
+              <td />
+            </tr>
+          </tfoot>
         </table>
       </div>
       <div v-if="filtered.length > visible.length" class="s-log__more">
@@ -172,6 +200,7 @@ import { STOCK_OUT_LOG_FREE_DAYS } from '~/types/subscription'
 import { usePreferences } from '~/composables/usePreferences'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { nameInitials } from '~/utils/name-initials'
+import { formatSaleWhen } from '~/utils/sale-display'
 import { stockItemDetailSummary } from '~/utils/stock-item-details'
 import {
   SUPPLIER_RETURN_OUTCOME_LABELS,
@@ -424,6 +453,16 @@ const filtered = computed(() => {
   })
 })
 const visible = computed(() => filtered.value.slice(0, limit.value))
+/** Restored deletions came back into stock, so they are listed but not counted as stock out. */
+const filteredTotals = computed(() => {
+  const rows = filtered.value.filter((e) => !e.restored)
+  const priced = rows.filter((e) => e.cost !== null)
+  return {
+    count: filtered.value.length,
+    units: rows.reduce((sum, e) => sum + e.units, 0),
+    cost: priced.length ? priced.reduce((sum, e) => sum + (e.cost ?? 0), 0) : null,
+  }
+})
 const emptyTitle = computed(() =>
   olderHidden.value
     ? `Nothing in the last ${STOCK_OUT_LOG_FREE_DAYS} days`
@@ -444,11 +483,6 @@ async function restore(removalId: string) {
   } finally {
     restoringId.value = null
   }
-}
-
-function formatDay(iso: string | null) {
-  if (!iso) return EMPTY_CELL
-  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' })
 }
 
 // Write-offs and removals aren't loaded by the rest of the page.

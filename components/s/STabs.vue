@@ -1,11 +1,24 @@
 <template>
   <div
+    ref="listEl"
     class="s-c s-tabs"
-    :class="{ 's-tabs--block': block }"
+    :class="{ 's-tabs--block': block, 's-tabs--sliding': indicator.ready }"
     role="tablist"
     :aria-label="label"
     @keydown="onKeydown"
   >
+    <!-- One highlight that glides to the selected tab, instead of each tab lighting up on its own -->
+    <span
+      v-if="indicator.ready"
+      class="s-tabs__indicator"
+      aria-hidden="true"
+      :style="{
+        '--ind-x': `${indicator.x}px`,
+        '--ind-y': `${indicator.y}px`,
+        '--ind-w': `${indicator.w}px`,
+        '--ind-h': `${indicator.h}px`,
+      }"
+    />
     <button
       v-for="tab in tabs"
       :id="tabId(tab.value)"
@@ -36,7 +49,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, useId, type Component } from 'vue'
+import {
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  useId,
+  watch,
+  type Component,
+} from 'vue'
 
 type STab = {
   value: string
@@ -57,7 +79,46 @@ const props = defineProps<{
 
 const model = defineModel<string>({ required: true })
 const tabRefs = ref<HTMLButtonElement[]>([])
+const listEl = ref<HTMLElement | null>(null)
 const baseId = useId()
+
+const indicator = reactive({ ready: false, x: 0, y: 0, w: 0, h: 0 })
+
+/** Moves the highlight onto the selected tab; hides it when nothing is selected. */
+function placeIndicator() {
+  const active = tabRefs.value.find((el) => el.id === tabId(model.value))
+  if (!active || !active.offsetWidth) {
+    indicator.ready = false
+    return
+  }
+  indicator.x = active.offsetLeft
+  indicator.y = active.offsetTop
+  indicator.w = active.offsetWidth
+  indicator.h = active.offsetHeight
+  indicator.ready = true
+}
+
+let resizeObserver: ResizeObserver | null = null
+
+onMounted(() => {
+  placeIndicator()
+  // Fonts, counts and container width all change tab sizes after the first paint
+  if (typeof ResizeObserver !== 'undefined' && listEl.value) {
+    resizeObserver = new ResizeObserver(() => placeIndicator())
+    resizeObserver.observe(listEl.value)
+    for (const el of tabRefs.value) resizeObserver.observe(el)
+  }
+})
+
+onBeforeUnmount(() => resizeObserver?.disconnect())
+
+watch(
+  () => [
+    model.value,
+    props.tabs.map((tab) => `${tab.value}:${tab.label}:${tab.count ?? ''}`).join('|'),
+  ],
+  () => nextTick(placeIndicator)
+)
 
 function tabId(value: string) {
   return `s-tab-${baseId}-${value}`

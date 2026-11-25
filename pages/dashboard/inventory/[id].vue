@@ -616,9 +616,14 @@
                           column.key === 'dateOut'
                         "
                       >
-                        <template v-if="item[column.key]">{{
-                          formatItemDate(item[column.key])
-                        }}</template>
+                        <template v-if="item[column.key]">
+                          <span
+                            v-if="itemEventWhen(column.key, item[column.key])"
+                            :title="itemEventWhen(column.key, item[column.key])!.title"
+                            >{{ itemEventWhen(column.key, item[column.key])!.label }}</span
+                          >
+                          <template v-else>{{ formatItemDate(item[column.key]) }}</template>
+                        </template>
                         <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
                       </template>
                       <template v-else-if="column.key === 'margin'">
@@ -670,6 +675,33 @@
                   </td>
                 </tr>
               </tbody>
+              <!-- What every product matching the filters adds up to (not just this page) -->
+              <tfoot v-if="itemTotals" class="s-table__totals">
+                <tr>
+                  <td v-if="showBulkRowSelection" class="s-table__check" />
+                  <td
+                    v-for="(column, colIndex) in columns"
+                    :key="column.key"
+                    :class="{ 's-table__num': isNumericItemColumn(column) }"
+                  >
+                    <span v-if="colIndex === 0" class="s-table__totals-label">
+                      {{ itemTotals.count }} {{ itemTotals.count === 1 ? 'product' : 'products' }}
+                    </span>
+                    <span
+                      v-else-if="column.key === itemTotalsQuantityKey && itemTotals.units !== null"
+                      class="s-table__totals-value"
+                      >{{ formatNumber(itemTotals.units) }}</span
+                    >
+                    <template v-else-if="column.key.toLowerCase() === 'price' && canViewFinancials">
+                      <span class="s-table__totals-value">{{
+                        formatCurrency(itemTotals.value)
+                      }}</span>
+                      <span class="s-table__totals-note"> in stock</span>
+                    </template>
+                  </td>
+                  <td v-if="canManageInventoryItems" class="s-table__actions" />
+                </tr>
+              </tfoot>
             </table>
           </div>
 
@@ -1477,6 +1509,7 @@ import {
 import { isNativePerfContext, scheduleNativeIdleWork } from '~/utils/capacitor-native-perf'
 import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { computeFolderTotalValue } from '~/utils/inventory-folder-availability'
+import { formatSaleWhen } from '~/utils/sale-display'
 import { hasSaleUnitPrice } from '~/utils/inventory-item-price'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import {
@@ -2966,6 +2999,49 @@ const existingSerialProductKeysInFolder = computed(() => {
 })
 
 // Available stock value (full category when loaded; otherwise folder aggregate from store).
+/** The quantity column the totals row sums (bulk categories only; serial rows are one unit each). */
+const itemTotalsQuantityKey = computed(() => {
+  if (folder.value?.hasSerialNumbers) return null
+  return (
+    columns.value.find(
+      (c) =>
+        c.type === 'number' &&
+        STOCK_LIKE_NAMES.includes(c.key.toLowerCase() as (typeof STOCK_LIKE_NAMES)[number])
+    )?.key ?? null
+  )
+})
+
+/**
+ * Totals row: every product matching the filters. The list is server-paginated, so sums need the
+ * whole category loaded (search loads it); otherwise the folder aggregates stand in when nothing
+ * is filtered, and the row is hidden when a filter applies to a partly loaded list.
+ */
+const itemTotals = computed((): { count: number; units: number | null; value: number } | null => {
+  const f = folder.value
+  if (!f) return null
+  let list: InventoryItem[] | null = null
+  if (isSearchActive.value) {
+    list = sortedFilteredItems.value
+  } else if (availabilityFilter.value === 'all') {
+    const full = fullItemsForSerialDup.value ?? items.value
+    const expected = f.itemCount ?? 0
+    if (full.length > 0 && (full.length >= expected || expected === 0)) list = full
+  }
+  if (!list) {
+    if (isSearchActive.value || availabilityFilter.value !== 'all') return null
+    return { count: paginationTotal.value, units: null, value: totalInventoryValue.value }
+  }
+  const qtyKey = itemTotalsQuantityKey.value
+  const units = qtyKey
+    ? list.reduce((sum, item) => {
+        const raw = item[qtyKey]
+        const n = typeof raw === 'number' ? raw : parseFloat(String(raw ?? ''))
+        return sum + (Number.isFinite(n) && n > 0 ? n : 0)
+      }, 0)
+    : null
+  return { count: list.length, units, value: computeFolderTotalValue(list, f) }
+})
+
 const totalInventoryValue = computed(() => {
   const f = folder.value
   if (!f) return 0
@@ -3443,6 +3519,32 @@ const formatItemDate = (date: string | Date | any) => {
     console.warn('Error formatting date:', date, error)
     return '-'
   }
+}
+
+/** Firestore timestamp, Date or date string as a Date; null when it can't be read. */
+function toItemDate(value: unknown): Date | null {
+  if (!value) return null
+  let date: Date | null = null
+  if (value instanceof Date) date = value
+  else if (typeof value === 'object') {
+    const ts = value as { toDate?: () => Date; seconds?: number; nanoseconds?: number }
+    if (typeof ts.toDate === 'function') date = ts.toDate()
+    else if (typeof ts.seconds === 'number') {
+      date = new Date(ts.seconds * 1000 + (ts.nanoseconds || 0) / 1_000_000)
+    }
+  } else if (typeof value === 'string') {
+    const seconds = value.includes('Timestamp') ? value.match(/seconds=(\d+)/)?.[1] : undefined
+    if (seconds) date = new Date(parseInt(seconds, 10) * 1000)
+    else if (!value.includes('Timestamp')) date = new Date(value)
+  }
+  return date && !Number.isNaN(date.getTime()) ? date : null
+}
+
+/** Date In / Date Out read like sales ("Today, 2:15 pm", "Nov 21"); other date fields keep the full date. */
+function itemEventWhen(key: string, value: unknown): { label: string; title: string } | null {
+  if (key !== 'dateIn' && key !== 'dateOut') return null
+  const date = toItemDate(value)
+  return date ? formatSaleWhen(date) : null
 }
 
 const getItemDisplayValue = (value: any) => {

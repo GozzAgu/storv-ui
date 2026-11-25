@@ -214,8 +214,11 @@
                       SALES_LEAD_STATUS_LABELS[lead.status]
                     }}</SBadge>
                   </td>
-                  <td class="s-hide-md s-table__nowrap s-table__muted">
-                    {{ formatDay(lead.updatedAt || lead.createdAt) }}
+                  <td
+                    class="s-hide-md s-table__nowrap s-table__muted"
+                    :title="formatSaleWhen(lead.updatedAt || lead.createdAt).title"
+                  >
+                    {{ formatSaleWhen(lead.updatedAt || lead.createdAt).label }}
                   </td>
                 </tr>
               </tbody>
@@ -255,6 +258,7 @@ import { isOpenSalesLeadStatus } from '~/types/leads'
 import { leadStatusTone } from '~/utils/lead-status'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { nameInitials } from '~/utils/name-initials'
+import { formatSaleWhen } from '~/utils/sale-display'
 
 definePageMeta({
   layout: 'dashboard',
@@ -347,15 +351,6 @@ const wonLeadCount = computed(() => salesLeadsStore.leads.filter((l) => l.status
 
 function openLead(lead: SalesLead) {
   void navigateTo(dashPath(`/leads/${lead.id}`))
-}
-
-function formatDay(v: Date | undefined) {
-  if (!v) return EMPTY_CELL
-  try {
-    return v.toLocaleDateString(undefined, { dateStyle: 'medium' })
-  } catch {
-    return EMPTY_CELL
-  }
 }
 
 async function onLeadCreated(leadId: string) {

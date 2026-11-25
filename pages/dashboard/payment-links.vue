@@ -238,7 +238,11 @@
             <ul class="s-list">
               <li v-for="inv in paginatedLinks" :key="inv.token" class="s-list__item">
                 <span class="s-list__main">
-                  <span class="s-list__primary">{{ inv.customerName }}</span>
+                  <span
+                    class="s-list__primary"
+                    :class="{ 's-walk-in': isWalkInCustomer(inv.customerName) }"
+                    >{{ isWalkInCustomer(inv.customerName) ? 'Walk-in' : inv.customerName }}</span
+                  >
                   <span class="s-list__secondary">
                     #{{ inv.invoiceNumber }} · {{ itemsLabel(inv.itemsCount) }}
                   </span>
@@ -282,7 +286,12 @@
                     <span class="s-table__secondary">{{ itemsLabel(inv.itemsCount) }}</span>
                   </td>
                   <td>
-                    <span class="s-table__primary">{{ inv.customerName }}</span>
+                    <span class="s-table__primary">
+                      <span v-if="isWalkInCustomer(inv.customerName)" class="s-walk-in"
+                        >Walk-in</span
+                      >
+                      <template v-else>{{ inv.customerName }}</template>
+                    </span>
                     <span v-if="inv.customerPhone" class="s-table__secondary">{{
                       inv.customerPhone
                     }}</span>
@@ -412,6 +421,7 @@ import { isCapacitorNative } from '~/utils/capacitor-env'
 import { useTotpConfirmModal } from '~/composables/useTotpConfirmModal'
 import { resolveTotpForSensitiveAction } from '~/utils/security-api-errors'
 import { EMPTY_CELL } from '~/utils/ui-empty'
+import { isWalkInCustomer } from '~/utils/sale-display'
 
 definePageMeta({
   layout: 'dashboard',

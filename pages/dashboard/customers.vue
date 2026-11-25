@@ -92,9 +92,13 @@
                 class="s-list__item s-list__item--interactive"
                 @click="openCustomer(customer)"
               >
-                <SAvatar :name="customer.name" size="sm" />
+                <SAvatar v-if="!isWalkInCustomer(customer.name)" :name="customer.name" size="sm" />
                 <span class="s-list__main">
-                  <span class="s-list__primary">{{ customer.name }}</span>
+                  <span
+                    class="s-list__primary"
+                    :class="{ 's-walk-in': isWalkInCustomer(customer.name) }"
+                    >{{ isWalkInCustomer(customer.name) ? 'Walk-in' : customer.name }}</span
+                  >
                   <span class="s-list__secondary">{{ customerSubtitle(customer) }}</span>
                 </span>
                 <span class="s-list__end">
@@ -134,7 +138,8 @@
                 @keydown.enter.self="openCustomer(customer)"
               >
                 <td>
-                  <div class="s-team__cell">
+                  <span v-if="isWalkInCustomer(customer.name)" class="s-walk-in">Walk-in</span>
+                  <div v-else class="s-team__cell">
                     <SAvatar :name="customer.name" />
                     <span class="s-table__primary">{{ customer.name }}</span>
                   </div>
@@ -154,8 +159,11 @@
                   </span>
                   <span v-else class="s-table__muted">{{ EMPTY_CELL }}</span>
                 </td>
-                <td class="s-hide-md s-table__muted s-table__nowrap">
-                  {{ formatDate(customer.lastOrderDate) }}
+                <td
+                  class="s-hide-md s-table__muted s-table__nowrap"
+                  :title="formatSaleWhen(customer.lastOrderDate).title"
+                >
+                  {{ formatSaleWhen(customer.lastOrderDate).label }}
                 </td>
                 <td class="s-table__actions" @click.stop>
                   <SIconButton
@@ -171,6 +179,35 @@
                 </td>
               </tr>
             </tbody>
+            <!-- What everyone matching the group and search adds up to (not just this page) -->
+            <tfoot class="s-table__totals">
+              <tr>
+                <td>
+                  <span class="s-table__totals-label">
+                    {{ visibleCustomerTotals.count }}
+                    {{ visibleCustomerTotals.count === 1 ? 'customer' : 'customers' }}
+                  </span>
+                </td>
+                <td class="s-hide-md" />
+                <td class="s-table__num s-dept-table__type">
+                  <span class="s-table__totals-value">{{ visibleCustomerTotals.orders }}</span>
+                </td>
+                <td class="s-table__num s-dept-table__money">
+                  <span class="s-table__totals-value">{{
+                    formatCurrency(visibleCustomerTotals.spent)
+                  }}</span>
+                </td>
+                <td v-if="hasBalanceFeature" class="s-table__num">
+                  <span class="s-table__totals-value">{{
+                    visibleCustomerTotals.owed > 0
+                      ? formatCurrency(visibleCustomerTotals.owed)
+                      : EMPTY_CELL
+                  }}</span>
+                </td>
+                <td class="s-hide-md" />
+                <td class="s-table__actions" />
+              </tr>
+            </tfoot>
           </table>
         </div>
 
@@ -301,13 +338,23 @@
                   @click="goToReceipt(receipt)"
                 >
                   <span class="s-list__main">
-                    <span class="s-list__primary"
-                      >#{{ receipt.receiptNumber }} · {{ formatDate(receipt.date) }}</span
+                    <span
+                      class="s-list__primary"
+                      :title="formatSaleWhen(toDate(receipt.date)).title"
+                      >#{{ receipt.receiptNumber }} ·
+                      {{ formatSaleWhen(toDate(receipt.date)).label }}</span
                     >
                     <span class="s-list__secondary">{{ receiptSummary(receipt) }}</span>
                   </span>
                   <span class="s-list__end">
-                    <span class="s-list__value">{{ formatCurrency(receipt.total) }}</span>
+                    <span
+                      class="s-list__value"
+                      :class="{
+                        's-amount--void':
+                          receipt.status === 'refunded' || receipt.status === 'cancelled',
+                      }"
+                      >{{ formatCurrency(receipt.total) }}</span
+                    >
                     <SBadge :tone="getReceiptStatusTone(receipt.status)">
                       {{ getReceiptStatusLabel(receipt.status) }}
                     </SBadge>
@@ -381,6 +428,7 @@ import {
   sortCustomerDirectory,
   type CustomerDirectoryEntry,
 } from '~/utils/customer-directory'
+import { formatSaleWhen, isWalkInCustomer } from '~/utils/sale-display'
 
 definePageMeta({
   layout: 'dashboard',
@@ -492,6 +540,17 @@ const visibleCustomers = computed(() => {
   return sortCustomerDirectory(filterCustomerDirectory(pool, searchQuery.value), sortBy.value)
 })
 
+/** Everyone in the current group and search, across every page. */
+const visibleCustomerTotals = computed(() => {
+  const rows = visibleCustomers.value
+  return {
+    count: rows.length,
+    orders: rows.reduce((sum, c) => sum + c.receipts.length, 0),
+    spent: rows.reduce((sum, c) => sum + c.totalSpent, 0),
+    owed: rows.reduce((sum, c) => sum + Math.max(0, balanceOf(c)), 0),
+  }
+})
+
 const currentPage = ref(1)
 const paginatedCustomers = computed(() =>
   visibleCustomers.value.slice((currentPage.value - 1) * PAGE_SIZE, currentPage.value * PAGE_SIZE)
@@ -550,9 +609,12 @@ const selectedCustomerReceipts = computed(() => {
     .sort((a, b) => toTime(b.date) - toTime(a.date))
 })
 
+function toDate(date: unknown): Date {
+  return (date as { toDate?: () => Date })?.toDate?.() ?? new Date(date as string)
+}
+
 function toTime(date: unknown) {
-  const d = (date as { toDate?: () => Date })?.toDate?.() ?? new Date(date as string)
-  return d.getTime()
+  return toDate(date).getTime()
 }
 
 function openCustomer(customer: CustomerDirectoryEntry) {

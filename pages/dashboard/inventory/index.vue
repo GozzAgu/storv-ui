@@ -232,109 +232,41 @@
         </InventoryCategoryCard>
       </div>
 
-      <div v-else class="s-table-wrap">
-        <table class="s-table">
-          <thead>
-            <tr>
-              <th v-if="canCreateInventoryFolders" scope="col" class="s-table__check">
-                <SCheckbox
-                  :model-value="allFoldersOnPageSelected"
-                  aria-label="Select all categories on this page"
-                  @update:model-value="toggleSelectAllFolders"
-                />
-              </th>
-              <th scope="col">Category</th>
-              <th scope="col" class="s-hide-sm">Type</th>
-              <th scope="col" class="s-table__num">Products</th>
-              <th v-if="canViewFinancials" scope="col" class="s-table__num s-hide-sm">Value</th>
-              <th v-if="canViewProfitAndCost" scope="col" class="s-table__num s-hide-md">Profit</th>
-              <th scope="col" class="s-hide-md">Tracking</th>
-              <th v-if="!isStaff" scope="col" class="s-hide-lg">Departments</th>
-              <th v-if="canCreateInventoryFolders" scope="col" class="s-table__actions">
-                <span class="ds-sr-only">Actions</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="folder in paginatedFolders"
-              :key="folder.id"
-              class="s-table__row--interactive"
-              :class="{
-                's-table__row--selected': isFolderSelected(folder),
-                's-table__row--locked': isFolderLocked(folder),
-              }"
-              tabindex="0"
-              @click="openFolder(folder)"
-              @keydown.enter.self="openFolder(folder)"
-            >
-              <td v-if="canCreateInventoryFolders" class="s-table__check" @click.stop>
-                <SCheckbox
-                  v-if="!isFolderLocked(folder)"
-                  :model-value="isFolderSelected(folder)"
-                  :aria-label="`Select ${folder.name}`"
-                  @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
-                />
-              </td>
-              <td>
-                <div class="s-category-cell">
-                  <span
-                    class="s-category-cell__mark"
-                    :class="{
-                      's-category-cell__mark--stocked':
-                        !isFolderLocked(folder) && folderDisplayStats(folder).itemCount > 0,
-                    }"
-                    aria-hidden="true"
-                  >
-                    <Lock v-if="isFolderLocked(folder)" :size="14" :stroke-width="1.75" />
-                    <component
-                      :is="folderKindIcon(folder)"
-                      v-else
-                      :size="14"
-                      :stroke-width="1.75"
-                    />
+      <template v-else>
+        <!-- Phone: one row per category -->
+        <SCard flush class="s-only-sm">
+          <ul class="s-list">
+            <li v-for="folder in paginatedFolders" :key="folder.id">
+              <div class="s-list__item">
+                <template v-if="canCreateInventoryFolders">
+                  <SCheckbox
+                    v-if="!isFolderLocked(folder)"
+                    :model-value="isFolderSelected(folder)"
+                    :aria-label="`Select ${folder.name}`"
+                    @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
+                  />
+                </template>
+                <button type="button" class="s-list__main s-list__hit" @click="openFolder(folder)">
+                  <span class="s-list__primary">{{ folder.name }}</span>
+                  <span class="s-list__secondary">
+                    <template v-if="isFolderLocked(folder)">No access</template>
+                    <template v-else>
+                      {{ folderDisplayStats(folder).itemCount }}
+                      {{ folderDisplayStats(folder).itemCount === 1 ? 'product' : 'products' }}
+                      · {{ formatFolderTypeLabel(folder) }}
+                    </template>
                   </span>
-                  <div class="s-category-cell__text">
-                    <span class="s-table__primary">{{ folder.name }}</span>
-                    <span v-if="isFolderLocked(folder)" class="s-table__secondary">No access</span>
-                    <span v-else-if="folderCategoryDescription(folder)" class="s-table__secondary">
-                      {{ folderCategoryDescription(folder) }}
-                    </span>
-                  </div>
+                </button>
+                <div class="s-list__end">
+                  <span v-if="canViewFinancials" class="s-list__value">{{
+                    formatCurrency(folderDisplayStats(folder).totalValue ?? 0)
+                  }}</span>
+                  <SBadge v-if="folderDisplayStats(folder).lowStockCount > 0" tone="warning">
+                    {{ folderDisplayStats(folder).lowStockCount }} low stock
+                  </SBadge>
                 </div>
-              </td>
-              <td class="s-hide-sm">
-                <span class="s-dept-table__type">{{ formatFolderTypeLabel(folder) }}</span>
-              </td>
-              <td class="s-table__num">
-                <span class="s-dept-table__type">{{ folderDisplayStats(folder).itemCount }}</span>
-                <span
-                  v-if="folderDisplayStats(folder).lowStockCount > 0"
-                  class="s-table__secondary s-table__warning"
-                >
-                  {{ folderDisplayStats(folder).lowStockCount }} low stock
-                </span>
-              </td>
-              <td v-if="canViewFinancials" class="s-table__num s-hide-sm s-dept-table__money">
-                {{ formatCurrency(folderDisplayStats(folder).totalValue ?? 0) }}
-              </td>
-              <td v-if="canViewProfitAndCost" class="s-table__num s-hide-md">
-                <span v-if="folder.trackProfit" :class="folderProfitToneClass(folder.id)">
-                  {{ formatFolderProfit(folder.id) }}
-                </span>
-                <span v-else class="s-table__muted">–</span>
-              </td>
-              <td class="s-hide-md">
-                <span class="s-dept-table__type">{{
-                  folder.hasSerialNumbers ? 'Serial numbers' : 'Quantity'
-                }}</span>
-              </td>
-              <td v-if="!isStaff" class="s-hide-lg">
-                <span class="s-table__secondary">{{ folderDepartmentsSummary(folder) }}</span>
-              </td>
-              <td v-if="canCreateInventoryFolders" class="s-table__actions" @click.stop>
                 <SIconButton
-                  v-if="!isFolderLocked(folder)"
+                  v-if="canCreateInventoryFolders && !isFolderLocked(folder)"
                   label="Category options"
                   size="sm"
                   :data-folder-actions-anchor="folder.id"
@@ -344,11 +276,137 @@
                 >
                   <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
                 </SIconButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              </div>
+            </li>
+          </ul>
+        </SCard>
+
+        <!-- Tablet and desktop: table -->
+        <div class="s-table-wrap s-hide-sm">
+          <table class="s-table">
+            <thead>
+              <tr>
+                <th v-if="canCreateInventoryFolders" scope="col" class="s-table__check">
+                  <SCheckbox
+                    :model-value="allFoldersOnPageSelected"
+                    aria-label="Select all categories on this page"
+                    @update:model-value="toggleSelectAllFolders"
+                  />
+                </th>
+                <th scope="col">Category</th>
+                <th scope="col" class="s-hide-sm">Type</th>
+                <th scope="col" class="s-table__num">Products</th>
+                <th v-if="canViewFinancials" scope="col" class="s-table__num s-hide-sm">Value</th>
+                <th v-if="canViewProfitAndCost" scope="col" class="s-table__num s-hide-md">
+                  Profit
+                </th>
+                <th scope="col" class="s-hide-md">Tracking</th>
+                <th v-if="!isStaff" scope="col" class="s-hide-lg">Departments</th>
+                <th v-if="canCreateInventoryFolders" scope="col" class="s-table__actions">
+                  <span class="ds-sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="folder in paginatedFolders"
+                :key="folder.id"
+                class="s-table__row--interactive"
+                :class="{
+                  's-table__row--selected': isFolderSelected(folder),
+                  's-table__row--locked': isFolderLocked(folder),
+                }"
+                tabindex="0"
+                @click="openFolder(folder)"
+                @keydown.enter.self="openFolder(folder)"
+              >
+                <td v-if="canCreateInventoryFolders" class="s-table__check" @click.stop>
+                  <SCheckbox
+                    v-if="!isFolderLocked(folder)"
+                    :model-value="isFolderSelected(folder)"
+                    :aria-label="`Select ${folder.name}`"
+                    @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
+                  />
+                </td>
+                <td>
+                  <div class="s-category-cell">
+                    <span
+                      class="s-category-cell__mark"
+                      :class="{
+                        's-category-cell__mark--stocked':
+                          !isFolderLocked(folder) && folderDisplayStats(folder).itemCount > 0,
+                      }"
+                      aria-hidden="true"
+                    >
+                      <Lock v-if="isFolderLocked(folder)" :size="14" :stroke-width="1.75" />
+                      <component
+                        :is="folderKindIcon(folder)"
+                        v-else
+                        :size="14"
+                        :stroke-width="1.75"
+                      />
+                    </span>
+                    <div class="s-category-cell__text">
+                      <span class="s-table__primary">{{ folder.name }}</span>
+                      <span v-if="isFolderLocked(folder)" class="s-table__secondary"
+                        >No access</span
+                      >
+                      <span
+                        v-else-if="folderCategoryDescription(folder)"
+                        class="s-table__secondary"
+                      >
+                        {{ folderCategoryDescription(folder) }}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td class="s-hide-sm">
+                  <span class="s-dept-table__type">{{ formatFolderTypeLabel(folder) }}</span>
+                </td>
+                <td class="s-table__num">
+                  <span class="s-dept-table__type">{{ folderDisplayStats(folder).itemCount }}</span>
+                  <span
+                    v-if="folderDisplayStats(folder).lowStockCount > 0"
+                    class="s-table__secondary s-table__warning"
+                  >
+                    {{ folderDisplayStats(folder).lowStockCount }} low stock
+                  </span>
+                </td>
+                <td v-if="canViewFinancials" class="s-table__num s-hide-sm s-dept-table__money">
+                  {{ formatCurrency(folderDisplayStats(folder).totalValue ?? 0) }}
+                </td>
+                <td v-if="canViewProfitAndCost" class="s-table__num s-hide-md">
+                  <span v-if="folder.trackProfit" :class="folderProfitToneClass(folder.id)">
+                    {{ formatFolderProfit(folder.id) }}
+                  </span>
+                  <span v-else class="s-table__muted">–</span>
+                </td>
+                <td class="s-hide-md">
+                  <span class="s-dept-table__type">{{
+                    folder.hasSerialNumbers ? 'Serial numbers' : 'Quantity'
+                  }}</span>
+                </td>
+                <td v-if="!isStaff" class="s-hide-lg">
+                  <span class="s-table__secondary">{{ folderDepartmentsSummary(folder) }}</span>
+                </td>
+                <td v-if="canCreateInventoryFolders" class="s-table__actions" @click.stop>
+                  <SIconButton
+                    v-if="!isFolderLocked(folder)"
+                    label="Category options"
+                    size="sm"
+                    :data-folder-actions-anchor="folder.id"
+                    aria-haspopup="menu"
+                    :aria-expanded="openFolderMenuId === folder.id"
+                    @click="toggleFolderMenu(folder.id)"
+                  >
+                    <EllipsisVertical :size="16" :stroke-width="2" aria-hidden="true" />
+                  </SIconButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
 
       <SPagination
         v-if="categoryFilter !== 'swap-ins'"
@@ -2091,7 +2149,7 @@ function closeFolderMenu() {
   const id = openFolderMenuId.value
   openFolderMenuId.value = null
   if (!id || !import.meta.client) return
-  document.querySelector<HTMLElement>(`[data-folder-actions-anchor="${id}"]`)?.focus()
+  getVisibleMenuAnchorElement('data-folder-actions-anchor', id)?.focus()
 }
 
 const categoryFilterTabs = computed(() =>

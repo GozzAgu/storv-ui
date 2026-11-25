@@ -73,7 +73,7 @@
               <STabs v-model="activeTab" :tabs="salesTabs" label="Sales views" />
               <template v-if="activeTab === 'receipts'">
                 <div
-                  v-if="canDeleteReceipts && selectedReceiptsForBulk.length > 0"
+                  v-if="canSelectReceipts && selectedReceiptsForBulk.length > 0"
                   class="s-toolbar s-toolbar--selection"
                   role="region"
                   aria-label="Bulk actions"
@@ -87,7 +87,23 @@
                     <SButton variant="ghost" size="sm" @click="selectedReceiptsForBulk = []"
                       >Clear</SButton
                     >
-                    <SButton variant="danger" size="sm" @click="openBulkDeleteReceiptsModal">
+                    <SButton
+                      variant="secondary"
+                      size="sm"
+                      :loading="exportingSelectedReceipts"
+                      @click="exportSelectedReceipts"
+                    >
+                      <template #leading
+                        ><Download :size="14" :stroke-width="2" aria-hidden="true"
+                      /></template>
+                      Export
+                    </SButton>
+                    <SButton
+                      v-if="canDeleteReceipts"
+                      variant="danger"
+                      size="sm"
+                      @click="openBulkDeleteReceiptsModal"
+                    >
                       <template #leading
                         ><Trash2 :size="14" :stroke-width="2" aria-hidden="true"
                       /></template>
@@ -182,7 +198,7 @@
                         :class="{ 's-list__item--flash': flashReceiptId === receipt.id }"
                       >
                         <SCheckbox
-                          v-if="canDeleteReceipts"
+                          v-if="canSelectReceipts"
                           :model-value="isReceiptSelected(receipt)"
                           :aria-label="`Select sale ${receipt.receiptNumber}`"
                           @update:model-value="
@@ -194,16 +210,26 @@
                           class="s-list__main s-list__hit"
                           @click="handleViewReceipt(receipt)"
                         >
-                          <span class="s-list__primary">{{
-                            receipt.customerName || 'Walk-in customer'
-                          }}</span>
+                          <span
+                            class="s-list__primary"
+                            :class="{ 's-walk-in': isWalkInCustomer(receipt.customerName) }"
+                            >{{
+                              isWalkInCustomer(receipt.customerName)
+                                ? 'Walk-in'
+                                : receipt.customerName
+                            }}</span
+                          >
                           <span class="s-list__secondary">
-                            #{{ receipt.receiptNumber }} · {{ formatDate(receipt.date) }}
+                            {{ formatSaleWhen(receipt.date).label }} · #{{ receipt.receiptNumber }}
                             <template v-if="receipt.edited"> · Edited</template>
                           </span>
                         </button>
                         <div class="s-list__end">
-                          <span class="s-list__value">{{ formatCurrency(receipt.total) }}</span>
+                          <span
+                            class="s-list__value"
+                            :class="{ 's-amount--void': receipt.status === 'refunded' }"
+                            >{{ formatCurrency(receipt.total) }}</span
+                          >
                           <SBadge
                             v-if="receipt.status !== 'completed'"
                             :tone="getReceiptDisplayStatus(receipt).tone"
@@ -231,7 +257,7 @@
                   <table class="s-table">
                     <thead>
                       <tr>
-                        <th v-if="canDeleteReceipts" scope="col" class="s-table__check">
+                        <th v-if="canSelectReceipts" scope="col" class="s-table__check">
                           <SCheckbox
                             :model-value="allReceiptsOnPageSelected"
                             aria-label="Select all sales on this page"
@@ -239,7 +265,7 @@
                           />
                         </th>
                         <th
-                          v-for="column in receiptTableColumns"
+                          v-for="column in visibleReceiptColumns"
                           :key="column.key"
                           scope="col"
                           :class="column.class"
@@ -271,7 +297,7 @@
                         @click="handleViewReceipt(receipt)"
                         @keydown.enter.self="handleViewReceipt(receipt)"
                       >
-                        <td v-if="canDeleteReceipts" class="s-table__check" @click.stop>
+                        <td v-if="canSelectReceipts" class="s-table__check" @click.stop>
                           <SCheckbox
                             :model-value="isReceiptSelected(receipt)"
                             :aria-label="`Select sale ${receipt.receiptNumber}`"
@@ -302,33 +328,54 @@
                           </span>
                         </td>
                         <td>
-                          <span class="s-team__cell">
-                            <SAvatar :name="receipt.customerName || 'Walk-in customer'" />
+                          <span v-if="isWalkInCustomer(receipt.customerName)" class="s-walk-in">
+                            Walk-in
+                          </span>
+                          <span v-else class="s-team__cell">
+                            <SAvatar :name="receipt.customerName" />
                             <span class="s-table__primary s-table__clip">{{
-                              receipt.customerName || 'Walk-in customer'
+                              receipt.customerName
                             }}</span>
                           </span>
                         </td>
-                        <td class="s-hide-md s-table__muted s-table__nowrap">
-                          {{ formatDate(receipt.date) }}
+                        <td
+                          class="s-hide-md s-table__muted s-table__nowrap"
+                          :title="formatSaleWhen(receipt.date).title"
+                        >
+                          {{ formatSaleWhen(receipt.date).label }}
                         </td>
                         <td class="s-hide-lg s-table__muted">
-                          <span class="s-table__clip">
-                            {{ getReceiptLineItemsPreview(receipt) || EMPTY_CELL }}
+                          <span v-if="summarizeSaleItems(receipt.items).first" class="s-items-cell">
+                            <span class="s-table__clip">{{
+                              summarizeSaleItems(receipt.items).first
+                            }}</span>
+                            <span
+                              v-if="summarizeSaleItems(receipt.items).more"
+                              class="s-items-cell__more"
+                              :title="getReceiptLineItemsPreview(receipt)"
+                              >+{{ summarizeSaleItems(receipt.items).more }} more</span
+                            >
                           </span>
+                          <template v-else>{{ EMPTY_CELL }}</template>
                         </td>
-                        <td class="s-table__num s-dept-table__money">
+                        <td
+                          class="s-table__num s-dept-table__money"
+                          :class="{ 's-amount--void': receipt.status === 'refunded' }"
+                          :title="
+                            receipt.status === 'refunded' ? 'Refunded: not counted' : undefined
+                          "
+                        >
                           {{ formatCurrency(receipt.total) }}
                         </td>
                         <td class="s-hide-lg s-table__muted">
-                          {{ formatPaymentMethod(receipt.paymentMethod) }}
+                          <PaymentMethodLabel :method="receipt.paymentMethod" />
                         </td>
                         <td>
                           <SBadge :tone="getReceiptDisplayStatus(receipt).tone" dot>
                             {{ getReceiptDisplayStatus(receipt).label }}
                           </SBadge>
                         </td>
-                        <td class="s-hide-lg">
+                        <td v-if="showCreatedByColumn" class="s-hide-lg">
                           <span class="s-dept-table__manager">
                             <SAvatar :name="sellerName(receipt)" size="sm" />
                             <span class="s-table__clip">{{ sellerName(receipt) }}</span>
@@ -348,6 +395,53 @@
                         </td>
                       </tr>
                     </tbody>
+                    <!-- What everything matching the filters adds up to (not just this page) -->
+                    <tfoot v-if="canViewFinancials" class="s-table__totals" @click.stop>
+                      <tr>
+                        <td v-if="canSelectReceipts" class="s-table__check" />
+                        <td
+                          v-for="column in visibleReceiptColumns"
+                          :key="column.key"
+                          :class="column.class"
+                        >
+                          <template v-if="column.key === 'receiptNumber'">
+                            <span class="s-table__totals-label">
+                              {{ filteredReceiptTotals.count }}
+                              {{ filteredReceiptTotals.count === 1 ? 'sale' : 'sales' }}
+                            </span>
+                          </template>
+                          <template v-else-if="column.key === 'customerName'">
+                            <span class="s-table__totals-note">
+                              <button
+                                v-if="filteredReceiptTotals.outstanding > 0"
+                                type="button"
+                                class="s-table__totals-link"
+                                @click="activeTab = 'outstanding'"
+                              >
+                                {{ formatCurrency(filteredReceiptTotals.outstanding) }} outstanding
+                              </button>
+                              <template
+                                v-if="
+                                  filteredReceiptTotals.outstanding > 0 &&
+                                  filteredReceiptTotals.refunded > 0
+                                "
+                              >
+                                ·
+                              </template>
+                              <template v-if="filteredReceiptTotals.refunded > 0">
+                                {{ formatCurrency(filteredReceiptTotals.refunded) }} refunded
+                              </template>
+                            </span>
+                          </template>
+                          <template v-else-if="column.key === 'total'">
+                            <span class="s-table__totals-value">{{
+                              formatCurrency(filteredReceiptTotals.total)
+                            }}</span>
+                          </template>
+                        </td>
+                        <td class="s-table__actions" />
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
 
@@ -421,9 +515,10 @@
                       @keydown.enter.self="viewOutstandingReceipt(row)"
                     >
                       <td>
-                        <span class="s-table__primary">{{
-                          row.customerName || 'Walk-in customer'
-                        }}</span>
+                        <span v-if="isWalkInCustomer(row.customerName)" class="s-walk-in"
+                          >Walk-in</span
+                        >
+                        <span v-else class="s-table__primary">{{ row.customerName }}</span>
                         <span
                           v-if="row.customerPhone || row.customerEmail"
                           class="s-table__secondary"
@@ -433,12 +528,23 @@
                       </td>
                       <td class="s-hide-sm">
                         <span class="s-table__primary">#{{ row.receiptNumber }}</span>
-                        <span class="s-table__secondary">{{ formatDate(row.date) }}</span>
+                        <span class="s-table__secondary" :title="formatSaleWhen(row.date).title">{{
+                          formatSaleWhen(row.date).label
+                        }}</span>
                       </td>
                       <td class="s-hide-md">
-                        <span class="s-table__secondary">{{
-                          getReceiptLineItemsPreview(row) || EMPTY_CELL
-                        }}</span>
+                        <span v-if="summarizeSaleItems(row.items).first" class="s-items-cell">
+                          <span class="s-table__secondary s-table__clip">{{
+                            summarizeSaleItems(row.items).first
+                          }}</span>
+                          <span
+                            v-if="summarizeSaleItems(row.items).more"
+                            class="s-items-cell__more"
+                            :title="getReceiptLineItemsPreview(row)"
+                            >+{{ summarizeSaleItems(row.items).more }} more</span
+                          >
+                        </span>
+                        <span v-else class="s-table__secondary">{{ EMPTY_CELL }}</span>
                       </td>
                       <td class="s-table__num s-hide-sm">{{ formatCurrency(row.total) }}</td>
                       <td class="s-table__num s-hide-sm">
@@ -467,6 +573,34 @@
                       </td>
                     </tr>
                   </tbody>
+                  <tfoot class="s-table__totals">
+                    <tr>
+                      <td>
+                        <span class="s-table__totals-label">
+                          {{ filteredOutstandingReceipts.length }}
+                          {{
+                            filteredOutstandingReceipts.length === 1
+                              ? 'open balance'
+                              : 'open balances'
+                          }}
+                        </span>
+                      </td>
+                      <td class="s-hide-sm" />
+                      <td class="s-hide-md" />
+                      <td class="s-table__num s-hide-sm">
+                        {{ formatCurrency(outstandingTotals.total) }}
+                      </td>
+                      <td class="s-table__num s-hide-sm">
+                        {{ formatCurrency(outstandingTotals.paid) }}
+                      </td>
+                      <td class="s-table__num s-table__warning">
+                        <span class="s-table__totals-value">{{
+                          formatCurrency(outstandingTotals.due)
+                        }}</span>
+                      </td>
+                      <td />
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
             </section>
@@ -584,6 +718,7 @@ import { PencilSquareIcon, ChevronRightIcon } from '~/utils/app-icons'
 import {
   CircleCheck,
   Copy as CopyIcon,
+  Download,
   EllipsisVertical,
   Eye,
   History,
@@ -652,6 +787,8 @@ import BalanceDuePaymentModal from '~/components/receipts/BalanceDuePaymentModal
 import { isV2Sale } from '~/utils/payments-v2-tenders'
 import { useDashboardPageRefreshRegister } from '~/composables/useDashboardPageRefresh'
 import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
+import { formatSaleWhen, isWalkInCustomer, summarizeSaleItems } from '~/utils/sale-display'
+import PaymentMethodLabel from '~/components/receipts/PaymentMethodLabel.vue'
 import { maskPhone } from '~/utils/mask-phone'
 import { useSensitiveAction } from '~/composables/useSensitiveAction'
 
@@ -954,6 +1091,67 @@ const receiptTableColumns: Array<{
   { key: 'createdBy', label: 'Created by', class: 's-hide-lg' },
 ]
 
+/** "Created by" only earns its space when more than one person rang up the sales in view. */
+const showCreatedByColumn = computed(() => {
+  const sellers = new Set(sortedFilteredReceipts.value.map((receipt) => sellerName(receipt)))
+  return sellers.size > 1
+})
+
+const visibleReceiptColumns = computed(() =>
+  receiptTableColumns.filter((column) => column.key !== 'createdBy' || showCreatedByColumn.value)
+)
+
+/** Anyone who can see the money can tick sales to export them; owners can also delete. */
+const canSelectReceipts = computed(() => canDeleteReceipts.value || canViewFinancials.value)
+
+/**
+ * Totals for everything matching the current filters; refunds are listed apart, not added in.
+ * "Outstanding" is what customers still owe on balance-due sales (the Outstanding tab).
+ */
+const filteredReceiptTotals = computed(() => {
+  let total = 0
+  let refunded = 0
+  let outstanding = 0
+  for (const receipt of sortedFilteredReceipts.value) {
+    if (receipt.status === 'refunded') {
+      refunded += receipt.total || 0
+      continue
+    }
+    total += receipt.total || 0
+  }
+  // Money still owed lives on balance-due sales, which the Outstanding tab lists
+  for (const receipt of outstandingReceipts.value) outstanding += outstandingBalanceDue(receipt)
+  return { count: sortedFilteredReceipts.value.length, total, refunded, outstanding }
+})
+
+const exportingSelectedReceipts = ref(false)
+
+async function exportSelectedReceipts() {
+  if (selectedReceiptsForBulk.value.length === 0 || exportingSelectedReceipts.value) return
+  exportingSelectedReceipts.value = true
+  try {
+    const [XLSX, { buildReceiptsWorkbook }] = await Promise.all([
+      import('xlsx'),
+      import('~/utils/store-data-export'),
+    ])
+    const wb = await buildReceiptsWorkbook(selectedReceiptsForBulk.value, {
+      branchName: storesStore.currentStore?.name,
+    })
+    const date = new Date().toISOString().slice(0, 10)
+    XLSX.writeFile(wb, `sales_${selectedReceiptsForBulk.value.length}_${date}.xlsx`)
+    toast.success(
+      `Exported ${selectedReceiptsForBulk.value.length} ${
+        selectedReceiptsForBulk.value.length === 1 ? 'sale' : 'sales'
+      }`
+    )
+  } catch (error) {
+    console.error('[sales] export failed', error)
+    toast.error('Could not export those sales. Please try again.')
+  } finally {
+    exportingSelectedReceipts.value = false
+  }
+}
+
 const salesTabs = computed(() => [
   { value: 'receipts', label: 'Sales' },
   { value: 'today', label: 'Today' },
@@ -1020,6 +1218,18 @@ const filteredOutstandingReceipts = computed(() => {
       (r.customerPhone || '').includes(q)
   )
 })
+
+/** What the open balances in view add up to: sale totals, paid so far and still owed. */
+const outstandingTotals = computed(() =>
+  filteredOutstandingReceipts.value.reduce(
+    (sum, row) => ({
+      total: sum.total + (row.total || 0),
+      paid: sum.paid + outstandingAmountPaid(row),
+      due: sum.due + outstandingBalanceDue(row),
+    }),
+    { total: 0, paid: 0, due: 0 }
+  )
+)
 
 function outstandingAmountPaid(receipt: Receipt) {
   return receiptAmountPaid(receipt)
@@ -1284,7 +1494,7 @@ const receiptsHeaderMetrics = computed(() => {
   return [
     {
       key: 'in-store',
-      label: shown !== inStore ? 'Receipts shown' : 'In store',
+      label: shown !== inStore ? 'Sales shown' : 'Sales',
       value: shown !== inStore ? `${shown} / ${inStore}` : String(inStore),
     },
     ...totals,

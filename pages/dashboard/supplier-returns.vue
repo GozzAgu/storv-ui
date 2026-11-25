@@ -175,7 +175,11 @@
                         </span>
                       </span>
                       <span class="s-list__end">
-                        <span class="s-list__value">{{ moneyOrDash(row.costValue) }}</span>
+                        <span
+                          class="s-list__value"
+                          :class="{ 's-amount--void': row.status === 'rejected' }"
+                          >{{ moneyOrDash(row.costValue) }}</span
+                        >
                         <SBadge :tone="STATUS_TONES[row.status]" size="sm" dot>
                           {{ SUPPLIER_RETURN_STATUS_LABELS[row.status] }}
                         </SBadge>
@@ -227,10 +231,17 @@
                           row.supplierReference
                         }}</span>
                       </td>
-                      <td class="s-hide-lg s-table__nowrap s-table__muted">
-                        {{ formatDay(row.createdAt) }}
+                      <td
+                        class="s-hide-lg s-table__nowrap s-table__muted"
+                        :title="formatSaleWhen(row.createdAt).title"
+                      >
+                        {{ formatSaleWhen(row.createdAt).label }}
                       </td>
-                      <td class="s-table__num s-dept-table__money">
+                      <td
+                        class="s-table__num s-dept-table__money"
+                        :class="{ 's-amount--void': row.status === 'rejected' }"
+                        :title="row.status === 'rejected' ? 'Rejected: not counted' : undefined"
+                      >
                         {{ moneyOrDash(row.costValue) }}
                       </td>
                       <td>
@@ -277,6 +288,34 @@
                       </td>
                     </tr>
                   </tbody>
+                  <!-- What everything matching the filters adds up to -->
+                  <tfoot class="s-table__totals">
+                    <tr>
+                      <td>
+                        <span class="s-table__totals-label">
+                          {{ filteredReturnTotals.count }}
+                          {{ filteredReturnTotals.count === 1 ? 'return' : 'returns' }}
+                        </span>
+                      </td>
+                      <td class="s-hide-md" />
+                      <td>
+                        <span
+                          v-if="filteredReturnTotals.rejected !== null"
+                          class="s-table__totals-note"
+                        >
+                          {{ formatCurrency(filteredReturnTotals.rejected) }} rejected
+                        </span>
+                      </td>
+                      <td class="s-hide-lg" />
+                      <td class="s-table__num s-dept-table__money">
+                        <span class="s-table__totals-value">{{
+                          moneyOrDash(filteredReturnTotals.cost)
+                        }}</span>
+                      </td>
+                      <td />
+                      <td />
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
             </template>
@@ -609,6 +648,7 @@ import { EMPTY_CELL } from '~/utils/ui-empty'
 import { nameInitials } from '~/utils/name-initials'
 import { stockItemDetailChips, stockItemDetailSummary } from '~/utils/stock-item-details'
 import { daysInStock, supplierReturnOriginFacts } from '~/utils/supplier-return-display'
+import { formatSaleWhen } from '~/utils/sale-display'
 import {
   SUPPLIER_RETURN_OUTCOME_LABELS,
   SUPPLIER_RETURN_STATUS_LABELS,
@@ -800,6 +840,21 @@ const filteredReturns = computed(() => {
         ...Object.values(r.item.details).map(String),
       ].some((v) => v?.toLowerCase().includes(q))
     })
+})
+
+/** Cost of the filtered returns; rejected claims are struck through and not counted. */
+const filteredReturnTotals = computed(() => {
+  const rows = filteredReturns.value
+  const sum = (list: SupplierReturn[]) => {
+    const priced = list.filter((r) => r.costValue !== null)
+    return priced.length ? priced.reduce((total, r) => total + (r.costValue ?? 0), 0) : null
+  }
+  const rejected = rows.filter((r) => r.status === 'rejected')
+  return {
+    count: rows.length,
+    cost: sum(rows.filter((r) => r.status !== 'rejected')),
+    rejected: rejected.length ? sum(rejected) : null,
+  }
 })
 
 function clearFilters() {
