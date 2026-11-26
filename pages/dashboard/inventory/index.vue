@@ -479,7 +479,12 @@
       :title="editingFolder ? 'Edit category' : 'Create new category'"
     >
       <SForm id="folder-drawer-form" @submit="handleSaveFolder">
-        <SFormSection title="Basic info">
+        <SStep
+          :number="1"
+          title="Name the category"
+          hint="Use the name your staff already call it, like Phones or Chairs."
+          :done="!!folderForm.name.trim()"
+        >
           <SField label="Category name" required>
             <SInput v-model="folderForm.name" required placeholder="e.g. Chairs" />
           </SField>
@@ -497,49 +502,65 @@
               placeholder="Optional: purpose of this category"
             />
           </SField>
-        </SFormSection>
+        </SStep>
 
-        <SFormSection title="What does it sell?">
+        <SStep
+          :number="2"
+          title="Choose what it sells"
+          hint="It sets the icon shown on this category and on your storefront."
+          :done="!!folderForm.type"
+        >
           <CategoryKindPicker
             v-if="showCreateFolderModal"
             :model-value="folderForm.type"
             :suggested="folderTypeSuggested"
             @update:model-value="chooseFolderType"
           />
-        </SFormSection>
+        </SStep>
 
-        <SFormSection v-if="showUsesSubcategoriesOption && !isSubfolderDrawer">
+        <SStep
+          v-if="!isSubfolderDrawer"
+          as="fieldset"
+          :number="3"
+          title="Choose how you track stock"
+          hint="Leave these off if you're not sure."
+          optional
+        >
           <SCheckbox
+            v-if="showUsesSubcategoriesOption && !isSubfolderDrawer"
             v-model="folderForm.usesSubcategories"
             label="Organize with subcategories"
             description="Products go inside subcategories (e.g. Corolla, Camry under Toyota) instead of directly in this category."
             :disabled="usesSubcategoriesLocked"
           />
-        </SFormSection>
-
-        <SFormSection v-if="!(editingFolder && isSubfolder(editingFolder))">
           <SCheckbox
+            v-if="!(editingFolder && isSubfolder(editingFolder))"
             v-model="folderForm.hasSerialNumbers"
             label="Use serial numbers"
-            description="On: one row per serial. Off: quantity field tracks stock."
+            description="On: each unit gets its own row and serial number. Off: you just track a quantity."
           />
-        </SFormSection>
-
-        <SFormSection v-if="canViewProfitAndCost && !isSubfolderDrawer">
           <SCheckbox
+            v-if="canViewProfitAndCost && !isSubfolderDrawer"
             v-model="folderForm.trackProfit"
             label="Track profit"
             description="Adds a cost price column and shows gross profit per category and for the store."
           />
-        </SFormSection>
+        </SStep>
 
-        <SFormSection
+        <SStep
           v-if="canCreateInventoryFolders && !isSubfolderDrawer && !isStaff"
-          title="Department access"
+          :number="4"
+          title="Choose who can see it"
+          hint="Leave every department unticked to keep it open to everyone. Tick some to limit it."
+          optional
         >
-          <p :class="drawerHintClass">
-            Leave all unchecked for every department. Check to limit access.
-          </p>
+          <template v-if="folderForm.allowedDepartments.length > 0" #aside>
+            <span class="s-step__count">
+              {{ folderForm.allowedDepartments.length }}
+              {{ folderForm.allowedDepartments.length === 1 ? 'department' : 'departments' }}
+            </span>
+          </template>
+          <p class="s-field__label">Departments</p>
           <p v-if="departmentsStore.loading" :class="drawerHintClass" role="status">
             Loading departments…
           </p>
@@ -565,46 +586,56 @@
               </li>
             </ul>
           </div>
-        </SFormSection>
 
-        <SFormSection
-          v-if="
-            canCreateInventoryFolders &&
-            !isSubfolderDrawer &&
-            !isStaff &&
-            folderForm.allowedDepartments.length > 0
-          "
-          title="Also allow these people"
+          <template
+            v-if="
+              canCreateInventoryFolders &&
+              !isSubfolderDrawer &&
+              !isStaff &&
+              folderForm.allowedDepartments.length > 0
+            "
+          >
+            <p class="s-field__label">Also allow these people</p>
+            <p :class="drawerHintClass">For staff outside the departments you picked.</p>
+            <p v-if="staffStore.loading" :class="drawerHintClass" role="status">Loading staff…</p>
+            <p v-else-if="staffOutsideChosenDepartments.length === 0" :class="drawerHintClass">
+              {{ staffPickerEmptyMessage }}
+            </p>
+            <div v-else :class="[pickListClass, 's-inv-pick']">
+              <ul :class="pickListScrollClass">
+                <li
+                  v-for="member in staffOutsideChosenDepartments"
+                  :key="member.authUid"
+                  :class="pickRowClass"
+                >
+                  <SCheckbox
+                    :model-value="folderForm.allowedStaff.includes(member.authUid!)"
+                    :label="`${member.firstName} ${member.lastName}`.trim()"
+                    :description="getDepartmentName(member.departmentId) || undefined"
+                    @update:model-value="(checked) => toggleStaffAccess(member.authUid!, !!checked)"
+                  />
+                </li>
+              </ul>
+            </div>
+          </template>
+        </SStep>
+
+        <SStep
+          v-if="!isSubfolderDrawer"
+          :number="canCreateInventoryFolders && !isStaff ? 5 : 4"
+          title="Set up the product columns"
+          :done="folderColumnsReady"
         >
-          <p :class="drawerHintClass">For staff outside the departments you picked.</p>
-          <p v-if="staffStore.loading" :class="drawerHintClass" role="status">Loading staff…</p>
-          <p v-else-if="staffOutsideChosenDepartments.length === 0" :class="drawerHintClass">
-            {{ staffPickerEmptyMessage }}
-          </p>
-          <div v-else :class="[pickListClass, 's-inv-pick']">
-            <ul :class="pickListScrollClass">
-              <li
-                v-for="member in staffOutsideChosenDepartments"
-                :key="member.authUid"
-                :class="pickRowClass"
-              >
-                <SCheckbox
-                  :model-value="folderForm.allowedStaff.includes(member.authUid!)"
-                  :label="`${member.firstName} ${member.lastName}`.trim()"
-                  :description="getDepartmentName(member.departmentId) || undefined"
-                  @update:model-value="(checked) => toggleStaffAccess(member.authUid!, !!checked)"
-                />
-              </li>
-            </ul>
-          </div>
-        </SFormSection>
-
-        <SFormSection v-if="!isSubfolderDrawer" title="Table template">
-          <p :class="drawerHintClass">
-            Columns for products in this category. Mark a column <strong>Unique</strong> when no two
-            products, in any branch, may share its value, such as an engine number, chassis number
-            or IMEI.
-          </p>
+          <template #hint>
+            These are the details you'll fill in for each product. Tick
+            <strong>Unique</strong> when no two products, in any branch, can share a value, like an
+            IMEI, engine or chassis number.
+          </template>
+          <template v-if="editableFields.length > 0" #aside>
+            <span class="s-step__count">
+              {{ editableFields.length }} {{ editableFields.length === 1 ? 'column' : 'columns' }}
+            </span>
+          </template>
           <input
             v-if="selectedTemplate"
             ref="folderTemplateExcelInput"
@@ -678,10 +709,38 @@
               {{ importingFolderTemplate ? 'Importing…' : 'Import Excel' }}
             </SButton>
           </div>
-        </SFormSection>
+        </SStep>
       </SForm>
 
       <template #footer>
+        <SStepSummary>
+          <template v-if="!folderForm.name.trim()">Start by naming the category.</template>
+          <template v-else-if="!folderForm.type">Next, choose what it sells.</template>
+          <template v-else-if="!isSubfolderDrawer && editableFields.length === 0">
+            Add at least one product column.
+          </template>
+          <template v-else-if="!isSubfolderDrawer && !folderColumnsReady">
+            Give every column a title.
+          </template>
+          <template v-else-if="editingFolder">
+            Ready to save your changes to <strong>{{ folderForm.name.trim() }}</strong
+            >.
+          </template>
+          <template v-else>
+            <strong>{{ folderForm.name.trim() }}</strong> will be created with
+            <strong>{{ editableFields.length }}</strong>
+            {{ editableFields.length === 1 ? 'column' : 'columns' }}.
+            <template v-if="canCreateInventoryFolders && !isStaff">
+              {{
+                folderForm.allowedDepartments.length === 0
+                  ? 'Open to every department.'
+                  : `Limited to ${folderForm.allowedDepartments.length} ${
+                      folderForm.allowedDepartments.length === 1 ? 'department' : 'departments'
+                    }${folderForm.allowedStaff.length > 0 ? ' and the people you added' : ''}.`
+              }}
+            </template>
+          </template>
+        </SStepSummary>
         <SDialogActions
           :primary-label="`${editingFolder ? 'Update' : 'Create'} category`"
           :primary-loading="isSavingFolder"
@@ -845,71 +904,84 @@
       </template>
     </SDialog>
 
-    <!-- Copy selected folder templates from another branch -->
+    <!-- Copy selected folder templates from another branch: a guided, step-by-step drawer -->
     <SDialog
       placement="right"
       v-model:open="showCopyFolderTemplatesModal"
-      title="Copy category templates from another branch"
-      description="Pick a source branch, select top-level categories, then choose whether to include subcategories."
+      title="Copy categories from another branch"
+      :description="
+        inventoryViewBranchLabel
+          ? `Bring another branch's category setup into ${inventoryViewBranchLabel} in a few steps. Only the categories are copied, not the products in them.`
+          : 'Bring another branch\'s category setup here in a few steps. Only the categories are copied, not the products in them.'
+      "
       size="md"
     >
-      <div :class="drawerFillClass">
-        <SSelect
-          v-model="copyTemplatesSourceStoreId"
-          label="Source branch"
-          placeholder="Select a branch…"
-          :options="
-            otherBranchesForTemplateCopy.map((s) => ({ value: s.id, label: branchDisplayLabel(s) }))
-          "
-        />
-        <section v-if="copyTemplatesSourceStoreId" class="s-form-section">
-          <div class="s-inv-row-head">
-            <h3 class="s-form-section__title">Categories to copy</h3>
-            <div class="s-inv-row-head__actions">
-              <span class="s-form-meta" aria-live="polite">
-                {{ copyTemplatesSelectedCount }} selected
-              </span>
-              <SButton
-                size="sm"
-                variant="ghost"
-                :disabled="
-                  copyTemplatesRootFoldersList.length === 0 || loadingCopyTemplatesSourceFolders
-                "
-                @click="selectAllCopyTemplatesFolders"
-              >
-                Select all
-              </SButton>
-              <SButton
-                size="sm"
-                variant="ghost"
-                :disabled="loadingCopyTemplatesSourceFolders"
-                @click="clearCopyTemplatesFolderSelection"
-              >
-                Clear
-              </SButton>
-            </div>
+      <div :class="[drawerFillClass, 's-copy-guide']">
+        <!-- Step 1: where from -->
+        <SStep
+          :number="1"
+          title="Choose the branch to copy from"
+          hint="Its categories will be listed in the next step."
+          :done="!!copyTemplatesSourceStoreId"
+        >
+          <SSelect
+            v-model="copyTemplatesSourceStoreId"
+            label="Copy from"
+            placeholder="Select a branch…"
+            :options="
+              otherBranchesForTemplateCopy.map((s) => ({
+                value: s.id,
+                label: branchDisplayLabel(s),
+              }))
+            "
+          />
+        </SStep>
+
+        <!-- Step 2: which categories -->
+        <SStep
+          v-if="copyTemplatesSourceStoreId"
+          :number="2"
+          title="Tick the categories you want"
+          :hint="`Top-level categories from ${copyTemplatesSourceBranchLabel}.`"
+          :done="copyTemplatesSelectedCount > 0"
+        >
+          <template v-if="copyTemplatesSelectedCount > 0" #aside>
+            <span class="s-step__count">{{ copyTemplatesSelectedCount }} selected</span>
+          </template>
+          <div
+            v-if="!loadingCopyTemplatesSourceFolders && copyTemplatesRootFoldersList.length > 0"
+            class="s-copy-guide__tools"
+          >
+            <SButton size="sm" variant="ghost" @click="selectAllCopyTemplatesFolders">
+              Select all
+            </SButton>
+            <SButton
+              size="sm"
+              variant="ghost"
+              :disabled="copyTemplatesSelectedCount === 0"
+              @click="clearCopyTemplatesFolderSelection"
+            >
+              Clear
+            </SButton>
           </div>
           <p v-if="loadingCopyTemplatesSourceFolders" :class="emptyStateClass" role="status">
             Loading categories…
           </p>
           <div v-else-if="copyTemplatesRootFoldersList.length === 0" class="s-callout">
             <p>
-              No category templates were found under
-              <strong>{{ copyTemplatesSourceBranchLabel }}</strong>
-              (your &ldquo;Source branch&rdquo; above).
+              <strong>{{ copyTemplatesSourceBranchLabel }}</strong> has no categories yet. Pick
+              another branch in step 1, or create categories there first.
             </p>
             <p
               v-if="
                 storesStore.currentStoreId &&
-                copyTemplatesSourceStoreId &&
                 copyTemplatesSourceStoreId !== storesStore.currentStoreId &&
                 inventoryViewBranchLabel
               "
             >
-              The category tiles behind this panel are from
+              The categories behind this panel belong to
               <strong>{{ inventoryViewBranchLabel }}</strong
-              >. Switch &ldquo;Source branch&rdquo; to that branch if those are the categories you
-              want to copy, or create categories first on {{ copyTemplatesSourceBranchLabel }}.
+              >, the branch you're copying into.
             </p>
           </div>
           <div v-else :class="[pickListClass, 's-inv-pick']">
@@ -937,19 +1009,35 @@
               </li>
             </ul>
           </div>
+        </SStep>
+
+        <!-- Step 3 (only when it applies): subcategories -->
+        <SStep
+          v-if="copyTemplatesSelectedCount > 0 && copyTemplatesSelectedHasSubfolders"
+          :number="3"
+          title="Bring their subcategories too?"
+          hint="Leave it off to copy only the top level."
+          optional
+        >
           <SCheckbox
-            v-if="copyTemplatesSelectedHasSubfolders"
             v-model="copyTemplatesIncludeSubfolders"
-            label="Also copy subcategories into selected categories"
+            label="Also copy subcategories"
             :description="
               copyTemplatesIncludeSubfolders && copyTemplatesSubfolderPreview
                 ? `Includes: ${copyTemplatesSubfolderPreview}`
                 : undefined
             "
           />
-        </section>
-        <fieldset class="s-form-section">
-          <legend class="s-form-section__title">When a category name already exists here</legend>
+        </SStep>
+
+        <!-- Last step: name clashes -->
+        <SStep
+          v-if="copyTemplatesSelectedCount > 0"
+          as="fieldset"
+          :number="copyTemplatesSelectedHasSubfolders ? 4 : 3"
+          title="If a name already exists here"
+          hint="Skipping is the safe choice; nothing is overwritten."
+        >
           <div
             class="s-c s-choice-grid"
             role="radiogroup"
@@ -984,16 +1072,31 @@
               </span>
             </button>
           </div>
-        </fieldset>
-        <p class="s-form-meta">
-          Department restrictions are not copied; set them again on this branch if you use them.
-        </p>
+          <p class="s-form-meta">
+            Department restrictions aren't copied. Set them again on this branch if you use them.
+          </p>
+        </SStep>
       </div>
       <template #footer>
+        <SStepSummary>
+          <template v-if="!copyTemplatesSourceStoreId">Start by choosing a branch.</template>
+          <template v-else-if="copyTemplatesSelectedCount === 0">
+            Now tick the categories to copy.
+          </template>
+          <template v-else>
+            <strong>{{ copyTemplatesEffectiveCount }}</strong>
+            {{ copyTemplatesEffectiveCount === 1 ? 'category' : 'categories' }}
+            from {{ copyTemplatesSourceBranchLabel }}
+            <ArrowRight :size="12" :stroke-width="2" aria-hidden="true" />
+            {{ inventoryViewBranchLabel || 'this branch' }}
+          </template>
+        </SStepSummary>
         <SDialogActions
           :primary-label="
             isCopyingFolderTemplates
               ? 'Copying…'
+              : copyTemplatesSelectedCount === 0
+              ? 'Copy categories'
               : `Copy ${copyTemplatesEffectiveCount || 0} ${
                   copyTemplatesEffectiveCount === 1 ? 'category' : 'categories'
                 }`
@@ -1041,13 +1144,15 @@ import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
 import SField from '~/components/s/SField.vue'
 import SForm from '~/components/s/SForm.vue'
-import SFormSection from '~/components/s/SFormSection.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import BulkDeleteConfirmModal from '~/components/dashboard/BulkDeleteConfirmModal.vue'
 import { ref, computed, reactive, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import type { Store } from '~/composables/useStores'
 import {
   ArrowLeftRight,
+  ArrowRight,
   Copy,
   Download,
   EllipsisVertical,
@@ -2639,6 +2744,12 @@ const handleConfirmDeleteFolder = async (folder: InventoryFolder) => {
     selectedFolderForDelete.value = null
   }
 }
+
+/** Every product column has a title (drives the "columns" step tick and the footer hint). */
+const folderColumnsReady = computed(
+  () =>
+    editableFields.value.length > 0 && editableFields.value.every((field) => !!field.label?.trim())
+)
 
 const isFolderDrawerValid = computed(() => {
   if (!folderForm.name.trim()) return false

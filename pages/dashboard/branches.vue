@@ -243,48 +243,87 @@
       :dismissible="!isSubmittingStore"
     >
       <form id="branch-form" class="s-form" @submit.prevent="handleStoreSubmit">
-        <template v-if="useRegionBranchPicker">
-          <SSelect
-            v-model="branchCity"
-            label="City"
-            :options="branchCityOptions"
-            placeholder="Choose a city"
-            :hint="`Cities in ${branchRegionLabel}, based on your account region.`"
+        <SStep
+          :number="1"
+          :title="useRegionBranchPicker ? 'Choose where the branch is' : 'Name the branch'"
+          :hint="
+            useRegionBranchPicker
+              ? 'The branch is named after its city and area.'
+              : 'Staff pick this name when they switch branches.'
+          "
+          :done="!!storeForm.name"
+        >
+          <template v-if="useRegionBranchPicker">
+            <SSelect
+              v-model="branchCity"
+              label="City"
+              :options="branchCityOptions"
+              placeholder="Choose a city"
+              :hint="`Cities in ${branchRegionLabel}, based on your account region.`"
+              required
+            />
+            <SInput
+              v-model="branchLocality"
+              label="Area"
+              placeholder="e.g. Lekki or GRA"
+              hint="Optional. Helps tell apart two branches in the same city."
+            />
+          </template>
+          <SInput
+            v-else
+            v-model="storeForm.name"
+            label="Branch name"
+            placeholder="e.g. Main shop"
             required
           />
-          <SInput
-            v-model="branchLocality"
-            label="Area"
-            placeholder="e.g. Lekki or GRA"
-            hint="Optional. Helps tell apart two branches in the same city."
+          <SCheckbox
+            v-if="editingStore && userStore.isSuperAdmin"
+            v-model="storeForm.isActive"
+            label="Branch is active"
           />
-        </template>
-        <SInput
-          v-else
-          v-model="storeForm.name"
-          label="Branch name"
-          placeholder="e.g. Main shop"
-          required
-        />
+        </SStep>
 
-        <STextarea v-model="storeForm.description" label="Description" :rows="2" />
-        <STextarea
-          v-model="storeForm.sellScreenNote"
-          label="Note for cashiers"
-          :rows="3"
-          placeholder="e.g. 10% off accessories today"
-          hint="Shown on Quick sale and checkout for this branch."
-        />
-        <SInput v-model="storeForm.address" label="Address" autocomplete="street-address" />
-        <SInput v-model="storeForm.phone" label="Phone" type="tel" autocomplete="tel" />
-        <SInput v-model="storeForm.email" label="Email" type="email" autocomplete="email" />
-        <SCheckbox
-          v-if="editingStore && userStore.isSuperAdmin"
-          v-model="storeForm.isActive"
-          label="Branch is active"
-        />
+        <SStep
+          :number="2"
+          title="Add contact details"
+          hint="Printed on receipts so customers can reach this branch."
+          optional
+        >
+          <SInput v-model="storeForm.address" label="Address" autocomplete="street-address" />
+          <SInput v-model="storeForm.phone" label="Phone" type="tel" autocomplete="tel" />
+          <SInput v-model="storeForm.email" label="Email" type="email" autocomplete="email" />
+        </SStep>
+
+        <SStep
+          :number="3"
+          title="Add notes for your team"
+          hint="Cashiers see their note on Quick sale and checkout."
+          optional
+        >
+          <STextarea v-model="storeForm.description" label="Description" :rows="2" />
+          <STextarea
+            v-model="storeForm.sellScreenNote"
+            label="Note for cashiers"
+            :rows="3"
+            placeholder="e.g. 10% off accessories today"
+            hint="Shown on Quick sale and checkout for this branch."
+          />
+        </SStep>
       </form>
       <template #footer>
+        <SStepSummary>
+          <template v-if="!storeForm.name">
+            {{
+              useRegionBranchPicker ? 'Start by choosing a city.' : 'Start by naming the branch.'
+            }}
+          </template>
+          <template v-else-if="editingStore">
+            Saving changes to <strong>{{ storeForm.name }}</strong>
+          </template>
+          <template v-else>
+            <strong>{{ storeForm.name }}</strong> will be added as a new branch
+          </template>
+        </SStepSummary>
         <SButton :disabled="isSubmittingStore" @click="closeStoreModal">Cancel</SButton>
         <SButton
           variant="primary"
@@ -356,6 +395,8 @@ import SMenuItem from '~/components/s/SMenuItem.vue'
 import SPageHeader from '~/components/s/SPageHeader.vue'
 import SSelect from '~/components/s/SSelect.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'

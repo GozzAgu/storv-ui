@@ -133,8 +133,21 @@
           title="Every plan,"
           accent="side by side."
         />
+        <!-- Phones: one plan's column at a time, picked here -->
+        <div class="mk-plan-switch" role="group" aria-label="Plan to compare">
+          <button
+            v-for="(plan, i) in MARKETING_PLANS"
+            :key="plan.id"
+            type="button"
+            class="mk-plan-switch__btn"
+            :aria-pressed="comparePlan === i"
+            @click="comparePlan = i"
+          >
+            {{ plan.name }}
+          </button>
+        </div>
         <div class="mk-table-wrap">
-          <table class="mk-table">
+          <table class="mk-table" :data-plan="comparePlan">
             <caption class="ds-sr-only">
               Features included in each plan
             </caption>
@@ -260,6 +273,7 @@ import { breadcrumbJsonLd, faqJsonLd, softwareJsonLd } from '~/utils/marketing-s
 import { marketingSoftwareOffers } from '~/composables/useMarketingPricing'
 import { useMarketingSeo } from '~/composables/useMarketingSeo'
 import type { Component } from 'vue'
+import { computed, ref } from 'vue'
 import {
   Boxes,
   Building2,
@@ -441,6 +455,14 @@ const workspaces: Workspace[] = [
     ],
   },
 ]
+
+/** Plan shown in the comparison on phones; starts on the featured plan. */
+const comparePlan = ref(
+  Math.max(
+    0,
+    MARKETING_PLANS.findIndex((plan) => plan.featured)
+  )
+)
 
 const billingFaq = computed<MkFaqItem[]>(() => [
   ...(trialOffer

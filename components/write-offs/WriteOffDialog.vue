@@ -30,45 +30,74 @@
         <p v-if="blockedReason" class="s-callout" role="alert">{{ blockedReason }}</p>
       </SFormSection>
 
-      <SFormSection v-if="!blockedReason">
-        <SField v-if="props.item && !serial" label="Units to write off" required>
-          <SInput v-model="quantity" type="number" inputmode="numeric" />
-        </SField>
-        <SField label="Why?" required>
-          <SSelect v-model="reason" :options="reasonOptions" />
-        </SField>
-        <SField
-          label="What happened"
-          :hint="reason === 'lost_stolen' ? 'Required for lost or stolen stock' : 'Optional'"
+      <template v-if="!blockedReason">
+        <SStep
+          v-if="showQuantityStep"
+          :number="1"
+          title="Enter how many units"
+          :hint="`You can write off up to ${available}.`"
+          :done="quantityValid"
         >
-          <STextarea
-            v-model="note"
-            :rows="2"
-            maxlength="500"
-            :placeholder="
-              reason === 'lost_stolen'
-                ? 'When it was noticed, who checked, any police report number'
-                : 'e.g. Dropped during unpacking, screen shattered'
-            "
-          />
-        </SField>
-        <p class="s-callout">
-          <template v-if="lossValue !== null">
-            <strong>{{ formatCurrency(lossValue) }}</strong> will be recorded as a loss at cost.
-          </template>
-          <template v-else
-            >This item has no cost recorded, so the loss is logged without a value.</template
-          >
-          {{ stockNote }}
-        </p>
-      </SFormSection>
+          <SField label="Units to write off" required>
+            <SInput v-model="quantity" type="number" inputmode="numeric" />
+          </SField>
+        </SStep>
+        <SStep
+          :number="showQuantityStep ? 2 : 1"
+          title="Pick the reason"
+          hint="So you can see later where stock is being lost."
+        >
+          <SField label="Why?" required>
+            <SSelect v-model="reason" :options="reasonOptions" />
+          </SField>
+        </SStep>
+        <SStep
+          :number="showQuantityStep ? 3 : 2"
+          title="Say what happened"
+          :hint="
+            reason === 'lost_stolen'
+              ? 'Needed for lost or stolen stock.'
+              : 'A short note helps when you look back later.'
+          "
+          :optional="reason !== 'lost_stolen'"
+          :done="reason === 'lost_stolen' && noteValid"
+        >
+          <SField label="What happened">
+            <STextarea
+              v-model="note"
+              :rows="2"
+              maxlength="500"
+              :placeholder="
+                reason === 'lost_stolen'
+                  ? 'When it was noticed, who checked, any police report number'
+                  : 'e.g. Dropped during unpacking, screen shattered'
+              "
+            />
+          </SField>
+        </SStep>
+      </template>
 
       <p v-if="error" class="s-field__error" role="alert">{{ error }}</p>
     </SForm>
 
     <template #footer>
+      <SStepSummary v-if="!blockedReason">
+        <template v-if="showQuantityStep && !quantityValid">
+          Enter how many units to write off, up to {{ available }}.
+        </template>
+        <template v-else-if="reason === 'lost_stolen' && !noteValid">
+          Now say what happened. It's needed for lost or stolen stock.
+        </template>
+        <template v-else>
+          <template v-if="lossValue !== null">
+            <strong>{{ formatCurrency(lossValue) }}</strong> will be recorded as a loss at cost.
+          </template>
+          <template v-else>No cost is recorded, so the loss is logged without a value.</template>
+          {{ stockNote }}
+        </template>
+      </SStepSummary>
       <SDialogActions
-        primary-label="Write off"
+        :primary-label="primaryLabel"
         primary-variant="danger"
         :primary-loading="saving"
         :primary-disabled="!canSubmit"
@@ -89,6 +118,8 @@ import SForm from '~/components/s/SForm.vue'
 import SFormSection from '~/components/s/SFormSection.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSelect from '~/components/s/SSelect.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { useWriteOffsStore, type WriteOffContext } from '~/stores/writeOffs'
@@ -246,6 +277,18 @@ const canSubmit = computed(() => {
   if (reason.value === 'lost_stolen' && note.value.trim().length < 3) return false
   if (props.item) return c.quantity >= 1 && c.quantity <= available.value
   return true
+})
+
+/** Step ticks and footer guidance. */
+const showQuantityStep = computed(() => !!props.item && !serial.value)
+const quantityValid = computed(() => {
+  const n = context.value?.quantity ?? 0
+  return n >= 1 && n <= available.value
+})
+const noteValid = computed(() => note.value.trim().length >= 3)
+const primaryLabel = computed(() => {
+  const n = summary.value.quantity
+  return !summary.value.serial && n > 1 ? `Write off ${n} units` : 'Write off'
 })
 
 watch(

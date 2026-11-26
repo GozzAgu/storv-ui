@@ -144,6 +144,14 @@
               <NuxtLink to="/privacy" class="mk-link">Privacy Policy</NuxtLink> and
               <NuxtLink to="/terms" class="mk-link">Terms of Service</NuxtLink>.
             </p>
+            <p id="report" class="mk-card__text">
+              Found a security issue? Email
+              <a href="mailto:hello@storvv.com?subject=Security%20report" class="mk-link"
+                >hello@storvv.com</a
+              >
+              with &ldquo;Security&rdquo; in the subject. Please give us time to fix it before
+              sharing details publicly.
+            </p>
           </MkSectionHead>
         </div>
         <MkFaq :items="detailItems" />

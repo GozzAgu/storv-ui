@@ -1,9 +1,15 @@
 <template>
   <div class="ds-root s-c s-page">
-    <SPageHeader title="Stock loans">
+    <SPageHeader title="Stock lent out">
       <template #description>
         Serial-numbered stock you've lent to resellers. Mark each loan sold or returned when they're
         done.
+      </template>
+      <template v-if="canStartLoan" #actions>
+        <SButton variant="primary" @click="showLendDialog = true">
+          <template #leading><Plus :size="16" :stroke-width="2" aria-hidden="true" /></template>
+          Lend stock
+        </SButton>
       </template>
     </SPageHeader>
 
@@ -59,11 +65,16 @@
     <SCard v-else-if="sellerLoansStore.loans.length === 0">
       <SEmptyState
         title="No stock loans yet"
-        description="To lend stock, select serial-numbered products in Inventory and choose Stock loan."
+        description="Lend serial-numbered stock to a reseller and track it here until it's sold or returned. You can also tick items in Inventory and choose Stock loan."
       >
         <template #icon><Handshake :size="24" :stroke-width="1.75" /></template>
         <template #actions>
-          <SButton variant="primary" :to="dashPath('/inventory')">Go to Inventory</SButton>
+          <SButton v-if="canStartLoan" variant="primary" @click="showLendDialog = true">
+            Lend stock
+          </SButton>
+          <SButton :variant="canStartLoan ? 'secondary' : 'primary'" :to="dashPath('/inventory')">
+            Go to Inventory
+          </SButton>
         </template>
       </SEmptyState>
     </SCard>
@@ -109,7 +120,16 @@
           >
             <template #icon><Handshake :size="24" :stroke-width="1.75" /></template>
             <template #actions>
-              <SButton @click="statusFilter = 'all'">Show all loans</SButton>
+              <SButton
+                v-if="canStartLoan && (statusFilter === 'active' || statusFilter === 'all')"
+                variant="primary"
+                @click="showLendDialog = true"
+              >
+                Lend stock
+              </SButton>
+              <SButton v-if="statusFilter !== 'all'" @click="statusFilter = 'all'">
+                Show all loans
+              </SButton>
             </template>
           </SEmptyState>
         </SCard>
@@ -424,6 +444,9 @@
         >
       </template>
     </SDialog>
+
+    <!-- Start a loan here: the form opens on "Pick the items to lend" -->
+    <CreateSellerLoanModal v-model="showLendDialog" @success="onLoanCreated" />
   </div>
 </template>
 
@@ -436,6 +459,7 @@ import {
   EllipsisVertical,
   Handshake,
   Lock,
+  Plus,
   Store,
   TriangleAlert,
   Undo2,
@@ -455,6 +479,7 @@ import SSkeleton from '~/components/s/SSkeleton.vue'
 import STabs from '~/components/s/STabs.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import PlanGate from '~/components/subscription/PlanGate.vue'
+import CreateSellerLoanModal from '~/components/seller-loans/CreateSellerLoanModal.vue'
 import StockItemDetailsList from '~/components/inventory/StockItemDetailsList.vue'
 import { useStockItemDetailsLookup } from '~/composables/useStockItemDetailsLookup'
 import { groupedItemNames, type StockItemRow } from '~/utils/stock-item-details'
@@ -497,6 +522,18 @@ const toast = useAppToast()
 
 const canAccessByRole = computed(() => can('sellerLoans', 'view'))
 const canAccessSellerLoansPlan = computed(() => canUseSubscriptionFeature('seller_loans'))
+
+/** Same rule as Inventory's Stock loan button: create access, on a plan with stock loans, in a branch. */
+const canStartLoan = computed(
+  () =>
+    can('sellerLoans', 'create') && canAccessSellerLoansPlan.value && !!storesStore.currentStoreId
+)
+const showLendDialog = ref(false)
+
+async function onLoanCreated() {
+  await sellerLoansStore.fetchSellerLoanOuts(true)
+  statusFilter.value = 'all'
+}
 
 type LoanStatusFilter = 'pending_approval' | 'active' | 'returned' | 'sold' | 'all'
 

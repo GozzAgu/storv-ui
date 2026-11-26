@@ -7,7 +7,12 @@
     @update:open="(v: boolean) => emit('update:modelValue', v)"
   >
     <SForm>
-      <SFormSection>
+      <SStep
+        :number="1"
+        title="Who is paying?"
+        hint="The link is made out to them. Add their WhatsApp number to send it straight to their phone."
+        :done="customerName.trim().length > 0"
+      >
         <div class="s-form-pair">
           <SField label="Customer name">
             <SInput v-model="customerName" placeholder="e.g. Sarah Johnson" />
@@ -16,9 +21,14 @@
             <SInput v-model="customerPhone" type="tel" placeholder="e.g. 080 1234 5678" />
           </SField>
         </div>
-      </SFormSection>
+      </SStep>
 
-      <SFormSection>
+      <SStep
+        :number="2"
+        title="Choose a category"
+        hint="Items in stock from it will be listed next. You can switch categories to add more."
+        :done="!!selectedFolderId || cartCount > 0"
+      >
         <SField label="Category">
           <SSelect v-model="selectedFolderId" @change="onFolderChange">
             <option value="">Select a category</option>
@@ -27,7 +37,18 @@
             </option>
           </SSelect>
         </SField>
+      </SStep>
 
+      <SStep
+        v-if="selectedFolderId"
+        :number="3"
+        title="Add the items"
+        hint="Use + and − to set how many of each the customer is paying for."
+        :done="cartCount > 0"
+      >
+        <template v-if="cartCount > 0" #aside>
+          <span class="s-step__count">{{ cartCount }} selected</span>
+        </template>
         <SField v-if="selectedFolderId" v-slot="{ labelId }" label="Items">
           <div v-if="itemsLoading" :class="pickListClass" aria-busy="true">
             <div :class="pickListScrollClass">
@@ -84,25 +105,30 @@
             </div>
           </div>
         </SField>
-      </SFormSection>
+      </SStep>
 
       <p v-if="errorMsg" class="s-field__error" role="alert">
         {{ friendlyDisplayMessage(errorMsg) }}
       </p>
     </SForm>
 
-    <template #leading>
-      <span class="s-form-meta">
-        Total
-        <strong class="s-sheet-total">{{ formatNaira(total) }}</strong>
-      </span>
-    </template>
-
     <template #footer>
+      <SStepSummary>
+        <template v-if="!customerName.trim()">Start with the customer's name.</template>
+        <template v-else-if="cartCount === 0 && !selectedFolderId">
+          Now choose a category to pick items from.
+        </template>
+        <template v-else-if="cartCount === 0">Now add at least one item.</template>
+        <template v-else-if="total <= 0">The items you picked don't have a price yet.</template>
+        <template v-else>
+          <strong>{{ cartCount }}</strong> item{{ cartCount === 1 ? '' : 's' }} ·
+          <strong>{{ formatNaira(total) }}</strong> for {{ customerName.trim() }}
+        </template>
+      </SStepSummary>
       <SDialogActions
         :primary-loading="creating"
         :primary-disabled="!canCreate"
-        primary-label="Generate link"
+        :primary-label="canCreate ? `Generate link for ${formatNaira(total)}` : 'Generate link'"
         @cancel="emit('update:modelValue', false)"
         @primary="create"
       />
@@ -120,9 +146,10 @@ import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
 import SField from '~/components/s/SField.vue'
 import SForm from '~/components/s/SForm.vue'
-import SFormSection from '~/components/s/SFormSection.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSelect from '~/components/s/SSelect.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import { ref, computed, reactive, watch } from 'vue'
 import { Minus, Plus } from '@lucide/vue'
 import SIconButton from '~/components/s/SIconButton.vue'
@@ -210,6 +237,7 @@ const availableItems = computed<CartEntry[]>(() => {
 const total = computed(() =>
   Object.values(cart).reduce((sum, e) => sum + e.unitPrice * e.quantity, 0)
 )
+const cartCount = computed(() => Object.values(cart).reduce((sum, e) => sum + e.quantity, 0))
 const canCreate = computed(
   () =>
     customerName.value.trim().length > 0 &&

@@ -134,6 +134,8 @@
           </p>
         </form>
 
+        <MkTrustStrip compact class="auth-trust" />
+
         <p class="auth-auth-footer-link">
           Already have an account?
           <NuxtLink to="/signin">Sign in</NuxtLink>
@@ -158,6 +160,7 @@ import AuthPasswordStrength from '~/components/auth/AuthPasswordStrength.vue'
 import SButton from '~/components/s/SButton.vue'
 import AuthBuddies from '~/components/auth/AuthBuddies.vue'
 import AuthGoogleButton from '~/components/auth/AuthGoogleButton.vue'
+import MkTrustStrip from '~/components/marketing/MkTrustStrip.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useGoogleSignIn } from '~/composables/useGoogleSignIn'
 import { useUserStore } from '~/stores/user'

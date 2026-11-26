@@ -15,11 +15,10 @@
 
     <div v-else class="s-form">
       <div class="s-receipt-callout s-receipt-callout--warning">
-        <p class="s-receipt-callout__title">Confirm return / refund</p>
+        <p class="s-receipt-callout__title">This refunds the whole sale</p>
         <p>
-          This marks the sale as refunded and puts the items back on sale. If you're not sure an
-          item is in good condition, mark it “Needs checking”: it's held off sale until a manager
-          inspects it.
+          The sale is marked as refunded and its items go back on sale, unless you hold them for
+          checking in step 1.
         </p>
       </div>
 
@@ -49,8 +48,23 @@
         </dl>
       </section>
 
-      <section class="s-form-section">
-        <h3 class="s-form-section__title">Items to be returned</h3>
+      <div v-if="v2 && moneyHeldKobo > 0" class="s-receipt-callout s-receipt-callout--warning">
+        <p class="s-receipt-callout__title">Refund the payments first</p>
+        <p>
+          {{ formatCurrency(koboToNaira(moneyHeldKobo)) }} is still held on this sale (confirmed,
+          awaiting confirmation or pending). Refund or reject each payment in the sale's Payments
+          section, then return the items here.
+        </p>
+      </div>
+
+      <SStep
+        :number="1"
+        title="Check the items coming back"
+        hint="Tick “Needs checking” for anything that might be faulty; a manager inspects it first."
+      >
+        <template v-if="heldItemIds.length" #aside>
+          <span class="s-step__count">{{ heldItemIds.length }} to check</span>
+        </template>
         <ul class="s-record-rows s-receipt-items">
           <li
             v-for="(item, index) in receipt.items"
@@ -75,42 +89,67 @@
           <span>Refund amount</span>
           <span class="s-record-row__value">{{ formatCurrency(receipt.total) }}</span>
         </div>
-      </section>
-
-      <div v-if="v2 && moneyHeldKobo > 0" class="s-receipt-callout s-receipt-callout--warning">
-        <p class="s-receipt-callout__title">Refund the payments first</p>
-        <p>
-          {{ formatCurrency(koboToNaira(moneyHeldKobo)) }} is still held on this sale (confirmed,
-          awaiting confirmation or pending). Refund or reject each payment in the sale's Payments
-          section, then return the items here.
+        <p v-if="heldItemIds.length" class="s-receipt-callout">
+          {{ heldItemIds.length }} item{{ heldItemIds.length === 1 ? '' : 's' }} will be held for
+          inspection. A manager decides from Returns → To inspect whether it goes back on sale or
+          back to the supplier.
         </p>
-      </div>
+      </SStep>
 
-      <p v-if="heldItemIds.length" class="s-receipt-callout">
-        {{ heldItemIds.length }} item{{ heldItemIds.length === 1 ? '' : 's' }} will be held for
-        inspection. A manager decides from Returns → To inspect whether it goes back on sale or back
-        to the supplier.
-      </p>
-
-      <SField
-        :label="heldItemIds.length ? 'What did the customer say is wrong?' : 'Return reason'"
-        :hint="reasonRequired ? 'Required' : 'Optional'"
+      <SStep
+        :number="2"
+        :title="heldItemIds.length ? 'Note what the customer said is wrong' : 'Give a reason'"
+        :hint="
+          reasonRequired
+            ? 'Needed for this refund. A few words is enough.'
+            : 'Helps you spot patterns in returns later.'
+        "
+        :optional="!reasonRequired"
+        :done="reasonRequired && reasonValid"
       >
-        <STextarea
-          v-model="returnReason"
-          :rows="2"
-          :placeholder="
-            heldItemIds.length
-              ? 'e.g. Screen flickers, battery drains overnight'
-              : 'Enter reason for return/refund...'
-          "
-        />
-      </SField>
+        <SField
+          :label="heldItemIds.length ? 'What did the customer say is wrong?' : 'Return reason'"
+          :hint="reasonRequired ? 'Required' : 'Optional'"
+        >
+          <STextarea
+            v-model="returnReason"
+            :rows="2"
+            :placeholder="
+              heldItemIds.length
+                ? 'e.g. Screen flickers, battery drains overnight'
+                : 'Enter reason for return/refund...'
+            "
+          />
+        </SField>
+      </SStep>
 
-      <SCheckbox v-model="confirmed" :label="confirmLabel" />
+      <SStep
+        :number="3"
+        title="Confirm the refund"
+        hint="Check the refund amount, then tick the box."
+        :done="confirmed"
+      >
+        <SCheckbox v-model="confirmed" :label="confirmLabel" />
+      </SStep>
     </div>
 
     <template #footer>
+      <SStepSummary v-if="receipt">
+        <template v-if="v2 && moneyHeldKobo > 0">
+          Refund the payments in the sale's Payments section first.
+        </template>
+        <template v-else-if="reasonRequired && !reasonValid">
+          Say why the {{ heldItemIds.length ? 'items need checking' : 'sale is being refunded' }}.
+        </template>
+        <template v-else-if="!confirmed">Tick the box in step 3 to confirm.</template>
+        <template v-else>
+          <strong>{{ formatCurrency(receipt.total) }}</strong> refund ·
+          <strong>{{ restockLineCount }}</strong> back on sale
+          <template v-if="heldItemIds.length">
+            · <strong>{{ heldItemIds.length }}</strong> held for checking
+          </template>
+        </template>
+      </SStepSummary>
       <SDialogActions
         :primary-label="isProcessing ? 'Processing…' : 'Confirm return / refund'"
         :primary-icon="ArrowPathIcon"
@@ -130,6 +169,8 @@ import SField from '~/components/s/SField.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import SCheckbox from '~/components/s/SCheckbox.vue'
 import SSpinner from '~/components/s/SSpinner.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import { computed, ref, watch } from 'vue'
 import { ArrowPathIcon } from '~/utils/app-icons'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
@@ -176,6 +217,15 @@ function toggleHeld(itemId: string, on: boolean) {
 }
 
 const reasonRequired = computed(() => v2.value || heldItemIds.value.length > 0)
+/** Same reason rule `canSubmit` uses; drives step 2's tick and the footer summary. */
+const reasonValid = computed(() => returnReason.value.trim().length >= 3)
+/** Sale lines that go straight back on sale (not held for checking). */
+const restockLineCount = computed(
+  () =>
+    (props.receipt?.items ?? []).filter(
+      (item) => !item.itemId || !heldItemIds.value.includes(item.itemId)
+    ).length
+)
 const confirmLabel = computed(() =>
   heldItemIds.value.length
     ? 'I confirm this return/refund. Held items wait for inspection; the rest go back on sale.'

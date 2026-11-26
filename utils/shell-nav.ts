@@ -24,15 +24,17 @@ export type ShellNavSection = {
 export const SHELL_CUSTOMERS_NAV_NAME = 'Customers'
 export const SHELL_BRANCHES_NAV_NAME = 'Branches'
 
+/** Labels say what each page is for, so people can tell routes apart at a glance. */
 const SHELL_LABELS: Record<string, string> = {
   Dashboard: 'Overview',
   Analytics: 'Reports',
-  Departments: 'Team',
-  'Multi-Store Sync': 'Transfers',
-  'Customer buybacks': 'Trade-ins',
-  'Supplier returns': 'Returns',
+  Departments: 'Staff & roles',
+  'Multi-Store Sync': 'Branch transfers',
+  'Stock loans': 'Stock lent out',
+  'Customer buybacks': 'Customer trade-ins',
+  'Supplier returns': 'Returns & write-offs',
   Partners: 'Trade with shops',
-  'Activity Logs': 'Activity',
+  'Activity Logs': 'Activity log',
   'Help center': 'Help',
 }
 
@@ -86,7 +88,7 @@ const ROUTE_TITLES: Record<string, string> = {
   returns: 'Returns',
   'storefront-inquiries': 'Storefront inquiries',
   'experience-unavailable': 'Unavailable',
-  stores: 'Team',
+  stores: 'Staff & roles',
 }
 
 /** Title for dashboard routes that are not nav destinations. `subPath` is relative to the dashboard base. */

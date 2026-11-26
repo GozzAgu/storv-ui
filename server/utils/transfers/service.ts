@@ -106,6 +106,7 @@ async function resolveTransferActor(
       uid,
       isOwner: any.isOwner,
       isDestinationAdmin: destination?.isAdmin === true,
+      isSourceMember: !any.isOwner && source !== null,
       canManageTransfers:
         any.isOwner ||
         source?.permissions.multiStoreSync.edit === true ||
@@ -158,7 +159,11 @@ async function readFolderPath(
     const snap = await tx.get(folders.doc(id))
     const data = snap.data()
     if (!data) break
-    names.unshift(String(data.name || '').trim().slice(0, 120) || 'Unnamed category')
+    names.unshift(
+      String(data.name || '')
+        .trim()
+        .slice(0, 120) || 'Unnamed category'
+    )
     id = typeof data.parentId === 'string' ? data.parentId : ''
   }
   return names
@@ -166,7 +171,9 @@ async function readFolderPath(
 
 async function readStoreName(tx: Transaction, store: DocumentReference): Promise<string> {
   const data = (await tx.get(store)).data()
-  return String(data?.name || data?.branchName || '').trim().slice(0, 120)
+  return String(data?.name || data?.branchName || '')
+    .trim()
+    .slice(0, 120)
 }
 
 /**
@@ -475,7 +482,10 @@ export async function runTransferAction(
 
 /** "TR-7F3K2A", the short reference both branches see. */
 function transferRefLabel(transferId: string): string {
-  return `TR-${transferId.replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase()}`
+  return `TR-${transferId
+    .replace(/[^a-z0-9]/gi, '')
+    .slice(-6)
+    .toUpperCase()}`
 }
 
 const TRANSFER_VERB: Record<TransferAction, string> = {
@@ -525,7 +535,9 @@ async function logTransferActivity(
         { label: 'Status', value: String(t.status || input.result.status).replace(/_/g, ' ') },
         { label: 'Units', value: units },
         ...(t.carrier ? [{ label: 'Carrier', value: String(t.carrier) }] : []),
-        ...(t.trackingNumber ? [{ label: 'Tracking number', value: String(t.trackingNumber) }] : []),
+        ...(t.trackingNumber
+          ? [{ label: 'Tracking number', value: String(t.trackingNumber) }]
+          : []),
         ...(t.rejectionReason
           ? [{ label: 'Reason', value: String(t.rejectionReason), tone: 'bad' as const }]
           : []),

@@ -67,7 +67,16 @@
         <p v-if="staffLimitMessage" class="s-field__hint">{{ staffLimitMessage }}</p>
       </SFormSection>
 
-      <SFormSection>
+      <SStep
+        :number="1"
+        title="Who are they?"
+        :hint="
+          isEdit
+            ? 'Their name, contact and job title.'
+            : 'We use their email to set up their sign-in.'
+        "
+        :done="whoStepDone"
+      >
         <div class="s-form-pair">
           <SField label="First name" required>
             <SInput v-model="formData.firstName" required placeholder="First name" />
@@ -97,9 +106,14 @@
             <SInput v-model="formData.position" required placeholder="e.g. Sales associate" />
           </SField>
         </div>
-      </SFormSection>
+      </SStep>
 
-      <SFormSection v-if="!isEdit">
+      <SStep
+        v-if="!isEdit"
+        :number="2"
+        title="Choose how they get their password"
+        hint="We create a secure password for them. They can change it after signing in."
+      >
         <SCheckbox
           v-model="emailCredentialsToStaff"
           label="Email sign-in details"
@@ -117,9 +131,13 @@
             Regenerate password
           </SButton>
         </div>
-      </SFormSection>
+      </SStep>
 
-      <SFormSection>
+      <SStep
+        :number="isEdit ? 2 : 3"
+        title="Add their job details"
+        hint="Hire date starts as today. Salary is only for your records."
+      >
         <div class="s-form-pair">
           <SField label="Hire date" required>
             <SInput v-model="formData.hireDate" type="date" required />
@@ -141,26 +159,56 @@
             <option value="on_leave">On leave</option>
           </SSelect>
         </SField>
-      </SFormSection>
+      </SStep>
 
-      <StaffAdminAccess v-if="isEdit" :staff="props.staff" @saved="onAdminSaved" />
+      <SStep
+        v-if="showAccessStep"
+        :number="isEdit ? 3 : 4"
+        title="Choose what they can do"
+        :hint="
+          isEdit
+            ? 'Change only what you need. Admin and payment access save as soon as you change them.'
+            : 'They start with sensible defaults. Change only what you need.'
+        "
+      >
+        <StaffAdminAccess v-if="isEdit" :staff="props.staff" @saved="onAdminSaved" />
 
-      <StaffPermissionsPanel
-        v-if="canEditStaffPermissions"
-        v-model="formData.permissions"
-        :locked-modules="lockedPermissionModules"
-        :locked-badge="isStoreOwner ? 'Turn on Transfer stock' : 'Owner only'"
-      />
-      <StaffPaymentPermissions
-        v-if="props.staff?.authUid"
-        :member-uid="props.staff.authUid"
-        :member-is-admin="targetIsAdmin"
-      />
+        <StaffPermissionsPanel
+          v-if="canEditStaffPermissions"
+          v-model="formData.permissions"
+          :locked-modules="lockedPermissionModules"
+          :locked-badge="isStoreOwner ? 'Turn on Transfer stock' : 'Owner only'"
+        />
+        <StaffPaymentPermissions
+          v-if="props.staff?.authUid"
+          :member-uid="props.staff.authUid"
+          :member-is-admin="targetIsAdmin"
+        />
+      </SStep>
 
       <p v-if="errorMessage" class="s-field__error" role="alert">{{ errorMessage }}</p>
     </SForm>
 
     <template #footer>
+      <SStepSummary v-if="!emailSentSuccess && !showTemporaryPassword">
+        <template v-if="staffLimitReached">
+          Your plan's staff limit is reached, so you can't add anyone else yet.
+        </template>
+        <template v-else-if="!whoStepDone">{{ whoStepNextAction }}</template>
+        <template v-else-if="isEdit">
+          Saving updates <strong>{{ staffFullName }}</strong
+          >'s details.
+        </template>
+        <template v-else>
+          <strong>{{ staffFullName }}</strong> joins
+          {{ staffDepartmentName || 'this department' }} as {{ formData.position.trim() }} ·
+          {{
+            emailCredentialsToStaff
+              ? 'we email their sign-in details'
+              : 'you copy their password next'
+          }}
+        </template>
+      </SStepSummary>
       <SDialogActions
         v-if="emailSentSuccess"
         cancel-label="Done"
@@ -196,6 +244,8 @@ import SDialogActions from '~/components/s/SDialogActions.vue'
 import SField from '~/components/s/SField.vue'
 import SForm from '~/components/s/SForm.vue'
 import SFormSection from '~/components/s/SFormSection.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSelect from '~/components/s/SSelect.vue'
 import { ref, watch, computed, onMounted } from 'vue'
@@ -328,7 +378,37 @@ const createdStaffMeta = ref<{
 
 const isEdit = computed(() => !!props.staff)
 
-const staffFooterPrimaryLabel = computed(() => (isEdit.value ? 'Update staff' : 'Add staff'))
+const staffFooterPrimaryLabel = computed(() => {
+  if (isEdit.value) return 'Update staff'
+  return emailCredentialsToStaff.value ? 'Add staff and email invite' : 'Add staff'
+})
+
+/** Guided-form helpers: step 1 is done once every required "who" field is filled. */
+const whoStepDone = computed(
+  () =>
+    !!(
+      formData.value.firstName.trim() &&
+      formData.value.lastName.trim() &&
+      formData.value.email.trim() &&
+      formData.value.position.trim()
+    )
+)
+const whoStepNextAction = computed(() => {
+  const f = formData.value
+  if (!f.firstName.trim() || !f.lastName.trim()) return 'Start with their first and last name.'
+  if (!f.email.trim()) return 'Now add their email address.'
+  return 'Now add their position, like Sales associate.'
+})
+const staffFullName = computed(() =>
+  `${formData.value.firstName} ${formData.value.lastName}`.trim()
+)
+const staffDepartmentName = computed(
+  () => departmentsStore.getDepartmentById(props.departmentId)?.name || ''
+)
+/** Permissions, admin and payment panels each hide themselves when they don't apply. */
+const showAccessStep = computed(
+  () => canEditStaffPermissions.value || (isEdit.value && !!props.staff?.authUid)
+)
 
 const staffStoreId = computed(() => departmentsStore.getDepartmentById(props.departmentId)?.storeId)
 

@@ -306,6 +306,7 @@ import {
   ArrowDownIcon,
   ChartBarIcon,
   CreditCardIcon,
+  ArrowsRightLeftIcon,
 } from '~/utils/app-icons'
 import { useSearchStore, type SearchEntityType } from '~/stores/search'
 import { useInventoryStore } from '~/stores/inventory'
@@ -322,6 +323,7 @@ const router = useRouter()
 const searchStore = useSearchStore()
 const userStore = useUserStore()
 const { canUse: canUseBusinessCapability } = useBusinessCapabilities()
+const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const paletteRef = ref<HTMLElement | null>(null)
 const resultsEl = ref<HTMLElement | null>(null)
 const showAdvancedFilters = ref(false)
@@ -336,6 +338,14 @@ const statusLabelId = `global-search-${uid}-status`
 // Check if user is staff to filter entity types
 const isStaff = computed(() => userStore.userData?.role === 'staff')
 
+// Same gate as the Transfers page: Enterprise multi-store plus transfer view access
+const { can: canPermission } = usePermissions()
+const canSearchTransfers = computed(
+  () =>
+    canUseSubscriptionFeature('multi_store_sync') &&
+    (userStore.isSuperAdmin || canPermission('multiStoreSync', 'view'))
+)
+
 const entityTypes = computed(() => {
   const baseTypes: Array<{ value: SearchEntityType; label: string; icon: any }> = [
     { value: 'all', label: 'All', icon: MagnifyingGlassIcon },
@@ -343,6 +353,9 @@ const entityTypes = computed(() => {
     { value: 'inventory', label: 'Inventory', icon: CubeIcon },
     { value: 'customers', label: 'Customers', icon: UserCircleIcon },
     { value: 'leads', label: 'Leads', icon: InboxIcon },
+    ...(canSearchTransfers.value
+      ? [{ value: 'transfers' as const, label: 'Transfers', icon: ArrowsRightLeftIcon }]
+      : []),
     { value: 'departments', label: 'Departments', icon: BuildingOfficeIcon },
     { value: 'staff', label: 'Staff', icon: UserIcon },
   ]
@@ -536,6 +549,7 @@ const getEntityIcon = (iconName: string) => {
     BuildingOfficeIcon,
     UserIcon,
     InboxIcon,
+    ArrowsRightLeftIcon,
   }
   return icons[iconName] || MagnifyingGlassIcon
 }
@@ -546,6 +560,7 @@ const getEntityTone = (type: SearchEntityType) => {
     inventory: 'info',
     customers: 'accent',
     leads: 'accent',
+    transfers: 'info',
     departments: 'warning',
     staff: 'neutral',
   }
@@ -558,6 +573,7 @@ const getEntityGroupLabel = (type: SearchEntityType) => {
     inventory: 'Products',
     customers: 'Customers',
     leads: 'Leads',
+    transfers: 'Transfers',
     departments: 'Departments',
     staff: 'Staff',
   }

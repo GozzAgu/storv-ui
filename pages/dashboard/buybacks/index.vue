@@ -1,6 +1,6 @@
 <template>
   <div class="ds-root s-c s-page">
-    <SPageHeader title="Trade-ins">
+    <SPageHeader title="Customer trade-ins">
       <template #description>
         Items you've bought back from customers. Each one goes into stock at what you paid.
       </template>

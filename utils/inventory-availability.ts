@@ -138,3 +138,16 @@ export function inventoryAvailabilityTone(
       return 'neutral'
   }
 }
+
+/**
+ * Free to lend to a reseller: not sold, not already lent (to a reseller or a partner shop), not
+ * reserved on an unpaid sale and not held for inspection. Matches what Inventory lets you tick.
+ */
+export function isItemLendable(item: InventoryItem): boolean {
+  return (
+    !isItemSold(item) &&
+    !isItemOnStockLoan(item) &&
+    !isItemAwaitingPayment(item) &&
+    !isItemOnInspection(item)
+  )
+}

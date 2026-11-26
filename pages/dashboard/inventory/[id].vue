@@ -905,13 +905,12 @@
       >
         <!-- Bulk add mode for serial numbers -->
         <template v-if="folder?.hasSerialNumbers && !editingItem">
-          <p class="s-callout">
-            <strong>Bulk add:</strong> Enter details once, then add serial numbers below. Each
-            serial creates a separate product.
-          </p>
-
-          <section class="s-form-section">
-            <h3 class="s-form-section__title">Shared product details</h3>
+          <SStep
+            :number="1"
+            title="Enter what these products have in common"
+            hint="You type these once and they're copied to every product."
+            :done="bulkSharedDetailsReady"
+          >
             <div class="s-form-pair">
               <SInput
                 v-model="itemForm.brand"
@@ -996,22 +995,22 @@
                 @update:model-value="(value) => (itemForm.unitCost = value)"
               />
             </div>
-          </section>
+          </SStep>
 
           <!-- Serial numbers fill the remaining drawer height -->
-          <section class="s-form-section">
-            <div class="s-inv-row-head">
-              <h3 class="s-form-section__title">Serial numbers</h3>
-              <SButton size="sm" @click="addSerialNumber">
-                <template #leading>
-                  <Plus :size="16" :stroke-width="2" aria-hidden="true" />
-                </template>
-                Add serial number
-              </SButton>
-            </div>
-            <p v-if="bulkUniqueFields.length > 0" :class="drawerHintClass">
-              Each product needs its own {{ bulkUniqueFieldLabels }}.
-            </p>
+          <SStep
+            :number="2"
+            title="Add a serial number for each product"
+            :hint="
+              bulkUniqueFields.length > 0
+                ? `Each serial number becomes its own product, with its own ${bulkUniqueFieldLabels}.`
+                : 'Each serial number becomes its own product.'
+            "
+            :done="validBulkSerialNumbers.length > 0"
+          >
+            <template v-if="validBulkSerialNumbers.length > 0" #aside>
+              <span class="s-step__count">{{ validBulkSerialNumbers.length }} added</span>
+            </template>
             <p v-if="serialNumbers.length === 0" :class="emptyStateClass">
               No serial numbers yet. Select “Add serial number” to start.
             </p>
@@ -1023,7 +1022,15 @@
               :unique-fields="bulkUniqueFields"
               @remove="removeSerialNumber"
             />
-          </section>
+            <div class="s-inv-actions">
+              <SButton size="sm" @click="addSerialNumber">
+                <template #leading>
+                  <Plus :size="16" :stroke-width="2" aria-hidden="true" />
+                </template>
+                Add serial number
+              </SButton>
+            </div>
+          </SStep>
         </template>
 
         <!-- Single item mode (add or edit) -->
@@ -1103,6 +1110,25 @@
       </form>
 
       <template #footer>
+        <SStepSummary v-if="folder?.hasSerialNumbers && !editingItem">
+          <template v-if="!bulkSharedDetailsReady">
+            Start with the details these products have in common.
+          </template>
+          <template v-else-if="validBulkSerialNumbers.length === 0">
+            Now add a serial number for each product.
+          </template>
+          <template v-else-if="!isItemDrawerValid">
+            Fill in the remaining required details for each product.
+          </template>
+          <template v-else>
+            <strong>{{ validBulkSerialNumbers.length }}</strong>
+            {{ validBulkSerialNumbers.length === 1 ? 'product' : 'products' }}
+            <template v-if="String(itemForm.brand ?? '').trim()">
+              ({{ String(itemForm.brand).trim() }})
+            </template>
+            will be added to {{ folder?.name || 'this category' }}.
+          </template>
+        </SStepSummary>
         <SDialogActions @cancel="handleCancelItem">
           <template #primary>
             <SButton
@@ -1459,6 +1485,8 @@ import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
 import SForm from '~/components/s/SForm.vue'
 import SFormSection from '~/components/s/SFormSection.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import BulkDeleteConfirmModal from '~/components/dashboard/BulkDeleteConfirmModal.vue'
 import {
@@ -1659,8 +1687,7 @@ const canDuplicateByPlan = computed(() => {
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
 })
 const { formatCurrency, preferences } = usePreferences()
-const { drawerFillClass, drawerFillScrollClass, emptyStateClass, drawerHintClass } =
-  useDashboardDrawerChrome()
+const { drawerFillClass, drawerFillScrollClass, emptyStateClass } = useDashboardDrawerChrome()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 
 function itemSelectFieldOptions(field: TemplateField) {
@@ -4027,6 +4054,30 @@ const bulkUniqueFieldNames = computed(() => new Set(bulkUniqueFields.value.map((
 const bulkUniqueFieldLabels = computed(() =>
   bulkUniqueFields.value.map((f) => f.label || f.name).join(', ')
 )
+
+/**
+ * Serial bulk add, step 1 tick: product model plus the required shared fields shown in that step
+ * (same exclusions as `isItemDrawerValid`, minus the per-serial unique columns).
+ */
+const bulkSharedDetailsReady = computed(() => {
+  if (!itemForm.brand || String(itemForm.brand).trim() === '') return false
+  const fields =
+    effectiveTemplateFields.value.length > 0
+      ? effectiveTemplateFields.value
+      : folder.value?.template?.fields ?? []
+  return fields
+    .filter(
+      (f) =>
+        f.required &&
+        f.name !== 'serialNo' &&
+        f.name !== 'serialNumber' &&
+        f.name !== 'brand' &&
+        f.name !== 'model' &&
+        f.id !== SYNTH_STOCK_FIELD_ID &&
+        !bulkUniqueFieldNames.value.has(f.name)
+    )
+    .every((f) => !isEmptyItemFormValue(itemForm[f.name]))
+})
 
 type SerialRowDraft = { serialNo: string; values: Record<string, string> }
 

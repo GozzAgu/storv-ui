@@ -48,6 +48,7 @@
             <ArrowRight :size="14" :stroke-width="2" aria-hidden="true" />
           </button>
         </p>
+        <MkTrustStrip class="mkh__trust mkh-in" style="--i: 3" />
       </div>
 
       <!-- Everything a shop runs, wired into one place -->
@@ -169,6 +170,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useMarketingMotion } from '~/composables/useMarketingMotion'
 import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 import { useWalkthrough } from '~/composables/useWalkthrough'
+import MkTrustStrip from '~/components/marketing/MkTrustStrip.vue'
 
 const signupUrl = useMarketingSignupUrl()
 const walkthrough = useWalkthrough()

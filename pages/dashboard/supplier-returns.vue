@@ -1,6 +1,6 @@
 <template>
   <div class="ds-root s-c s-page">
-    <SPageHeader title="Returns">
+    <SPageHeader title="Returns &amp; write-offs">
       <template #description>
         Everything that came back or left stock outside a sale: customer returns waiting for
         inspection, defective stock going back to suppliers, and a log of every item removed.
@@ -463,7 +463,12 @@
       :description="acting ? acting.item.name : undefined"
     >
       <SForm id="sr-send-form" @submit="submitSend">
-        <SFormSection>
+        <SStep
+          :number="1"
+          title="Who is taking it back?"
+          hint="Pick a supplier you've used before or type a new name."
+          :done="!!sendForm.supplierName.trim()"
+        >
           <SField label="Supplier" required>
             <SInput
               v-model="sendForm.supplierName"
@@ -475,6 +480,13 @@
               <option v-for="name in knownSuppliers" :key="name" :value="name" />
             </datalist>
           </SField>
+        </SStep>
+        <SStep
+          :number="2"
+          title="Add a reference or note"
+          hint="Helps you match it to the supplier's paperwork later."
+          optional
+        >
           <SField label="Supplier reference" hint="Optional">
             <SInput
               v-model="sendForm.supplierReference"
@@ -490,10 +502,17 @@
               placeholder="e.g. Picked up by the supplier's driver"
             />
           </SField>
-        </SFormSection>
+        </SStep>
         <p v-if="actionError" class="s-field__error" role="alert">{{ actionError }}</p>
       </SForm>
       <template #footer>
+        <SStepSummary>
+          <template v-if="!sendForm.supplierName.trim()">Start by entering the supplier.</template>
+          <template v-else>
+            Goes to <strong>{{ sendForm.supplierName.trim() }}</strong
+            >. Close the return when they reply.
+          </template>
+        </SStepSummary>
         <SDialogActions
           primary-label="Mark as sent"
           :primary-loading="saving"
@@ -515,10 +534,39 @@
       "
     >
       <SForm id="sr-resolve-form" @submit="submitResolve">
-        <SFormSection>
+        <SStep
+          :number="1"
+          title="Choose what the supplier did"
+          hint="Repaired or replaced items can go back on sale."
+        >
           <SField label="What did the supplier do?" required>
             <SSelect v-model="resolveForm.outcome" :options="resolveOptions" />
           </SField>
+          <p v-if="acting && restocksOnClose" class="s-callout">
+            {{ restockNote(acting, resolveForm.outcome) }}
+          </p>
+        </SStep>
+        <SStep
+          v-if="resolveForm.outcome === 'replacement' && acting?.item.serial"
+          :number="2"
+          title="Enter the new unit's serial"
+          hint="So the replacement can be tracked and sold."
+          :done="!!resolveForm.newSerial.trim()"
+        >
+          <SField
+            label="Serial number of the replacement"
+            hint="Serial, IMEI or VIN of the new unit the supplier sent"
+            required
+          >
+            <SInput v-model="resolveForm.newSerial" maxlength="80" />
+          </SField>
+        </SStep>
+        <SStep
+          :number="resolveForm.outcome === 'replacement' && acting?.item.serial ? 3 : 2"
+          title="Add a note"
+          hint="Keep the credit note number or the reason for later."
+          optional
+        >
           <SField label="Note" hint="Optional">
             <STextarea
               v-model="resolveForm.note"
@@ -531,21 +579,22 @@
               "
             />
           </SField>
-          <SField
-            v-if="resolveForm.outcome === 'replacement' && acting?.item.serial"
-            label="Serial number of the replacement"
-            hint="Serial, IMEI or VIN of the new unit the supplier sent"
-            required
-          >
-            <SInput v-model="resolveForm.newSerial" maxlength="80" />
-          </SField>
-          <p v-if="acting && restocksOnClose" class="s-callout">
-            {{ restockNote(acting, resolveForm.outcome) }}
-          </p>
-        </SFormSection>
+        </SStep>
         <p v-if="actionError" class="s-field__error" role="alert">{{ actionError }}</p>
       </SForm>
       <template #footer>
+        <SStepSummary>
+          <template v-if="needsSerial(acting, resolveForm.outcome, resolveForm.newSerial)">
+            Now enter the replacement's serial number.
+          </template>
+          <template v-else-if="resolveForm.outcome === 'rejected'">
+            The return closes as <strong>rejected</strong>
+          </template>
+          <template v-else>
+            The return closes as <strong>{{ resolveOutcomeLabel }}</strong
+            ><template v-if="restocksOnClose"> and the item goes back in stock</template>
+          </template>
+        </SStepSummary>
         <SDialogActions
           :primary-label="
             resolveForm.outcome === 'rejected'
@@ -622,6 +671,8 @@ import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
 import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import SField from '~/components/s/SField.vue'
 import SForm from '~/components/s/SForm.vue'
@@ -923,6 +974,9 @@ const resolveOptions = [
   ...Object.entries(SUPPLIER_RETURN_OUTCOME_LABELS).map(([value, label]) => ({ value, label })),
   { value: 'rejected', label: 'Rejected the claim' },
 ]
+const resolveOutcomeLabel = computed(
+  () => resolveOptions.find((o) => o.value === resolveForm.outcome)?.label ?? ''
+)
 
 function openResolve(row: SupplierReturn, outcome: SupplierReturnOutcome | 'rejected' = 'refund') {
   acting.value = row

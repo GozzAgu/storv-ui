@@ -12,80 +12,108 @@
           recorded; refund and sell again to change those. The receipt will show it was edited.
         </p>
 
-        <SInput
-          v-model="form.customerName"
-          label="Customer name"
-          autocomplete="off"
-          :maxlength="RECEIPT_EDIT_LIMITS.customerName"
-          required
-        />
-        <div class="s-receipt-edit__row">
+        <SStep
+          :number="1"
+          title="Correct the details"
+          hint="Change only what's wrong. Fields you leave as they are stay the same."
+          :done="changes.length > 0 && form.customerName.trim().length > 0"
+        >
+          <template v-if="changes.length" #aside>
+            <span class="s-step__count">
+              {{ changes.length }} {{ changes.length === 1 ? 'change' : 'changes' }}
+            </span>
+          </template>
           <SInput
-            v-model="form.customerPhone"
-            label="Phone"
-            hint="Optional"
-            type="tel"
-            inputmode="tel"
+            v-model="form.customerName"
+            label="Customer name"
             autocomplete="off"
-            :maxlength="RECEIPT_EDIT_LIMITS.customerPhone"
+            :maxlength="RECEIPT_EDIT_LIMITS.customerName"
+            required
           />
+          <div class="s-receipt-edit__row">
+            <SInput
+              v-model="form.customerPhone"
+              label="Phone"
+              hint="Optional"
+              type="tel"
+              inputmode="tel"
+              autocomplete="off"
+              :maxlength="RECEIPT_EDIT_LIMITS.customerPhone"
+            />
+            <SInput
+              v-model="form.customerEmail"
+              label="Email"
+              hint="Optional"
+              type="email"
+              inputmode="email"
+              autocomplete="off"
+              :maxlength="RECEIPT_EDIT_LIMITS.customerEmail"
+            />
+          </div>
           <SInput
-            v-model="form.customerEmail"
-            label="Email"
+            v-model="form.customerAddress"
+            label="Address"
             hint="Optional"
-            type="email"
-            inputmode="email"
             autocomplete="off"
-            :maxlength="RECEIPT_EDIT_LIMITS.customerEmail"
+            :maxlength="RECEIPT_EDIT_LIMITS.customerAddress"
           />
-        </div>
-        <SInput
-          v-model="form.customerAddress"
-          label="Address"
-          hint="Optional"
-          autocomplete="off"
-          :maxlength="RECEIPT_EDIT_LIMITS.customerAddress"
-        />
-        <STextarea
-          v-model="form.notes"
-          label="Note"
-          hint="Optional"
-          :rows="2"
-          :maxlength="RECEIPT_EDIT_LIMITS.notes"
-        />
+          <STextarea
+            v-model="form.notes"
+            label="Note"
+            hint="Optional"
+            :rows="2"
+            :maxlength="RECEIPT_EDIT_LIMITS.notes"
+          />
+        </SStep>
 
-        <div v-if="changes.length" class="s-record-summary s-receipt-edit__diff">
-          <h4 class="s-record-history__title">What will change</h4>
-          <ul class="s-record-rows">
-            <li v-for="change in changes" :key="change.field" class="s-receipt-edit__change">
-              <span class="s-receipt-edit__field">{{
-                RECEIPT_EDIT_FIELD_LABELS[change.field]
-              }}</span>
-              <span class="s-receipt-edit__values">
-                <del>{{ change.from || 'Empty' }}</del>
-                <span aria-hidden="true">→</span>
-                <ins>{{ change.to || 'Empty' }}</ins>
-              </span>
-            </li>
-          </ul>
-        </div>
+        <SStep
+          :number="2"
+          title="Say why you're changing it"
+          hint="Kept with the sale's history so everyone can see why it changed."
+          :done="reasonValid"
+        >
+          <div v-if="changes.length" class="s-record-summary s-receipt-edit__diff">
+            <h4 class="s-record-history__title">What will change</h4>
+            <ul class="s-record-rows">
+              <li v-for="change in changes" :key="change.field" class="s-receipt-edit__change">
+                <span class="s-receipt-edit__field">{{
+                  RECEIPT_EDIT_FIELD_LABELS[change.field]
+                }}</span>
+                <span class="s-receipt-edit__values">
+                  <del>{{ change.from || 'Empty' }}</del>
+                  <span aria-hidden="true">→</span>
+                  <ins>{{ change.to || 'Empty' }}</ins>
+                </span>
+              </li>
+            </ul>
+          </div>
 
-        <STextarea
-          v-model="reason"
-          label="Reason for this edit"
-          hint="Kept with the sale’s history so everyone can see why it changed."
-          placeholder="e.g. Customer’s phone number was mistyped"
-          :rows="2"
-          :maxlength="RECEIPT_EDIT_LIMITS.reason"
-          :error="reasonError"
-          required
-        />
+          <STextarea
+            v-model="reason"
+            label="Reason for this edit"
+            placeholder="e.g. Customer’s phone number was mistyped"
+            :rows="2"
+            :maxlength="RECEIPT_EDIT_LIMITS.reason"
+            :error="reasonError"
+            required
+          />
+        </SStep>
       </form>
     </template>
 
     <template #footer>
+      <SStepSummary v-if="receipt">
+        <template v-if="!form.customerName.trim()">Add the customer's name to continue.</template>
+        <template v-else-if="changes.length === 0">Start by correcting a detail.</template>
+        <template v-else-if="!reasonValid">Now say why you're changing it.</template>
+        <template v-else>
+          <strong>{{ changes.length }}</strong>
+          {{ changes.length === 1 ? 'change' : 'changes' }} to sale #{{ receipt.receiptNumber }},
+          recorded in its history
+        </template>
+      </SStepSummary>
       <SDialogActions
-        primary-label="Save changes"
+        :primary-label="changes.length > 1 ? `Save ${changes.length} changes` : 'Save changes'"
         :primary-loading="submitting"
         :primary-disabled="!canSubmit"
         @cancel="emit('update:modelValue', false)"
@@ -99,6 +127,8 @@
 import { computed, reactive, ref, watch } from 'vue'
 import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import SInput from '~/components/s/SInput.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import type { Receipt } from '~/stores/receipts'
@@ -169,6 +199,9 @@ const reasonError = computed(() =>
     ? 'Add a few words about why'
     : undefined
 )
+
+/** Same rule as `canSubmit` uses for the reason; drives step 2's tick. */
+const reasonValid = computed(() => reason.value.trim().length >= 3)
 
 const canSubmit = computed(
   () =>

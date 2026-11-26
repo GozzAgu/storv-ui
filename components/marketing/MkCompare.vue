@@ -27,13 +27,13 @@
           <tbody>
             <tr v-for="row in rows" :key="row.label">
               <th scope="row">{{ row.label }}</th>
-              <td class="mkx__us">
+              <td class="mkx__us" data-label="Storvv">
                 <span class="mkx__cell">
                   <Check :size="16" class="mkx__yes" aria-hidden="true" />{{ row.us }}
                 </span>
               </td>
-              <td>{{ row.sheet }}</td>
-              <td>{{ row.legacy }}</td>
+              <td data-label="Notebook or spreadsheet">{{ row.sheet }}</td>
+              <td data-label="Installed till software">{{ row.legacy }}</td>
             </tr>
           </tbody>
         </table>

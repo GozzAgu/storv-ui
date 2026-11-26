@@ -202,6 +202,9 @@
       </div>
     </div>
 
+    <!-- Chat on WhatsApp; waits for the cookie choice so the two never overlap -->
+    <MkWhatsappChat v-if="cookiesAccepted && !menuOpen" />
+
     <Transition name="mk-fade">
       <div v-if="showBackToTop && cookiesAccepted" class="mk-to-top">
         <SIconButton label="Back to top" variant="secondary" @click="scrollToTop">
@@ -240,6 +243,7 @@ import {
   useMarketingSignupUrl,
 } from '~/composables/useMarketingSite'
 import { readCookieChoice, saveCookieChoice, type CookieChoice } from '~/utils/cookie-consent'
+import MkWhatsappChat from '~/components/marketing/MkWhatsappChat.vue'
 
 const route = useRoute()
 const signupUrl = useMarketingSignupUrl()

@@ -1,6 +1,6 @@
 <template>
   <div class="ds-root s-c s-page">
-    <SPageHeader title="Activity">
+    <SPageHeader title="Activity log">
       <template #description>
         Everything that happens in this branch: who did it, when, and exactly what changed. Point at
         an entry (or tap it) for the full details.
