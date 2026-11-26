@@ -1220,3 +1220,331 @@ html.dark .s-user-menu__theme .s-tabs__tab[aria-checked='true'] {
     scale: 0 1;
   }
 }
+
+/* ── Toasts: compact ink capsules ──────────────────────────────────────── */
+
+:root {
+  --s-toast-bg: #17181c;
+  --s-toast-text: #f4f4f6;
+  --s-toast-muted: rgb(255 255 255 / 0.5);
+  --s-toast-ring: rgb(255 255 255 / 0.06);
+  --s-toast-shadow: 0 12px 32px -12px rgb(10 12 20 / 0.5), 0 3px 8px -2px rgb(10 12 20 / 0.18);
+}
+
+html.dark {
+  --s-toast-bg: #26272c;
+  --s-toast-ring: rgb(255 255 255 / 0.09);
+  --s-toast-shadow: 0 14px 36px -12px rgb(0 0 0 / 0.75), 0 3px 8px -2px rgb(0 0 0 / 0.4);
+}
+
+.s-toast-stack {
+  gap: 8px;
+}
+
+@media (min-width: 1024px) {
+  .s-toast-stack {
+    width: 380px;
+  }
+}
+
+.s-toast-stack .s-toast {
+  --toast-tone: #8ea2ff;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  max-width: min(380px, 100%);
+  min-height: 44px;
+  padding: 7px 7px 7px 10px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--s-toast-bg);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px var(--s-toast-ring), var(--s-toast-shadow);
+  color: var(--s-toast-text);
+}
+
+.s-toast-stack .s-toast--success {
+  --toast-tone: #3ddc97;
+}
+
+.s-toast-stack .s-toast--error {
+  --toast-tone: #ff6b6b;
+}
+
+.s-toast-stack .s-toast--warning {
+  --toast-tone: #fbbf24;
+}
+
+/* Status: the icon on a small tinted disc */
+.s-toast-stack .s-toast__icon {
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 3px;
+  border-radius: var(--s-radius-full);
+  background: color-mix(in srgb, var(--toast-tone) 18%, transparent);
+  color: var(--toast-tone);
+}
+
+.s-toast-stack .s-toast__body {
+  gap: 2px 8px;
+}
+
+.s-toast-stack .s-toast__message {
+  color: inherit;
+  font: 500 0.8125rem / 1.4 var(--s-font-sans);
+  letter-spacing: -0.005em;
+}
+
+.s-toast-stack .s-toast__action.s-btn {
+  height: 26px;
+  min-height: 26px;
+  margin: 0;
+  padding: 0 9px;
+  border-radius: 7px;
+  background: rgb(255 255 255 / 0.1);
+  box-shadow: none;
+  color: var(--s-toast-text);
+  font: 600 0.75rem / 1 var(--s-font-sans);
+}
+
+.s-toast-stack .s-toast__action.s-btn:hover {
+  background: rgb(255 255 255 / 0.16);
+}
+
+.s-toast-stack .s-toast__close {
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
+  margin: 0;
+  border-radius: 7px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--s-toast-muted);
+}
+
+.s-toast-stack .s-toast__close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.s-toast-stack .s-toast__close:hover {
+  background: rgb(255 255 255 / 0.1);
+  color: var(--s-toast-text);
+}
+
+.s-toast-stack .s-toast__close:focus-visible {
+  outline: 2px solid var(--toast-tone);
+  outline-offset: 1px;
+}
+
+/* Time left: a hairline in the status colour, inset from the corners */
+.s-toast-stack .s-toast__progress {
+  inset-inline: 12px;
+  height: 1.5px;
+  border-radius: var(--s-radius-full);
+  background: transparent;
+}
+
+.s-toast-stack .s-toast__progress-bar,
+.s-toast-stack .s-toast--success .s-toast__progress-bar,
+.s-toast-stack .s-toast--error .s-toast__progress-bar,
+.s-toast-stack .s-toast--warning .s-toast__progress-bar {
+  border-radius: inherit;
+  background: var(--toast-tone);
+  opacity: 0.55;
+}
+
+/* Arrive with a soft spring: down from the top on desktop, up from the nav on phones */
+@media (prefers-reduced-motion: no-preference) {
+  .s-toast-stack .s-toast-enter-active {
+    transition: opacity 220ms var(--s-ease-emph), transform 420ms var(--s-spring),
+      filter 220ms var(--s-ease-emph);
+  }
+
+  .s-toast-stack .s-toast-leave-active {
+    transition: opacity 160ms ease-in, transform 200ms ease-in, filter 160ms ease-in;
+  }
+
+  .s-toast-stack .s-toast-move {
+    transition: transform 320ms var(--s-ease-emph);
+  }
+
+  .s-toast-stack .s-toast-enter-from,
+  .s-toast-stack .s-toast-leave-to {
+    opacity: 0;
+    filter: blur(2px);
+    transform: translateY(10px) scale(0.96);
+  }
+
+  @media (min-width: 1024px) {
+    .s-toast-stack .s-toast-enter-from,
+    .s-toast-stack .s-toast-leave-to {
+      transform: translateY(-8px) scale(0.96);
+    }
+  }
+}
+
+/* ── Copy categories from another branch ─────────────────────────────────── */
+
+.s-copy-guide__tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin: -8px 0 -4px;
+}
+
+/* ── Guided forms (SStep / SStepSummary) ───────────────────────────────────
+   Numbered steps that tick off as they're filled, then a live summary above the buttons. Used by
+   every multi-part create/edit form so they all read the same way. */
+
+/* Steps carry their own spacing and hairlines */
+:is(.s-form, div):has(> .s-step) {
+  gap: 0;
+}
+
+.s-step {
+  display: grid;
+  gap: var(--s-space-2);
+  min-inline-size: 0;
+  margin: 0;
+  padding: var(--s-space-3) 0;
+  border: 0;
+  background: linear-gradient(90deg, var(--s-divider), transparent 90%) top left / 100% 1px
+    no-repeat;
+}
+
+.s-step:first-child {
+  padding-top: 0;
+  background: none;
+}
+
+/* After a notice or intro above step 1: keep the breathing room, drop the hairline */
+:not(.s-step) + .s-step {
+  background: none;
+}
+
+.s-step__legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.s-step__head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 2px;
+}
+
+.s-step__num {
+  display: grid;
+  grid-row: span 2;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--s-radius-full);
+  background: var(--s-btn-sec-in-panel);
+  color: var(--s-text-2);
+  font: 600 0.8125rem / 1 var(--s-font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.s-step--done .s-step__num {
+  background: var(--s-btn-primary);
+  background-image: var(--s-btn-primary-sheen);
+  color: var(--s-on-btn-primary);
+}
+
+.s-step__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--s-text);
+  font: var(--s-text-heading);
+}
+
+.s-step__optional {
+  padding: 1px 8px;
+  border-radius: var(--s-radius-full);
+  background: var(--s-chip-bg);
+  color: var(--s-text-muted);
+  font: 500 0.6875rem / 1.25rem var(--s-font-sans);
+}
+
+.s-step__hint {
+  grid-column: 2;
+  margin: 0;
+  color: var(--s-text-muted);
+  font: var(--s-text-small);
+}
+
+.s-step__aside {
+  display: inline-flex;
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-items: center;
+  gap: 6px;
+}
+
+.s-step__body {
+  display: grid;
+  gap: var(--s-space-2);
+  min-width: 0;
+}
+
+/* A count chip for the aside slot ("3 selected") */
+.s-step__count {
+  padding: 2px 10px;
+  border-radius: var(--s-radius-full);
+  background: color-mix(in srgb, var(--s-accent) 12%, transparent);
+  color: var(--s-accent);
+  font: 600 0.75rem / 1.25rem var(--s-font-sans);
+  white-space: nowrap;
+}
+
+/* Footer summary: its own row above the buttons (the dialog footer stacks rows bottom-up) */
+.s-step-summary {
+  display: inline-flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  order: 99;
+  gap: 6px;
+  margin: 0 0 4px;
+  color: var(--s-text-2);
+  font: var(--s-text-small);
+}
+
+.s-step-summary strong {
+  color: var(--s-text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.s-step-summary svg {
+  color: var(--s-accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-step {
+    animation: s-rise 380ms var(--s-ease-emph) both;
+  }
+
+  .s-step__num {
+    transition: background-color 240ms var(--s-ease-emph), color 240ms var(--s-ease-emph);
+  }
+
+  .s-step--done .s-step__num svg {
+    animation: s-tick-pop 320ms var(--s-spring);
+  }
+}

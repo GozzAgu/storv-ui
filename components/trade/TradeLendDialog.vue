@@ -11,82 +11,126 @@
     @update:open="(v) => !v && emit('update:open', false)"
   >
     <form id="trade-lend-form" class="s-form" @submit.prevent="submit">
-      <SSelect
-        v-model="partnerHandle"
-        label="Partner"
-        placeholder="Choose a partner"
-        :options="partnerOptions"
-        :disabled="!!request"
-        required
-      />
-      <SSelect
-        v-model="folderId"
-        label="Category"
-        placeholder="Choose a category"
-        :options="folderOptions"
-        required
-      />
+      <SStep
+        :number="1"
+        title="Choose the partner"
+        :hint="
+          request
+            ? 'Set from their request, so there is nothing to change here.'
+            : 'Only partners you are connected with are listed.'
+        "
+        :done="!!partnerHandle"
+      >
+        <SSelect
+          v-model="partnerHandle"
+          label="Partner"
+          placeholder="Choose a partner"
+          :options="partnerOptions"
+          :disabled="!!request"
+          required
+        />
+      </SStep>
 
-      <p v-if="foldersLoaded && !folderOptions.length" class="s-partners__note">
-        Add some inventory first. Your categories will show here.
-      </p>
-      <SSkeleton v-if="loadingItems" :lines="3" />
-      <p v-else-if="folderId && !available.length" class="s-partners__note">
-        Nothing in this category is free to lend. Sold or out-of-stock items, items held for a sale
-        and items already on loan are not shown.
-      </p>
-      <ul v-else-if="available.length" class="s-list s-trade-lend__items">
-        <li v-for="item in available" :key="item.id" class="s-list__item s-trade-lend__item">
-          <SCheckbox
-            :model-value="!!picked[item.id]"
-            :label="labelOf(item).name"
-            :description="
-              serialFolder
-                ? labelOf(item).serial || 'No serial number'
-                : `${stockOf(item)} in stock`
-            "
-            @update:model-value="(v: boolean) => toggle(item, v)"
-          />
-          <div v-if="picked[item.id]" class="s-trade-lend__price">
-            <SInput
-              v-if="!serialFolder"
-              v-model="picked[item.id]!.quantity"
-              type="number"
-              inputmode="numeric"
-              label="How many"
-              :min="1"
-              :max="stockOf(item)"
-              :aria-label="`How many ${labelOf(item).name}`"
-              required
+      <SStep
+        :number="2"
+        title="Pick the items to lend"
+        hint="Choose a category, then tick the items and agree a price for each."
+        :done="itemsDone"
+      >
+        <template v-if="pickedCount > 0" #aside>
+          <span class="s-step__count">{{ pickedCount }} selected</span>
+        </template>
+        <SSelect
+          v-model="folderId"
+          label="Category"
+          placeholder="Choose a category"
+          :options="folderOptions"
+          required
+        />
+
+        <p v-if="foldersLoaded && !folderOptions.length" class="s-partners__note">
+          Add some inventory first. Your categories will show here.
+        </p>
+        <SSkeleton v-if="loadingItems" :lines="3" />
+        <p v-else-if="folderId && !available.length" class="s-partners__note">
+          Nothing in this category is free to lend. Sold or out-of-stock items, items held for a
+          sale and items already on loan are not shown.
+        </p>
+        <ul v-else-if="available.length" class="s-list s-trade-lend__items">
+          <li v-for="item in available" :key="item.id" class="s-list__item s-trade-lend__item">
+            <SCheckbox
+              :model-value="!!picked[item.id]"
+              :label="labelOf(item).name"
+              :description="
+                serialFolder
+                  ? labelOf(item).serial || 'No serial number'
+                  : `${stockOf(item)} in stock`
+              "
+              @update:model-value="(v: boolean) => toggle(item, v)"
             />
-            <SInput
-              v-model="picked[item.id]!.price"
-              type="number"
-              inputmode="decimal"
-              :label="serialFolder ? 'Agreed price' : 'Agreed price each'"
-              :aria-label="`Agreed price for ${labelOf(item).name}`"
-              required
-            >
-              <template #prefix>₦</template>
-            </SInput>
-          </div>
-        </li>
-      </ul>
+            <div v-if="picked[item.id]" class="s-trade-lend__price">
+              <SInput
+                v-if="!serialFolder"
+                v-model="picked[item.id]!.quantity"
+                type="number"
+                inputmode="numeric"
+                label="How many"
+                :min="1"
+                :max="stockOf(item)"
+                :aria-label="`How many ${labelOf(item).name}`"
+                required
+              />
+              <SInput
+                v-model="picked[item.id]!.price"
+                type="number"
+                inputmode="decimal"
+                :label="serialFolder ? 'Agreed price' : 'Agreed price each'"
+                :aria-label="`Agreed price for ${labelOf(item).name}`"
+                required
+              >
+                <template #prefix>₦</template>
+              </SInput>
+            </div>
+          </li>
+        </ul>
+      </SStep>
 
-      <SInput
-        v-model="dueDate"
-        type="date"
-        label="Due back by"
-        :min="today"
-        :max="maxDate"
-        required
-      />
-      <p class="s-partners__note">
-        The items stay in your inventory, marked as lent, until {{ partnerName }} returns them or
-        pays for them. You both get reminders from the due date.
-      </p>
+      <SStep
+        :number="3"
+        title="Set the due date"
+        hint="A week from today is filled in. Change it to any date in the next 90 days."
+      >
+        <SInput
+          v-model="dueDate"
+          type="date"
+          label="Due back by"
+          :min="today"
+          :max="maxDate"
+          required
+        />
+        <p class="s-partners__note">
+          The items stay in your inventory, marked as lent, until {{ partnerName }} returns them or
+          pays for them. You both get reminders from the due date.
+        </p>
+      </SStep>
     </form>
     <template #footer>
+      <SStepSummary>
+        <template v-if="!partnerHandle">Start by choosing a partner.</template>
+        <template v-else-if="pickedCount === 0 && !folderId">
+          Now choose a category to lend from.
+        </template>
+        <template v-else-if="pickedCount === 0">Now tick the items to lend.</template>
+        <template v-else-if="!itemsDone">
+          Add a price, and how many where asked, for each item you ticked.
+        </template>
+        <template v-else-if="!dueDate">Now set the due date.</template>
+        <template v-else>
+          <strong>{{ pickedUnits }}</strong> item{{ pickedUnits === 1 ? '' : 's' }} ·
+          <strong>{{ formatNaira(pickedValue) }}</strong> to {{ partnerName }} · due back
+          {{ dueDateLabel }}
+        </template>
+      </SStepSummary>
       <SDialogActions
         :primary-label="
           pickedUnits ? `Lend ${pickedUnits} item${pickedUnits === 1 ? '' : 's'}` : 'Lend'
@@ -108,6 +152,8 @@ import SDialogActions from '~/components/s/SDialogActions.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSelect from '~/components/s/SSelect.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import { useAppToast } from '~/composables/useAppToast'
 import {
   getInventoryItemDisplayName,
@@ -124,6 +170,7 @@ import {
 import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
 import { folderHasChildren } from '~/utils/inventory-folder-tree'
 import { folderHasSerialNumbers } from '~/utils/receipt-multi-folder'
+import { formatNaira } from '~/utils/naira'
 
 const props = defineProps<{
   open: boolean
@@ -232,6 +279,22 @@ function unitsOf(itemId: string): number {
 
 const pickedCount = computed(() => Object.keys(picked.value).length)
 const pickedUnits = computed(() => Object.keys(picked.value).reduce((n, id) => n + unitsOf(id), 0))
+const itemsDone = computed(
+  () =>
+    pickedCount.value > 0 &&
+    Object.entries(picked.value).every(([id, p]) => !!p.price && p.price > 0 && unitsOf(id) > 0)
+)
+const pickedValue = computed(() =>
+  Object.entries(picked.value).reduce((sum, [id, p]) => sum + (p.price ?? 0) * unitsOf(id), 0)
+)
+const dueDateLabel = computed(() =>
+  dueDate.value
+    ? new Date(`${dueDate.value}T00:00:00`).toLocaleDateString('en-NG', {
+        day: 'numeric',
+        month: 'short',
+      })
+    : ''
+)
 const canSubmit = computed(
   () =>
     !saving.value &&

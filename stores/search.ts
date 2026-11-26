@@ -21,6 +21,13 @@ import { useCustomersStore } from './customers'
 import { useDepartmentsStore } from './departments'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import { useStaffStore } from './staff'
+import { useStoresStore } from './stores'
+import {
+  transferMatchesQuery,
+  transferSearchSummary,
+  transferSearchUrl,
+  type SearchableTransfer,
+} from '~/utils/transfer-search'
 export type SearchEntityType =
   | 'all'
   | 'receipts'
@@ -29,6 +36,48 @@ export type SearchEntityType =
   | 'departments'
   | 'staff'
   | 'leads'
+  | 'transfers'
+
+/** Transfers are re-read at most this often while someone types. */
+const TRANSFER_CACHE_MS = 60_000
+let transferCache: { key: string; at: number; transfers: SearchableTransfer[] } | null = null
+
+/**
+ * Transfers the signed-in person may see: everything for the owner, or only those touching their
+ * branch for a branch admin (a full read fails the rules for them). Demo mode reads its own copy.
+ */
+async function loadSearchableTransfers(homeStoreId: string): Promise<SearchableTransfer[]> {
+  const { isDemoModeActive } = await import('~/utils/demo-mode')
+  if (isDemoModeActive()) {
+    const { getDemoTransfers } = await import('~/utils/demo-multi-store')
+    return getDemoTransfers()
+  }
+
+  const db = useFirestore().getFirestoreInstance()
+  const { getQueryUserId } = await import('~/composables/useFirestorePaths')
+  const ownerId = (await getQueryUserId()) ?? useAuthStore().currentUser?.uid
+  if (!db || !ownerId) return []
+
+  const key = `${ownerId}:${homeStoreId}`
+  if (transferCache?.key === key && Date.now() - transferCache.at < TRANSFER_CACHE_MS) {
+    return transferCache.transfers
+  }
+
+  const ref = collection(db, 'users', ownerId, 'storeTransfers')
+  const snaps = homeStoreId
+    ? await Promise.all([
+        getDocs(query(ref, where('sourceStoreId', '==', homeStoreId))),
+        getDocs(query(ref, where('destinationStoreId', '==', homeStoreId))),
+      ])
+    : [await getDocs(ref)]
+  const byId = new Map<string, SearchableTransfer>()
+  for (const snap of snaps) {
+    for (const d of snap.docs) byId.set(d.id, { id: d.id, ...(d.data() as object) })
+  }
+  const transfers = [...byId.values()]
+  transferCache = { key, at: Date.now(), transfers }
+  return transfers
+}
 
 /** Item-level inventory search needs typed text; avoids full-folder Firestore scans on filter-only. */
 const INVENTORY_ITEM_SEARCH_MIN_CHARS = 2
@@ -196,7 +245,7 @@ export const useSearchStore = defineStore('search', {
 
       // Filter entity types - remove departments and staff for staff users
       let entityTypes = this.filters.entityTypes.includes('all')
-        ? ['receipts', 'inventory', 'customers', 'departments', 'staff', 'leads']
+        ? ['receipts', 'inventory', 'customers', 'departments', 'staff', 'leads', 'transfers']
         : (this.filters.entityTypes.filter((t) => t !== 'all') as string[])
 
       // Remove departments and staff from search for staff/intern (but keep customers)
@@ -502,6 +551,48 @@ export const useSearchStore = defineStore('search', {
                   })
                 }
               })
+          }
+        }
+
+        // Search stock transfers between branches (Enterprise, with transfer access)
+        if (entityTypes.includes('transfers')) {
+          const { useSubscriptionFeatures } = await import('~/composables/useSubscriptionFeatures')
+          const { usePermissions } = await import('~/composables/usePermissions')
+          const { can, isAdmin } = usePermissions()
+          const canSeeTransfers =
+            useSubscriptionFeatures().canUse('multi_store_sync') &&
+            (userStore.isSuperAdmin || can('multiStoreSync', 'view'))
+          if (canSeeTransfers) {
+            const homeStoreId =
+              isAdmin.value && !userStore.isSuperAdmin
+                ? String(useStaffStore().getCurrentStaffMember?.storeId || '')
+                : ''
+            try {
+              const transfers = await loadSearchableTransfers(homeStoreId)
+              const storeNames: Record<string, string> = {}
+              for (const store of useStoresStore().stores as Array<{
+                id: string
+                name?: string
+                branchName?: string
+              }>) {
+                storeNames[store.id] = store.name || store.branchName || ''
+              }
+              transfers
+                .filter((t) => transferMatchesQuery(t, searchQuery, storeNames))
+                .slice(0, 20)
+                .forEach((transfer) => {
+                  results.push({
+                    id: transfer.id,
+                    type: 'transfers',
+                    ...transferSearchSummary(transfer, storeNames),
+                    icon: 'ArrowsRightLeftIcon',
+                    url: transferSearchUrl(transfer.id),
+                    metadata: { status: transfer.status },
+                  })
+                })
+            } catch (error) {
+              console.warn('[SearchStore] Transfers search skipped:', error)
+            }
           }
         }
 

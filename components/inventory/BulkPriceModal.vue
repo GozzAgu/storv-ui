@@ -7,7 +7,12 @@
     @update:open="(value: boolean) => (value ? null : handleCancel())"
   >
     <SForm>
-      <SFormSection>
+      <SStep
+        :number="1"
+        title="Choose the products to update"
+        hint="Only unsold products change. Sold ones keep their price."
+        :done="productsChosen"
+      >
         <SSelect v-model="scope" label="Which products" :options="scopeOptions" />
         <SSelect
           v-if="scope === 'group'"
@@ -18,9 +23,18 @@
           :placeholder="isLoadingItems ? 'Loading products…' : 'Choose a product'"
           hint="Every product in this category with this name and model, unsold ones only."
         />
-      </SFormSection>
+      </SStep>
 
-      <SFormSection>
+      <SStep
+        :number="2"
+        title="Set the new prices"
+        :hint="
+          canEditCost
+            ? 'Change the unit price, the cost price or both.'
+            : 'Type a new amount, or change it by a percentage.'
+        "
+        :done="pricesEntered"
+      >
         <SSelect v-model="unitMode" label="Unit price" :options="modeOptions" />
         <SField
           v-if="unitMode !== 'keep'"
@@ -55,14 +69,16 @@
             </SInput>
           </SField>
         </template>
-      </SFormSection>
 
-      <SFormSection v-if="formError && hasInput" fixed>
-        <p class="s-notice" role="status">{{ formError }}</p>
-      </SFormSection>
+        <p v-if="formError && hasInput" class="s-notice" role="status">{{ formError }}</p>
+      </SStep>
 
-      <SFormSection v-else-if="summary" fixed>
-        <h3 class="s-form-section__title">Preview</h3>
+      <SStep
+        v-if="!(formError && hasInput) && summary"
+        :number="3"
+        title="Check the changes"
+        hint="Nothing is saved until you press Update."
+      >
         <p class="s-callout">
           <template v-if="summary.toUpdate.length > 0">
             <strong>{{ summary.toUpdate.length }}</strong>
@@ -72,8 +88,8 @@
           <template v-if="skipText"> Skipped: {{ skipText }}.</template>
         </p>
         <p v-if="belowCostCount > 0" class="s-notice" role="status">
-          {{ belowCostCount }} product{{ belowCostCount === 1 ? '' : 's' }} would sell below cost
-          at the new prices.
+          {{ belowCostCount }} product{{ belowCostCount === 1 ? '' : 's' }} would sell below cost at
+          the new prices.
         </p>
         <div v-if="previewRows.length" :class="pickListClass">
           <div :class="pickListScrollClass">
@@ -114,10 +130,29 @@
           Sold items, items on a stock loan and items held for a balance payment keep their price.
           Past sales are not changed.
         </p>
-      </SFormSection>
+      </SStep>
     </SForm>
 
     <template #footer>
+      <SStepSummary>
+        <template v-if="!productsChosen">
+          {{
+            isLoadingItems
+              ? 'Loading the products in this category…'
+              : 'Start by choosing the products to update.'
+          }}
+        </template>
+        <template v-else-if="!hasInput">Now enter the new price.</template>
+        <template v-else-if="formError">Fix the price above to see what will change.</template>
+        <template v-else-if="summary && summary.toUpdate.length > 0">
+          <strong>{{ summary.toUpdate.length }}</strong>
+          product{{ summary.toUpdate.length === 1 ? '' : 's' }} will change
+          <template v-if="belowCostCount > 0">
+            · <strong>{{ belowCostCount }}</strong> below cost
+          </template>
+        </template>
+        <template v-else>No products will change with these prices.</template>
+      </SStepSummary>
       <SDialogActions
         :primary-label="primaryLabel"
         :primary-loading="isApplying"
@@ -135,9 +170,10 @@ import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
 import SField from '~/components/s/SField.vue'
 import SForm from '~/components/s/SForm.vue'
-import SFormSection from '~/components/s/SFormSection.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSelect from '~/components/s/SSelect.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
@@ -258,6 +294,9 @@ const parsed = computed<{ change: BulkPriceChange | null; error: string | null }
   }
 })
 const formError = computed(() => parsed.value.error)
+/** Step ticks: products picked (step 1) and a valid price change typed (step 2). */
+const productsChosen = computed(() => targetItems.value.length > 0)
+const pricesEntered = computed(() => hasInput.value && !formError.value)
 
 const summary = computed(() =>
   parsed.value.change && targetItems.value.length

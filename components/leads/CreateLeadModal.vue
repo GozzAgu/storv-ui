@@ -7,7 +7,12 @@
     @update:open="(value: boolean) => emit('update:modelValue', value)"
   >
     <SForm @submit="save">
-      <SFormSection>
+      <SStep
+        :number="1"
+        title="Who is enquiring?"
+        hint="Add a phone or email so you can follow up later."
+        :done="customerStepDone"
+      >
         <SField label="Customer name" required>
           <SInput
             v-model="customerName"
@@ -41,20 +46,25 @@
             />
           </SField>
         </div>
-      </SFormSection>
 
-      <p v-if="duplicateLead" class="s-callout" role="status">
-        An open lead already exists for this contact ({{ duplicateLead.customerName }}).
-        <NuxtLink
-          :to="dashPath(`/leads/${duplicateLead.id}`)"
-          class="s-link"
-          @click="emit('update:modelValue', false)"
-        >
-          Open existing lead
-        </NuxtLink>
-      </p>
+        <p v-if="duplicateLead" class="s-callout" role="status">
+          An open lead already exists for this contact ({{ duplicateLead.customerName }}).
+          <NuxtLink
+            :to="dashPath(`/leads/${duplicateLead.id}`)"
+            class="s-link"
+            @click="emit('update:modelValue', false)"
+          >
+            Open existing lead
+          </NuxtLink>
+        </p>
+      </SStep>
 
-      <SFormSection>
+      <SStep
+        :number="2"
+        title="What are they looking for?"
+        hint="Link an item from your stock if you have it, so you can see it when you follow up."
+        :done="productStepDone"
+      >
         <SField label="Product interest" required>
           <SInput v-model="productName" maxlength="160" placeholder="What are they looking for?" />
         </SField>
@@ -81,7 +91,13 @@
             <button type="button" class="s-link" @click="clearInventoryLink">Clear</button>
           </p>
         </SField>
+      </SStep>
 
+      <SStep
+        :number="3"
+        title="Add the details"
+        hint="Where the lead came from, what it could be worth, and anything to remember."
+      >
         <div class="s-form-pair">
           <SField label="Estimated value" hint="Optional">
             <SInput v-model="estimatedValue" type="number" min="0" step="0.01" placeholder="0.00">
@@ -106,12 +122,26 @@
             placeholder="Anything useful for follow-up"
           />
         </SField>
-      </SFormSection>
+      </SStep>
 
       <p v-if="errorMessage" class="s-field__error" role="alert">{{ errorMessage }}</p>
     </SForm>
 
     <template #footer>
+      <SStepSummary>
+        <template v-if="!customerStepDone">Start with the customer's name.</template>
+        <template v-else-if="!productStepDone">Now add what they're looking for.</template>
+        <template v-else-if="duplicateLead">
+          An open lead already exists for this contact. Open it instead of adding another.
+        </template>
+        <template v-else>
+          <strong>{{ customerName.trim() }}</strong> wants {{ productName.trim() }}
+          <template v-if="estimatedValueLabel">
+            · <strong>{{ estimatedValueLabel }}</strong></template
+          >
+          · {{ SALES_LEAD_SOURCE_LABELS[source] }}
+        </template>
+      </SStepSummary>
       <SDialogActions
         cancel-label="Cancel"
         primary-label="Save lead"
@@ -134,7 +164,8 @@ import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
 import SField from '~/components/s/SField.vue'
 import SForm from '~/components/s/SForm.vue'
-import SFormSection from '~/components/s/SFormSection.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSelect from '~/components/s/SSelect.vue'
 import STextarea from '~/components/s/STextarea.vue'
@@ -181,6 +212,15 @@ const errorMessage = ref('')
 const canSave = computed(
   () => customerName.value.trim().length > 0 && productName.value.trim().length > 0
 )
+
+/** Guided-form helpers for the step ticks and the footer summary. */
+const customerStepDone = computed(() => customerName.value.trim().length > 0)
+const productStepDone = computed(() => productName.value.trim().length > 0)
+const estimatedValueLabel = computed(() => {
+  const value = Number(estimatedValue.value)
+  if (!Number.isFinite(value) || value <= 0) return ''
+  return `${currencySymbol.value}${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+})
 
 function resetForm() {
   customerName.value = ''

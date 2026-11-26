@@ -451,7 +451,12 @@
 
         <!-- Step 4: Sale Details -->
         <SForm v-if="currentStep === 3">
-          <SFormSection>
+          <SStep
+            :number="1"
+            title="Who's buying?"
+            hint="Start typing to pick a saved customer, or leave it blank for a walk-in."
+            optional
+          >
             <SField label="Customer name" hint="Leave blank for a walk-in customer">
               <div class="s-pop-anchor">
                 <SInput
@@ -510,6 +515,13 @@
                 placeholder="123 Main St, City, State"
               />
             </SField>
+          </SStep>
+          <SStep
+            :number="2"
+            title="Take payment"
+            hint="Choose how they're paying. Pick balance due if they're paying part now."
+            :done="paymentStepDone"
+          >
             <SField :label="useSplitPayment ? 'Payment methods' : 'Payment method'" required>
               <SSelect v-if="!useSplitPayment" v-model="receiptForm.paymentMethod" required>
                 <option value="">Select payment method</option>
@@ -641,8 +653,18 @@
                 </strong>
               </p>
             </div>
-          </SFormSection>
-          <SFormSection>
+          </SStep>
+          <SStep
+            :number="3"
+            :title="hasAnyCheckoutDiscount ? 'Say why there\'s a discount' : 'Add a note'"
+            :hint="
+              hasAnyCheckoutDiscount
+                ? 'A discount needs a reason so the owner can see why.'
+                : 'Anything worth remembering about this sale.'
+            "
+            :optional="!hasAnyCheckoutDiscount"
+            :done="hasAnyCheckoutDiscount && !!discountReason.trim()"
+          >
             <SField label="Notes" hint="Optional">
               <STextarea v-model="receiptForm.notes" :rows="2" placeholder="Additional notes..." />
             </SField>
@@ -653,10 +675,17 @@
                 placeholder="Why is a discount being applied to this sale?"
               />
             </SField>
-          </SFormSection>
+          </SStep>
 
           <!-- Swap-In Section -->
-          <SFormSection v-if="canUseSwapInReceipt">
+          <SStep
+            v-if="canUseSwapInReceipt"
+            :number="4"
+            title="Taking a device in swap?"
+            hint="Tick this if the customer is trading in a device. Its value comes off the amount due."
+            :optional="!isSwapIn"
+            :done="isSwapIn && swapInStepDone"
+          >
             <SCheckbox v-model="isSwapIn" label="This is a swap-in transaction" />
 
             <div v-if="isSwapIn" class="s-form">
@@ -779,7 +808,7 @@
                 </p>
               </div>
             </div>
-          </SFormSection>
+          </SStep>
           <dl class="s-new-sale__totals">
             <div class="s-new-sale__total-row">
               <dt>Products</dt>
@@ -801,7 +830,8 @@
               <dd>{{ formatCurrency(receiptTotal) }}</dd>
             </div>
           </dl>
-          <p v-if="createBlockedReason" class="s-new-sale__blocked" role="status">
+          <!-- Wider screens say this in the footer summary instead -->
+          <p v-if="createBlockedReason && isPhone" class="s-new-sale__blocked" role="status">
             {{ createBlockedReason }}
           </p>
         </SForm>
@@ -843,6 +873,36 @@
         />
       </div>
       <template v-else>
+        <SStepSummary>
+          <template v-if="currentStep === 3 && createBlockedReason">
+            {{ createBlockedReason }}
+          </template>
+          <template v-else-if="currentStep === 3">
+            <strong>{{ totalSelectedQuantity }}</strong>
+            {{ totalSelectedQuantity === 1 ? 'item' : 'items' }} ·
+            <strong>{{ formatCurrency(receiptTotal) }}</strong> · {{ checkoutPaymentSummary }}
+            <ArrowRightIcon :size="12" :stroke-width="2" aria-hidden="true" />
+            {{ resolvedCustomerName }}
+          </template>
+          <template v-else-if="currentStep === 2 && selectedItems.length === 0">
+            Tick the products being sold.
+          </template>
+          <template v-else-if="currentStep === 2 && hasInvalidSelectedQuantities">
+            Check the product quantities.
+          </template>
+          <template v-else-if="currentStep === 2">
+            <strong>{{ totalSelectedQuantity }}</strong>
+            {{ totalSelectedQuantity === 1 ? 'item' : 'items' }} ·
+            <strong>{{ formatCurrency(itemsSubtotal) }}</strong
+            >. Press Next to take payment.
+          </template>
+          <template v-else-if="currentStep === 1">
+            {{ canProceed ? 'Press Next to pick the products.' : 'Now choose a subcategory.' }}
+          </template>
+          <template v-else>
+            {{ canProceed ? 'Press Next to continue.' : 'Start by choosing a category.' }}
+          </template>
+        </SStepSummary>
         <div v-if="currentStep > 0" class="s-dialog__foot-start">
           <SButton :disabled="isCreating" @click="previousStep">Back</SButton>
         </div>
@@ -923,6 +983,8 @@ import { invalidateFolderItemCaches } from '~/utils/inventory-items-firestore'
 import SField from '~/components/s/SField.vue'
 import SForm from '~/components/s/SForm.vue'
 import SFormSection from '~/components/s/SFormSection.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSelect from '~/components/s/SSelect.vue'
 import STextarea from '~/components/s/STextarea.vue'
@@ -938,6 +1000,7 @@ import {
   PencilSquareIcon,
   ArrowPathIcon,
   ChevronRightIcon,
+  ArrowRightIcon,
 } from '~/utils/app-icons'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import CustomerSuggestions from '~/components/receipts/CustomerSuggestions.vue'
@@ -1180,7 +1243,7 @@ const canProceed = computed(() => {
 
 const receiptFooterPrimaryLabel = computed(() => {
   if (currentStep.value < 3) return 'Next'
-  return isCreating.value ? 'Creating…' : 'Create sale'
+  return isCreating.value ? 'Creating…' : `Create sale · ${formatCurrency(receiptTotal.value)}`
 })
 
 const { isViewOnly: isPlanViewOnly } = usePlanViewOnly()
@@ -1320,15 +1383,8 @@ const hasCustomerDetails = computed(() =>
   )
 )
 
-/** Why the sale can't be created yet, shown above the button; null when ready. */
-const createBlockedReason = computed((): string | null => {
-  if (selectedItems.value.length === 0) return 'Add at least one product.'
-  if (hasInvalidSelectedQuantities.value) return 'Check the product quantities.'
-  const unpriced = selectedItems.value.find((si) => !hasSaleUnitPrice(si.item))
-  if (unpriced) {
-    return `${getItemDisplayName(unpriced.item)} has no Unit Price. Set one in Inventory first.`
-  }
-
+/** The payment part of `createBlockedReason`; null when payment is filled in. Ticks checkout step 2. */
+const paymentBlockedReason = computed((): string | null => {
   if (paymentSettlement.value === 'balance_due') {
     const deposit = roundMoney(Number(depositAmount.value) || 0)
     if (deposit <= 0) return 'Enter the amount paid now.'
@@ -1346,24 +1402,54 @@ const createBlockedReason = computed((): string | null => {
   } else if (!receiptForm.value.paymentMethod) {
     return 'Choose a payment method.'
   }
+  return null
+})
+const paymentStepDone = computed(() => paymentBlockedReason.value === null)
+/** How the sale is being paid, for the footer summary. */
+const checkoutPaymentSummary = computed(() => {
+  if (paymentSettlement.value === 'balance_due') {
+    return `${formatCurrency(roundMoney(Number(depositAmount.value) || 0))} now, rest later`
+  }
+  if (useSplitPayment.value) return 'split payment'
+  return receiptForm.value.paymentMethod
+})
+
+/** The swap-in part of `createBlockedReason` (used only while swap-in is on). Ticks step 4. */
+const swapInBlockedReason = computed((): string | null => {
+  if (!swapInFolderId.value || !swapInFolder.value) return 'Choose a category for the swap-in item.'
+  const requiredFields = swapInDisplayFields.value.filter(swapInFieldRequired)
+  for (const field of requiredFields) {
+    const value = swapInItemForm.value[field.name]
+    if (
+      value === undefined ||
+      value === null ||
+      (typeof value === 'string' && value.trim() === '')
+    ) {
+      return 'Fill in the required swap-in details.'
+    }
+  }
+  if (swapInNeedsSwapValue.value && getSwapInCredit() <= 0)
+    return 'Enter the swap value for the swapped-in device.'
+  return null
+})
+const swapInStepDone = computed(() => swapInBlockedReason.value === null)
+
+/** Why the sale can't be created yet, shown above the button; null when ready. */
+const createBlockedReason = computed((): string | null => {
+  if (selectedItems.value.length === 0) return 'Add at least one product.'
+  if (hasInvalidSelectedQuantities.value) return 'Check the product quantities.'
+  const unpriced = selectedItems.value.find((si) => !hasSaleUnitPrice(si.item))
+  if (unpriced) {
+    return `${getItemDisplayName(unpriced.item)} has no Unit Price. Set one in Inventory first.`
+  }
+
+  const paymentReason = paymentBlockedReason.value
+  if (paymentReason) return paymentReason
 
   // Only the swap-in fields we display, aligned with inventory
   if (isSwapIn.value) {
-    if (!swapInFolderId.value || !swapInFolder.value)
-      return 'Choose a category for the swap-in item.'
-    const requiredFields = swapInDisplayFields.value.filter(swapInFieldRequired)
-    for (const field of requiredFields) {
-      const value = swapInItemForm.value[field.name]
-      if (
-        value === undefined ||
-        value === null ||
-        (typeof value === 'string' && value.trim() === '')
-      ) {
-        return 'Fill in the required swap-in details.'
-      }
-    }
-    if (swapInNeedsSwapValue.value && getSwapInCredit() <= 0)
-      return 'Enter the swap value for the swapped-in device.'
+    const swapInReason = swapInBlockedReason.value
+    if (swapInReason) return swapInReason
   }
 
   if (hasAnyCheckoutDiscount.value && !discountReason.value.trim()) {
@@ -1790,7 +1876,8 @@ const setItemPriceOverride = (itemId: string, raw: unknown) => {
   if (!selected) return
   const n = roundMoney(parseFloat(String(raw)))
   const list = roundMoney(getEffectivePrice(selected.item))
-  selected.priceOverride = Number.isFinite(n) && n > 0 && Math.abs(n - list) >= 0.005 ? n : undefined
+  selected.priceOverride =
+    Number.isFinite(n) && n > 0 && Math.abs(n - list) >= 0.005 ? n : undefined
 }
 
 const clearItemPriceOverride = (itemId: string) => {

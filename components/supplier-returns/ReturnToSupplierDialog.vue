@@ -13,34 +13,34 @@
     @update:open="(value: boolean) => emit('update:open', value)"
   >
     <SForm id="return-to-supplier-form" @submit="submit">
-      <!-- Pick the item when the dialog wasn't opened from one -->
-      <SFormSection v-if="!props.item && !props.hold">
-        <SField label="Category" required>
-          <SSelect
-            v-model="pickedFolderId"
-            :options="folderOptions"
-            placeholder="Choose a category"
-          />
-        </SField>
-        <SField
-          v-if="pickedFolderId"
-          label="Item"
-          required
-          :hint="loadingItems ? 'Loading items…' : undefined"
-        >
-          <SSelect
-            v-model="pickedItemId"
-            :options="itemOptions"
-            :disabled="loadingItems || itemOptions.length === 0"
-            :placeholder="
-              itemOptions.length ? 'Choose the defective item' : 'No items in stock here'
-            "
-          />
-        </SField>
-      </SFormSection>
+      <SStep :number="1" :title="itemStepTitle" :hint="itemStepHint" :done="itemStepDone">
+        <!-- Pick the item when the dialog wasn't opened from one -->
+        <template v-if="!props.item && !props.hold">
+          <SField label="Category" required>
+            <SSelect
+              v-model="pickedFolderId"
+              :options="folderOptions"
+              placeholder="Choose a category"
+            />
+          </SField>
+          <SField
+            v-if="pickedFolderId"
+            label="Item"
+            required
+            :hint="loadingItems ? 'Loading items…' : undefined"
+          >
+            <SSelect
+              v-model="pickedItemId"
+              :options="itemOptions"
+              :disabled="loadingItems || itemOptions.length === 0"
+              :placeholder="
+                itemOptions.length ? 'Choose the defective item' : 'No items in stock here'
+              "
+            />
+          </SField>
+        </template>
 
-      <SFormSection v-if="props.hold">
-        <dl class="s-record-summary s-record-summary--stack">
+        <dl v-if="props.hold" class="s-record-summary s-record-summary--stack">
           <div class="s-record-row">
             <dt>Item</dt>
             <dd class="s-record-row__value">{{ props.hold.item.name }}</dd>
@@ -60,77 +60,118 @@
             </dd>
           </div>
         </dl>
-      </SFormSection>
 
-      <SFormSection v-else-if="item">
-        <dl class="s-record-summary s-record-summary--stack">
-          <div class="s-record-row">
-            <dt>Item</dt>
-            <dd class="s-record-row__value">{{ itemName }}</dd>
-          </div>
-          <div v-if="itemDetails" class="s-record-row">
-            <dt>Details</dt>
-            <dd class="s-record-row__value">{{ itemDetails }}</dd>
-          </div>
-          <div class="s-record-row">
-            <dt>Category</dt>
-            <dd class="s-record-row__value">{{ folder?.name || 'Inventory' }}</dd>
-          </div>
-          <div v-if="!serial" class="s-record-row">
-            <dt>In stock</dt>
-            <dd class="s-record-row__value">{{ available }}</dd>
-          </div>
-        </dl>
-        <p v-if="blockedReason" class="s-callout" role="alert">
-          {{ blockedReason }}
-        </p>
-        <SField v-else-if="!serial" label="Units going back" required>
-          <SInput v-model="quantity" type="number" inputmode="numeric" />
-        </SField>
-      </SFormSection>
+        <template v-else-if="item">
+          <dl class="s-record-summary s-record-summary--stack">
+            <div class="s-record-row">
+              <dt>Item</dt>
+              <dd class="s-record-row__value">{{ itemName }}</dd>
+            </div>
+            <div v-if="itemDetails" class="s-record-row">
+              <dt>Details</dt>
+              <dd class="s-record-row__value">{{ itemDetails }}</dd>
+            </div>
+            <div class="s-record-row">
+              <dt>Category</dt>
+              <dd class="s-record-row__value">{{ folder?.name || 'Inventory' }}</dd>
+            </div>
+            <div v-if="!serial" class="s-record-row">
+              <dt>In stock</dt>
+              <dd class="s-record-row__value">{{ available }}</dd>
+            </div>
+          </dl>
+          <p v-if="blockedReason" class="s-callout" role="alert">
+            {{ blockedReason }}
+          </p>
+          <SField v-else-if="!serial" label="Units going back" required>
+            <SInput v-model="quantity" type="number" inputmode="numeric" />
+          </SField>
+        </template>
+      </SStep>
 
-      <SFormSection v-if="props.hold || (item && !blockedReason)">
-        <SField label="Supplier" required>
-          <SInput
-            v-model="supplierName"
-            maxlength="120"
-            list="rts-known-suppliers"
-            placeholder="Who you bought it from"
-          />
-          <datalist id="rts-known-suppliers">
-            <option v-for="name in knownSuppliers" :key="name" :value="name" />
-          </datalist>
-        </SField>
-        <SField label="What is wrong with it?" required>
-          <STextarea
-            v-model="defect"
-            :rows="2"
-            maxlength="300"
-            placeholder="e.g. Arrived with a cracked screen, won't power on"
-          />
-        </SField>
-        <SField label="Supplier reference" hint="Optional">
-          <SInput
-            v-model="supplierReference"
-            maxlength="60"
-            placeholder="Invoice, waybill or RMA no."
-          />
-        </SField>
-        <SField label="Notes" hint="Optional">
-          <STextarea
-            v-model="notes"
-            :rows="2"
-            maxlength="1000"
-            placeholder="When it was found, who inspected it"
-          />
-        </SField>
-        <p class="s-callout">{{ stockNote }}</p>
-      </SFormSection>
+      <template v-if="props.hold || (item && !blockedReason)">
+        <SStep
+          :number="2"
+          title="Who are you sending it back to?"
+          hint="The supplier you bought it from. Add their invoice or waybill number if you have it."
+          :done="supplierName.trim().length > 0"
+        >
+          <SField label="Supplier" required>
+            <SInput
+              v-model="supplierName"
+              maxlength="120"
+              list="rts-known-suppliers"
+              placeholder="Who you bought it from"
+            />
+            <datalist id="rts-known-suppliers">
+              <option v-for="name in knownSuppliers" :key="name" :value="name" />
+            </datalist>
+          </SField>
+          <SField label="Supplier reference" hint="Optional">
+            <SInput
+              v-model="supplierReference"
+              maxlength="60"
+              placeholder="Invoice, waybill or RMA no."
+            />
+          </SField>
+        </SStep>
+
+        <SStep
+          :number="3"
+          title="Describe the fault"
+          hint="A short, clear description helps the supplier settle it faster."
+          :done="defect.trim().length >= 3"
+        >
+          <SField label="What is wrong with it?" required>
+            <STextarea
+              v-model="defect"
+              :rows="2"
+              maxlength="300"
+              placeholder="e.g. Arrived with a cracked screen, won't power on"
+            />
+          </SField>
+        </SStep>
+
+        <SStep
+          :number="4"
+          title="Add a note"
+          hint="For your team: when it was found and who checked it."
+          optional
+        >
+          <SField label="Notes" hint="Optional">
+            <STextarea
+              v-model="notes"
+              :rows="2"
+              maxlength="1000"
+              placeholder="When it was found, who inspected it"
+            />
+          </SField>
+        </SStep>
+      </template>
 
       <p v-if="error" class="s-field__error" role="alert">{{ error }}</p>
     </SForm>
 
     <template #footer>
+      <SStepSummary>
+        <template v-if="!props.item && !props.hold && !pickedFolderId">
+          Start by choosing the item's category.
+        </template>
+        <template v-else-if="!props.hold && !item">Now choose the faulty item.</template>
+        <template v-else-if="!props.hold && blockedReason">
+          This item can't go back to the supplier right now.
+        </template>
+        <template v-else-if="!props.hold && !quantityValid">
+          Enter how many units are going back (up to {{ available }}).
+        </template>
+        <template v-else-if="!supplierName.trim()">Now enter the supplier.</template>
+        <template v-else-if="defect.trim().length < 3">Describe what is wrong with it.</template>
+        <template v-else>
+          <strong>{{ summaryUnits }}</strong> ×
+          {{ props.hold ? props.hold.item.name : itemName }} back to {{ supplierName.trim() }} ·
+          {{ stockNote }}
+        </template>
+      </SStepSummary>
       <SDialogActions
         primary-label="Return to supplier"
         :primary-loading="saving"
@@ -149,9 +190,10 @@ import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
 import SField from '~/components/s/SField.vue'
 import SForm from '~/components/s/SForm.vue'
-import SFormSection from '~/components/s/SFormSection.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSelect from '~/components/s/SSelect.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { useSupplierReturnsStore } from '~/stores/supplierReturns'
@@ -268,6 +310,31 @@ const stockNote = computed(() => {
     ? 'This unit will be removed from inventory.'
     : `${n} unit${n === 1 ? '' : 's'} will be taken off the stock count.`
 })
+
+const quantityValid = computed(
+  () => quantityNumber.value >= 1 && quantityNumber.value <= available.value
+)
+const pickingItem = computed(() => !props.item && !props.hold)
+const itemStepTitle = computed(() => {
+  if (props.hold) return 'Check the returned item'
+  if (pickingItem.value && !item.value) return 'Choose the faulty item'
+  return item.value && !serial.value && !blockedReason.value
+    ? 'Check the item and how many are going back'
+    : 'Check the item'
+})
+const itemStepHint = computed(() => {
+  if (props.hold) return 'This is what the customer brought back.'
+  if (pickingItem.value && !item.value)
+    return 'Pick its category first, then the item. Only items in stock are listed.'
+  if (blockedReason.value) return undefined
+  return serial.value
+    ? 'This exact unit goes back to the supplier.'
+    : `You have ${available.value} in stock.`
+})
+const itemStepDone = computed(
+  () => !!props.hold || (!!item.value && !blockedReason.value && quantityValid.value)
+)
+const summaryUnits = computed(() => (props.hold ? props.hold.item.quantity : quantityNumber.value))
 
 const canSubmit = computed(() => {
   if (props.hold) {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   isItemAwaitingPayment,
+  isItemLendable,
   availabilityBadgeForAwaitingPayment,
 } from '~/utils/inventory-availability'
 import type { InventoryItem } from '~/stores/inventory'
@@ -29,5 +30,18 @@ describe('inventory-availability', () => {
     expect(badge.label).toBe('Awaiting payment')
     expect(badge.meta).toBe('REC-123')
     expect(badge.status).toBe('awaiting_payment')
+  })
+
+  it('only lets free items be lent to a reseller', () => {
+    expect(isItemLendable(item({}))).toBe(true)
+    expect(isItemLendable(item({ dateOut: '2026-11-20' } as Partial<InventoryItem>))).toBe(false)
+    expect(isItemLendable(item({ sellerLoanOutId: 'loan1' } as Partial<InventoryItem>))).toBe(false)
+    expect(isItemLendable(item({ sellerLoanOutId: 'trade~x' } as Partial<InventoryItem>))).toBe(
+      false
+    )
+    expect(isItemLendable(item({ pendingSaleReceiptId: 'r1' } as Partial<InventoryItem>))).toBe(
+      false
+    )
+    expect(isItemLendable(item({ inspectionHoldId: 'h1' } as Partial<InventoryItem>))).toBe(false)
   })
 })

@@ -1,6 +1,6 @@
 <template>
   <div class="ds-root s-c s-page">
-    <SPageHeader title="Transfers">
+    <SPageHeader title="Branch transfers">
       <template #description>
         Move stock between branches and compare how each branch is selling.
       </template>
@@ -353,7 +353,11 @@
               <!-- Phone -->
               <SCard flush class="s-only-sm">
                 <ul class="s-list">
-                  <li v-for="transfer in transferHistory" :key="transfer.id">
+                  <li
+                    v-for="transfer in transferHistory"
+                    :key="transfer.id"
+                    :data-transfer-id="transfer.id"
+                  >
                     <div class="s-list__item s-transfer-row">
                       <button
                         type="button"
@@ -452,6 +456,7 @@
                   <tbody>
                     <template v-for="transfer in transferHistory" :key="transfer.id">
                       <tr
+                        :data-transfer-id="transfer.id"
                         class="s-transfer-table__row"
                         :class="{ 's-table__row--expanded': expandedTransferIds.has(transfer.id) }"
                         @click="onTransferRowClick($event, transfer.id)"
@@ -854,6 +859,7 @@ import STabs from '~/components/s/STabs.vue'
 import STextarea from '~/components/s/STextarea.vue'
 import PlanGate from '~/components/subscription/PlanGate.vue'
 import TransferDetailsPanel from '~/components/transfers/TransferDetailsPanel.vue'
+import { transferReference } from '~/utils/transfer-search'
 import { useStockItemDetailsLookup } from '~/composables/useStockItemDetailsLookup'
 import {
   groupedItemNames,
@@ -2036,6 +2042,10 @@ function transferActorFor(transfer: TransferApprovalFields): TransferActor {
     isOwner: userStore.isSuperAdmin,
     isDestinationAdmin:
       isAdmin.value && !!homeStoreId.value && homeStoreId.value === transfer.destinationStoreId,
+    isSourceMember:
+      !userStore.isSuperAdmin &&
+      !!homeStoreId.value &&
+      homeStoreId.value === transfer.sourceStoreId,
     canManageTransfers: canChangeTransfers.value,
   }
 }
@@ -2269,8 +2279,7 @@ const transferRefFromId = (id: string) => transferRef({ id })
 
 /** Short, stable reference people can quote to each other, e.g. "TR-7F3K2A". */
 function transferRef(transfer: { id?: string }): string {
-  const id = String(transfer.id || '').replace(/[^a-z0-9]/gi, '')
-  return `TR-${id.slice(-6).toUpperCase()}`
+  return transferReference(transfer.id)
 }
 
 function toDate(value: unknown): Date | null {
@@ -2516,6 +2525,26 @@ async function confirmCancelTransfer() {
 }
 
 // Lifecycle
+const pageRoute = useRoute()
+
+/** Search links here with ?transfer=<id>: open History with that transfer expanded and in view. */
+function focusTransferFromQuery() {
+  const id = typeof pageRoute.query.transfer === 'string' ? pageRoute.query.transfer : ''
+  if (!id || !transferHistory.value.some((t) => t.id === id)) return
+  activeTab.value = 'history'
+  if (!expandedTransferIds.value.has(id)) {
+    expandedTransferIds.value = new Set([...expandedTransferIds.value, id])
+  }
+  void nextTick(() => {
+    // Only the visible layout (table on wide screens, list on phones) has a box to scroll to
+    const target = [
+      ...document.querySelectorAll<HTMLElement>(`[data-transfer-id="${CSS.escape(id)}"]`),
+    ].find((el) => el.offsetParent !== null)
+    target?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  })
+}
+watch([() => pageRoute.query.transfer, transferHistory], focusTransferFromQuery)
+
 onMounted(async () => {
   if (!canAccess.value) return
   if (!userStore.userData) {

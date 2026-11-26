@@ -986,3 +986,8 @@ html.dark .s-auth__mobile-logo-dark {
     --s-auth-card-pad: var(--s-space-2);
   }
 }
+
+/* What keeps a store safe, under the signup form */
+.auth-trust {
+  margin: var(--s-space-2) 0;
+}

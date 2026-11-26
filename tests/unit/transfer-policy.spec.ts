@@ -50,6 +50,20 @@ describe('transfer policy', () => {
     expect(decideTransferAction(transfer('in_transit'), 'receive', cashier).ok).toBe(false)
   })
 
+  it('never lets the sending branch approve or reject its own transfer, only the owner', () => {
+    // An admin of both branches is still the sender here
+    const adminOfBoth: TransferActor = { ...receivingAdmin, uid: 'both', isSourceMember: true }
+    for (const action of ['receive', 'reject'] as const) {
+      const decision = decideTransferAction(transfer('in_transit'), action, adminOfBoth, 'Damaged')
+      expect(decision).toMatchObject({ ok: false, code: 'FORBIDDEN' })
+    }
+    expect(availableTransferActions(transfer('in_transit'), adminOfBoth)).not.toContain('receive')
+
+    const ownerAtSource: TransferActor = { ...owner, isSourceMember: true }
+    expect(decideTransferAction(transfer('in_transit'), 'receive', ownerAtSource).ok).toBe(true)
+    expect(decideTransferAction(transfer('in_transit'), 'receive', receivingAdmin).ok).toBe(true)
+  })
+
   it('stops an admin from approving a transfer they requested themselves', () => {
     const own = transfer('in_transit', 'ph-admin')
     expect(decideTransferAction(own, 'receive', receivingAdmin)).toMatchObject({

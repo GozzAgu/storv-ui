@@ -16,6 +16,11 @@ export interface TransferActor {
   isOwner: boolean
   /** Active admin of the transfer's receiving branch. */
   isDestinationAdmin: boolean
+  /**
+   * Active member of the sending branch. Someone there can't also check the stock in, even when
+   * they're an admin of the receiving branch too; only the owner can act for both ends.
+   */
+  isSourceMember?: boolean
   /** May run transfers (multiStoreSync.edit; for admins, with the stock-transfers extra). */
   canManageTransfers: boolean
 }
@@ -34,12 +39,21 @@ const manager: Rule['check'] = (_t, a) =>
     ? ok
     : deny('FORBIDDEN', 'You don’t have permission to change transfers.')
 
-/** Only the receiving branch says what enters its stock. The owner can act for any branch. */
+/**
+ * Only the receiving branch says what enters its stock, and nobody from the sending branch can
+ * approve it in on their behalf. The owner can act for any branch.
+ */
 const receivingAdmin =
   (needsReason: boolean): Rule['check'] =>
   (t, a, reason) => {
     if (!a.isOwner && !a.isDestinationAdmin) {
       return deny('FORBIDDEN', 'Only an admin of the receiving branch can approve this transfer.')
+    }
+    if (!a.isOwner && a.isSourceMember) {
+      return deny(
+        'FORBIDDEN',
+        'The sending branch can’t approve its own transfer. An admin of the receiving branch or the owner must.'
+      )
     }
     if (!a.isOwner && a.uid === t.createdBy) {
       return deny('SELF_APPROVAL', 'Someone other than the requester must approve this transfer.')

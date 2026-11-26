@@ -1474,3 +1474,8 @@ html.dark .mkl__branch {
     padding-inline: 0;
   }
 }
+
+/* What keeps a store safe, under the hero buttons */
+.mkh__trust {
+  margin-top: var(--s-space-3);
+}

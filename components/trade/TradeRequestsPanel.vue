@@ -139,29 +139,50 @@
       :dismissible="!asking"
     >
       <form id="trade-ask-form" class="s-form" @submit.prevent="submitAsk">
-        <SInput
-          v-model="askItem"
-          label="What do you need?"
-          placeholder="e.g. iPhone 15 Pro Max 256GB"
-          maxlength="120"
-          required
-        />
-        <SInput
-          v-model="askQty"
-          label="Quantity"
-          inputmode="numeric"
-          :error="askQtyError"
-          class="s-trade-reqs__qty"
-        />
-        <STextarea
-          v-model="askNote"
-          label="Details (optional)"
-          placeholder="Colour, condition, when you need it…"
-          :rows="2"
-          maxlength="280"
-        />
-        <fieldset class="s-trade-reqs__to">
-          <legend class="s-trade-reqs__legend">Ask</legend>
+        <SStep
+          :number="1"
+          title="Say what you need"
+          hint="Be specific so partners can check their shelves quickly."
+          :done="askItemDone"
+        >
+          <SInput
+            v-model="askItem"
+            label="What do you need?"
+            placeholder="e.g. iPhone 15 Pro Max 256GB"
+            maxlength="120"
+            required
+          />
+          <SInput
+            v-model="askQty"
+            label="Quantity"
+            inputmode="numeric"
+            :error="askQtyError"
+            class="s-trade-reqs__qty"
+          />
+        </SStep>
+        <SStep
+          :number="2"
+          title="Add details"
+          hint="Colour, condition or when you need it."
+          optional
+        >
+          <STextarea
+            v-model="askNote"
+            label="Details (optional)"
+            placeholder="Colour, condition, when you need it…"
+            :rows="2"
+            maxlength="280"
+          />
+        </SStep>
+        <SStep
+          as="fieldset"
+          :number="3"
+          title="Choose who to ask"
+          hint="Everyone by default, or pick a few partners."
+        >
+          <template v-if="!askAll && askTo.length > 0" #aside>
+            <span class="s-step__count">{{ askTo.length }} selected</span>
+          </template>
           <SCheckbox v-model="askAll" :label="`All partners (${partners.length})`" />
           <div v-if="!askAll" class="s-trade-reqs__choose">
             <SCheckbox
@@ -173,9 +194,19 @@
               @update:model-value="(on) => toggleTo(p.partner.handle, on)"
             />
           </div>
-        </fieldset>
+        </SStep>
       </form>
       <template #footer>
+        <SStepSummary>
+          <template v-if="askItem.trim().length < 2">Start by saying what you need.</template>
+          <template v-else-if="askQtyError">Check the quantity.</template>
+          <template v-else-if="askRecipientCount === 0">Now choose at least one partner.</template>
+          <template v-else>
+            <strong>{{ askQtyValue }}</strong> × {{ askItem.trim() }}, asking
+            <strong>{{ askRecipientCount }}</strong>
+            {{ askRecipientCount === 1 ? 'partner' : 'partners' }}
+          </template>
+        </SStepSummary>
         <SDialogActions
           primary-label="Send request"
           :primary-loading="asking"
@@ -295,6 +326,8 @@ import SCard from '~/components/s/SCard.vue'
 import SCheckbox from '~/components/s/SCheckbox.vue'
 import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
+import SStep from '~/components/s/SStep.vue'
+import SStepSummary from '~/components/s/SStepSummary.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import SInput from '~/components/s/SInput.vue'
 import STextarea from '~/components/s/STextarea.vue'
@@ -407,6 +440,11 @@ const canAsk = computed(
     !askQtyError.value &&
     (askAll.value || askTo.value.length > 0) &&
     !asking.value
+)
+
+const askItemDone = computed(() => askItem.value.trim().length >= 2 && !askQtyError.value)
+const askRecipientCount = computed(() =>
+  askAll.value ? props.partners.length : askTo.value.length
 )
 
 function openAsk() {

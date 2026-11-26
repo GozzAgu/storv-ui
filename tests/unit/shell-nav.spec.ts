@@ -9,7 +9,7 @@ import {
 const item = (name: string, href: string): ShellNavSourceItem => ({ name, href, iconKey: 'folder' })
 
 describe('shell-nav', () => {
-  it('places Branches between Team and Activity under Organization', () => {
+  it('places Branches between Staff & roles and Activity log under Organization', () => {
     const sections = buildShellNavSections([
       item('Activity Logs', '/dashboard/activity'),
       item(SHELL_BRANCHES_NAV_NAME, '/dashboard/branches'),
@@ -17,9 +17,9 @@ describe('shell-nav', () => {
     ])
     const organization = sections.find((section) => section.id === 'organization')
     expect(organization?.items.map((entry) => entry.label)).toEqual([
-      'Team',
+      'Staff & roles',
       'Branches',
-      'Activity',
+      'Activity log',
     ])
   })
 
