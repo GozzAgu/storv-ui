@@ -81,7 +81,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, ref, useId, watch, type Component } from 'vue'
-import { ArrowRight, ChevronDown } from '@lucide/vue'
+import { ArrowRight, ChevronDown } from '~/icons'
 
 export interface MkNavMenuItem {
   icon: Component

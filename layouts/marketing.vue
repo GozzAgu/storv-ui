@@ -1,5 +1,5 @@
 <template>
-  <div class="ds-root s-c mk">
+  <div class="ds-root s-c mk" :class="{ 'mk--pill': pillShown && !menuOpen }">
     <!-- Hidden while the menu is open: the menu sheet is padded for the header alone -->
     <MkTopBar v-show="!menuOpen" />
     <header
@@ -7,7 +7,7 @@
       :class="{
         'mk-header--scrolled': headerScrolled,
         'mk-header--open': menuOpen,
-        'mk-header--overlay': route.path === '/' && !headerScrolled && !menuOpen,
+        'mk-header--overlay': headerOverlay,
         'mk-header--quiet': primaryInView && !menuOpen,
       }"
     >
@@ -19,7 +19,7 @@
             aria-label="Storvv home"
             @click="menuOpen = false"
           >
-            <img :src="logoSrc" alt="" class="mk-header__logo" width="82" height="22" />
+            <img :src="headerLogo" alt="" class="mk-header__logo" width="82" height="22" />
           </NuxtLink>
 
           <nav class="mk-header__nav" aria-label="Primary">
@@ -61,9 +61,16 @@
             >
               Sign in
             </SButton>
-            <SButton variant="primary" class="mk-btn mk-btn--compact mk-header__cta" :to="signupUrl"
-              >Start free</SButton
+            <SButton
+              variant="primary"
+              class="mk-btn mk-btn--compact mk-header__cta"
+              :to="signupUrl"
             >
+              Start free
+              <span class="mk-header__cta-arrow" aria-hidden="true">
+                <ArrowRight :size="15" :stroke-width="2.25" />
+              </span>
+            </SButton>
             <button
               ref="burgerEl"
               type="button"
@@ -82,6 +89,32 @@
         </div>
       </div>
     </header>
+
+    <!-- Wide screens: once you scroll past the top, the nav gathers into a floating pill -->
+    <div
+      class="mk-pillnav"
+      :class="{ 'is-shown': pillShown && !menuOpen }"
+      :inert="!(pillShown && !menuOpen) || undefined"
+    >
+      <nav class="mk-pillnav__bar" aria-label="Primary">
+        <NuxtLink to="/" class="mk-pillnav__mark" aria-label="Storvv home">
+          <img src="/brand/storvv-symbol.png" alt="" width="22" height="22" />
+        </NuxtLink>
+        <MkProductMenu />
+        <MkFeatureMenu />
+        <NuxtLink
+          v-for="link in pageLinks.filter((l) => l.to !== '/features')"
+          :key="`pill-${link.to}`"
+          :to="link.to"
+          class="mk-nav-link"
+        >
+          {{ link.label }}
+        </NuxtLink>
+        <SButton variant="primary" class="mk-btn mk-btn--compact mk-pillnav__cta" :to="signupUrl">
+          Start free
+        </SButton>
+      </nav>
+    </div>
 
     <Transition name="mk-menu" @after-enter="focusFirstMenuItem">
       <div
@@ -220,7 +253,7 @@ import '~/assets/css/marketing.css'
 import '~/assets/css/marketing-home.css'
 import '~/assets/css/marketing-future.css'
 import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'vue'
-import { ArrowRight, ArrowUp, CalendarDays, ChevronRight, Monitor, Moon, Sun } from '@lucide/vue'
+import { ArrowRight, ArrowUp, CalendarDays, ChevronRight, Monitor, Moon, Sun } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import MkFeatureMenu from '~/components/marketing/MkFeatureMenu.vue'
@@ -269,6 +302,13 @@ watch(
 )
 const signinUrl = useMarketingSigninUrl()
 const logoSrc = useMarketingLogo()
+/** Over the home hero photo the header uses the white logo, in either theme. */
+// Stays on while the header is over the photo, so scrolling never flips its colours mid-photo
+const headerOverPhoto = ref(true)
+const headerOverlay = computed(() => route.path === '/' && headerOverPhoto.value && !menuOpen.value)
+const headerLogo = computed(() =>
+  headerOverlay.value ? '/brand/storvv-logo-reversed.png' : logoSrc.value
+)
 const { scrollToSection, scrollToTop, goToSection } = useSectionScroll()
 const { theme, actualTheme, setTheme, initTheme, applyTheme } = useTheme()
 useMarketingReveal()
@@ -322,6 +362,8 @@ const menuOpen = ref(false)
 const menuEl = ref<HTMLElement | null>(null)
 const burgerEl = ref<HTMLButtonElement | null>(null)
 const headerScrolled = ref(false)
+/** Past the top of the page on wide screens: the floating pill nav takes over */
+const pillShown = ref(false)
 
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
@@ -371,6 +413,9 @@ function chooseCookies(choice: CookieChoice) {
 
 function onScroll() {
   headerScrolled.value = window.scrollY > 8
+  const stage = document.querySelector('.mkh__stage')
+  headerOverPhoto.value = !!stage && stage.getBoundingClientRect().bottom > 80
+  pillShown.value = window.scrollY > 240
   showBackToTop.value = window.scrollY > 800
 }
 
@@ -385,6 +430,7 @@ watch(
   () => route.path,
   () => {
     menuOpen.value = false
+    nextTick(onScroll)
   }
 )
 

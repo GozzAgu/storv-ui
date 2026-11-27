@@ -69,7 +69,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { Check } from '@lucide/vue'
+import { Check } from '~/icons'
 import SSearch from '~/components/s/SSearch.vue'
 import {
   CATEGORY_KIND_GROUPS,

@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { Search } from '@lucide/vue'
+import { Search } from '~/icons'
 
 defineProps<{
   title: string

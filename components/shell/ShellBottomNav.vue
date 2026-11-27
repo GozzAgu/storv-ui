@@ -113,7 +113,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Plus } from '@lucide/vue'
+import { Plus } from '~/icons'
 import { useHaptics } from '~/composables/useHaptics'
 import { DASHBOARD_NAV_ICONS } from '~/utils/dashboard-nav-icons'
 import StorvvMark from '~/components/shell/StorvvMark.vue'

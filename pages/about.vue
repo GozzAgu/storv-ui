@@ -117,7 +117,7 @@ import {
   MessageCircle,
   Phone,
   ShieldCheck,
-} from '@lucide/vue'
+} from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'

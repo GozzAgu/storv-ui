@@ -188,7 +188,7 @@ import {
   UserCog,
   UserRound,
   Users,
-} from '@lucide/vue'
+} from '~/icons'
 import SAvatar from '~/components/s/SAvatar.vue'
 import SButton from '~/components/s/SButton.vue'
 import STabs from '~/components/s/STabs.vue'

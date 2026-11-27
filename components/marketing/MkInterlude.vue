@@ -2,8 +2,8 @@
   <div
     class="mkl"
     :class="[`mkl--${variant}`, { 'is-still': still }]"
-    role="img"
-    :aria-label="label"
+    :role="variant === 'notes' ? undefined : 'img'"
+    :aria-label="variant === 'notes' ? undefined : label"
   >
     <!-- A sale's journey: stock, the sale, the receipt, the money, the report, gliding along a wave -->
     <svg
@@ -39,32 +39,54 @@
       </g>
     </svg>
 
-    <!-- Little moments from a shop's day, drifting past in two directions -->
-    <div v-else-if="variant === 'notes'" class="mkl__notes">
-      <div
-        v-for="(row, r) in noteRows"
-        :key="r"
-        class="mkl__lane"
-        :class="{ 'mkl__lane--back': r === 1 }"
-      >
-        <ul v-for="copy in 2" :key="copy" class="mkl__row" aria-hidden="true">
-          <li
-            v-for="note in row"
-            :key="note.title"
-            class="mkl__note"
-            :class="`mk-tint--${note.tint}`"
-          >
-            <span class="mkl__note-icon"
-              ><component :is="note.icon" :size="16" :stroke-width="2"
-            /></span>
-            <span class="mkl__note-body">
-              <span class="mkl__note-title">{{ note.title }}</span>
-              <span class="mkl__note-text">{{ note.text }}</span>
-            </span>
-          </li>
-        </ul>
+    <!-- A live feed: little moments from a shop's day, drifting past in two lanes -->
+    <section v-else-if="variant === 'notes'" class="mkl__feed" aria-labelledby="home-feed-title">
+      <div class="mk-container">
+        <MkSectionHead
+          title-id="home-feed-title"
+          eyebrow="Live feed"
+          title="Every sale, payment and stock move."
+          accent="The moment it happens."
+          lede="Owners see each branch as it trades, from the counter, the phone or anywhere."
+        />
       </div>
-    </div>
+
+      <div class="mkl__panel">
+        <p class="mkl__panel-tag">
+          <span class="mkl__live-dot" aria-hidden="true" />
+          Live · sample activity from a demo shop
+        </p>
+        <div class="mkl__notes" aria-hidden="true">
+          <div
+            v-for="(row, r) in noteRows"
+            :key="r"
+            class="mkl__lane"
+            :class="{ 'mkl__lane--back': r === 1 }"
+          >
+            <ul v-for="copy in 2" :key="copy" class="mkl__row">
+              <li
+                v-for="note in row"
+                :key="note.title + note.text"
+                class="mkl__note"
+                :class="`mk-tint--${note.tint}`"
+              >
+                <span class="mkl__note-icon"
+                  ><component :is="note.icon" :size="24" :stroke-width="1.75"
+                /></span>
+                <span class="mkl__note-body">
+                  <span class="mkl__note-top">
+                    <span class="mkl__note-title">{{ note.title }}</span>
+                    <span class="mkl__note-time">{{ note.time }}</span>
+                  </span>
+                  <span class="mkl__note-text">{{ note.text }}</span>
+                  <span class="mkl__note-branch">{{ note.branch }}</span>
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- Branches trading stock: parcels travel along the routes between three shops -->
     <svg
@@ -88,8 +110,9 @@
           calcMode="spline"
           keySplines="0.45 0 0.55 1"
         />
-        <rect class="mkl__pill" x="-17" y="-17" width="34" height="34" rx="10" />
-        <component :is="parcel.icon" x="-9" y="-9" :size="18" :stroke-width="2" class="mkl__ink" />
+        <!-- Page-coloured halo: hides the dashed track under the parcel without drawing a tile -->
+        <circle class="mkl__halo" r="22" />
+        <StorvvIcon name="parcel" x="-19" y="-19" :size="38" class="mkl__parcel" />
       </g>
       <g
         v-for="branch in branches"
@@ -113,8 +136,7 @@
           />
         </circle>
         <rect class="mkl__branch" x="-74" y="-28" width="148" height="56" rx="18" />
-        <rect class="mkl__branch-badge" x="-62" y="-17" width="34" height="34" rx="10" />
-        <Store x="-55" y="-10" :size="20" :stroke-width="2" class="mkl__branch-icon" />
+        <StorvvIcon name="store" x="-64" y="-18" :size="36" class="mkl__branch-icon" />
         <text class="mkl__branch-name" x="-18" y="-1">{{ branch.name }}</text>
         <text class="mkl__branch-meta" x="-18" y="16">{{ branch.meta }}</text>
       </g>
@@ -124,6 +146,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import StorvvIcon from '~/components/brand/StorvvIcon.vue'
+import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 import {
   ArrowLeftRight,
   BarChart3,
@@ -137,9 +161,8 @@ import {
   ReceiptText,
   Repeat,
   ScanBarcode,
-  Store,
   Wallet,
-} from '@lucide/vue'
+} from '~/icons'
 import { useMarketingMotion, useSvgMotion } from '~/composables/useMarketingMotion'
 
 const props = withDefaults(defineProps<{ variant?: 'journey' | 'notes' | 'branches' }>(), {
@@ -172,23 +195,88 @@ const journey = [
 
 const noteRows = [
   [
-    { icon: CheckCheck, title: 'Receipt sent', text: 'On WhatsApp · ₦25,000', tint: 'sky' },
-    { icon: Boxes, title: 'Stock updated', text: 'iPhone 13 · 13 left', tint: 'sand' },
-    { icon: HandCoins, title: 'Balance cleared', text: 'Ada paid ₦120,000', tint: 'rose' },
-    { icon: Repeat, title: 'Trade-in priced', text: 'iPhone 11 · ₦180,000', tint: 'lilac' },
-    { icon: BarChart3, title: 'Best day this week', text: '₦1.2m in sales', tint: 'sage' },
+    {
+      icon: CheckCheck,
+      title: 'Receipt sent',
+      text: 'On WhatsApp · ₦25,000',
+      branch: 'Ikeja',
+      time: 'now',
+      tint: 'sky',
+    },
+    {
+      icon: Boxes,
+      title: 'Stock updated',
+      text: 'iPhone 13 · 13 left',
+      branch: 'Lekki',
+      time: '1m',
+      tint: 'sand',
+    },
+    {
+      icon: HandCoins,
+      title: 'Balance cleared',
+      text: 'Ada paid ₦120,000',
+      branch: 'Ikeja',
+      time: '3m',
+      tint: 'rose',
+    },
+    {
+      icon: Repeat,
+      title: 'Trade-in priced',
+      text: 'iPhone 11 · ₦180,000',
+      branch: 'Abuja',
+      time: '6m',
+      tint: 'lilac',
+    },
+    {
+      icon: BarChart3,
+      title: 'Best day this week',
+      text: '₦1.2m in sales',
+      branch: 'All branches',
+      time: '9m',
+      tint: 'sage',
+    },
   ],
   [
     {
       icon: ArrowLeftRight,
       title: 'Transfer approved',
       text: 'Ikeja → Lekki · 12 units',
+      branch: 'Lekki',
+      time: 'now',
       tint: 'sage',
     },
-    { icon: BellRing, title: 'Low stock', text: 'AirPods Pro · 2 left', tint: 'peach' },
-    { icon: Wallet, title: 'Split payment', text: 'Cash + transfer', tint: 'sky' },
-    { icon: ReceiptText, title: 'Quick sale', text: 'Phone case · ₦8,500', tint: 'sand' },
-    { icon: MessageCircle, title: 'Receipt sent', text: 'PDF to Musa', tint: 'lilac' },
+    {
+      icon: BellRing,
+      title: 'Low stock',
+      text: 'AirPods Pro · 2 left',
+      branch: 'Abuja',
+      time: '2m',
+      tint: 'peach',
+    },
+    {
+      icon: Wallet,
+      title: 'Split payment',
+      text: 'Cash + transfer · ₦64,000',
+      branch: 'Ikeja',
+      time: '4m',
+      tint: 'sky',
+    },
+    {
+      icon: ReceiptText,
+      title: 'Quick sale',
+      text: 'Phone case · ₦8,500',
+      branch: 'Lekki',
+      time: '5m',
+      tint: 'sand',
+    },
+    {
+      icon: MessageCircle,
+      title: 'Receipt sent',
+      text: 'PDF to Musa',
+      branch: 'Abuja',
+      time: '7m',
+      tint: 'lilac',
+    },
   ],
 ]
 

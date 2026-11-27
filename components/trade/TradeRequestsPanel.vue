@@ -318,7 +318,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { ChevronRight, PackageSearch, Plus } from '@lucide/vue'
+import { ChevronRight, PackageSearch, Plus } from '~/icons'
 import SAvatar from '~/components/s/SAvatar.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'

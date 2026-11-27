@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { computed, useAttrs, type StyleValue } from 'vue'
-import { Search, X } from '@lucide/vue'
+import { Search, X } from '~/icons'
 
 /** `class` / `style` size the field; every other attribute goes to the input. */
 defineOptions({ inheritAttrs: false })

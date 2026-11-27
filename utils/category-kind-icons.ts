@@ -70,7 +70,7 @@ import {
   Watch,
   Wine,
   Wrench,
-} from '@lucide/vue'
+} from '~/icons'
 import { resolveCategoryKind } from '~/utils/category-kinds'
 
 const KIND_ICONS: Record<string, Component> = {

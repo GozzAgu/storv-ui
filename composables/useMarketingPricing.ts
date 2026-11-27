@@ -1,6 +1,6 @@
 import type { Component } from 'vue'
 import { computed, ref } from 'vue'
-import { Building2, Rocket, Store } from '@lucide/vue'
+import { Building2, Rocket, Store } from '~/icons'
 import {
   BILLING_CYCLE_PERIOD_SUFFIX,
   deriveBillingAmount,

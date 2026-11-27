@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { Check } from '@lucide/vue'
+import { Check } from '~/icons'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 import { useMarketingLogo } from '~/composables/useMarketingSite'
 

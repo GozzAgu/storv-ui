@@ -26,7 +26,7 @@ import {
   UserCog,
   Wallet,
   WifiOff,
-} from '@lucide/vue'
+} from '~/icons'
 import MkNavMenu, {
   type MkNavMenuItem,
   type MkNavMenuSideItem,

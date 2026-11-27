@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { Check, TriangleAlert } from '@lucide/vue'
+import { Check, TriangleAlert } from '~/icons'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import SSpinner from '~/components/s/SSpinner.vue'
 

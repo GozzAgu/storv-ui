@@ -82,7 +82,7 @@ import SFormSection from '~/components/s/SFormSection.vue'
 import SInput from '~/components/s/SInput.vue'
 import STabs from '~/components/s/STabs.vue'
 import { ref, computed, watch } from 'vue'
-import { ArrowRight } from '@lucide/vue'
+import { ArrowRight } from '~/icons'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { getCustomerContactKey } from '~/utils/customer-key'
 

@@ -194,7 +194,7 @@
 import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import SDialog from '~/components/s/SDialog.vue'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { CircleCheck, Copy, Download, ShieldCheck, Smartphone } from '@lucide/vue'
+import { CircleCheck, Copy, Download, ShieldCheck, Smartphone } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SInput from '~/components/s/SInput.vue'

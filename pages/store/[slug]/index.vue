@@ -262,7 +262,7 @@ import {
   Phone,
   Share2,
   Store,
-} from '@lucide/vue'
+} from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'

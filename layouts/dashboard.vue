@@ -126,7 +126,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch, nextTick, defineAsyncComponent } from 'vue'
-import { Loader2, RefreshCw, Sparkles } from '@lucide/vue'
+import { Loader2, RefreshCw, Sparkles } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import SDialog from '~/components/s/SDialog.vue'

@@ -83,7 +83,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { X } from '@lucide/vue'
+import { X } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import { useUser } from '~/composables/useUser'

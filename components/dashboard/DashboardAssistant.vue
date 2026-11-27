@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { X } from '@lucide/vue'
+import { X } from '~/icons'
 import SAvatar from '~/components/s/SAvatar.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import DashboardAssistantBody from '~/components/dashboard/DashboardAssistantBody.vue'

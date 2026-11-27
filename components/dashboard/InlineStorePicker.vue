@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Store } from '@lucide/vue'
+import { Store } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SSpinner from '~/components/s/SSpinner.vue'
 import { useStoresStore } from '~/stores/stores'

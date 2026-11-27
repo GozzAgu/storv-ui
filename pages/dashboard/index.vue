@@ -316,7 +316,7 @@ import {
   ShoppingBag,
   Store,
   TriangleAlert,
-} from '@lucide/vue'
+} from '~/icons'
 
 const Tutorial = defineAsyncComponent(() => import('~/components/Tutorial.vue'))
 const GettingStartedChecklist = defineAsyncComponent(

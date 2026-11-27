@@ -45,7 +45,7 @@ import {
   ref,
   watch,
 } from 'vue'
-import { ChartArea } from '@lucide/vue'
+import { ChartArea } from '~/icons'
 import SCard from '~/components/s/SCard.vue'
 import STabs from '~/components/s/STabs.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'

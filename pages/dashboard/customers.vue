@@ -391,7 +391,7 @@ import {
   SearchX,
   Users,
   Wallet,
-} from '@lucide/vue'
+} from '~/icons'
 import SAvatar from '~/components/s/SAvatar.vue'
 import LoyaltyCustomerRewards from '~/components/loyalty/LoyaltyCustomerRewards.vue'
 import LoyaltyTopCustomers from '~/components/loyalty/LoyaltyTopCustomers.vue'

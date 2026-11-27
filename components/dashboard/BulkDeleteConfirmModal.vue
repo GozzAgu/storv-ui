@@ -50,7 +50,7 @@ import SCheckbox from '~/components/s/SCheckbox.vue'
 import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
 import { computed } from 'vue'
-import { Trash2 } from '@lucide/vue'
+import { Trash2 } from '~/icons'
 const props = withDefaults(
   defineProps<{
     modelValue: boolean

@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Bell } from '@lucide/vue'
+import { Bell } from '~/icons'
 import NotificationsPanel from '~/components/notifications/NotificationsPanel.vue'
 import SPopover from '~/components/s/SPopover.vue'
 import SIconButton from '~/components/s/SIconButton.vue'

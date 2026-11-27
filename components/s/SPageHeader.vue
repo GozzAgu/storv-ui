@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft } from '@lucide/vue'
+import { ArrowLeft } from '~/icons'
 
 defineProps<{
   title: string

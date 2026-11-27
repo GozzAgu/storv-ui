@@ -8,8 +8,6 @@
 
     <MkFeatureCarousel id="product" />
 
-    <MkInterlude variant="notes" />
-
     <MkIntro />
 
     <MkOnboarding />
@@ -20,51 +18,79 @@
 
     <MkTestimonials />
 
-    <!-- Pricing teaser -->
-    <section id="pricing" class="mk-section" aria-labelledby="home-pricing-title">
+    <!-- Pricing teaser: one strip, three plans side by side -->
+    <section id="pricing" class="mk-section mkp" aria-labelledby="home-pricing-title">
       <div class="mk-container">
-        <MkSectionHead
-          title-id="home-pricing-title"
-          eyebrow="Pricing"
-          title="Start free."
-          accent="Grow when you're ready."
-          lede="Prices in naira. Change or cancel your plan any time."
-        />
-        <MkTrialOffer />
-        <div class="mk-plans">
-          <article
-            v-for="plan in MARKETING_PLANS"
+        <div class="mkp__head">
+          <MkSectionHead
+            title-id="home-pricing-title"
+            eyebrow="Pricing"
+            title="Start free."
+            accent="Grow when you're ready."
+            lede="Prices in naira. Change or cancel your plan any time."
+            align="start"
+          />
+          <div class="mkp__aside">
+            <MkTrialOffer />
+            <NuxtLink to="/pricing" class="mkp__compare">
+              Compare every plan
+              <ArrowRight :size="16" :stroke-width="2" aria-hidden="true" />
+            </NuxtLink>
+          </div>
+        </div>
+
+        <ol ref="plansEl" class="mkp__plans" @scroll.passive="onPlansScroll">
+          <li
+            v-for="(plan, i) in MARKETING_PLANS"
             :key="plan.id"
-            class="mk-plan mk-reveal"
-            :class="{ 'mk-plan--featured': plan.featured }"
+            class="mkp__plan mk-reveal"
+            :class="{ 'is-featured': plan.featured }"
           >
-            <span v-if="plan.featured" class="mk-plan__badge">Most popular</span>
-            <div>
-              <h3 class="mk-plan__name">{{ plan.name }}</h3>
-              <p class="mk-plan__for">{{ plan.for }}</p>
-            </div>
-            <p class="mk-plan__price">
+            <p class="mkp__index">
+              <span>{{ String(i + 1).padStart(2, '0') }}</span>
+              <span v-if="plan.featured" class="mkp__tag">Most popular</span>
+            </p>
+            <h3 class="mkp__name">{{ plan.name }}</h3>
+            <p class="mkp__for">{{ plan.for }}</p>
+            <p class="mkp__price">
               <template v-if="plan.id === 'micro'">
-                <span class="mk-plan__amount">Free</span>
-                <span class="mk-plan__period">forever</span>
+                <span class="mkp__amount">Free</span>
+                <span class="mkp__period">forever</span>
               </template>
               <template v-else>
-                <span class="mk-plan__amount">{{ planPrice(plan.id) }}</span>
-                <span class="mk-plan__period">{{ periodSuffix }}</span>
+                <span class="mkp__amount"
+                  ><span class="mkp__cur">{{ priceParts(planPrice(plan.id)).symbol }}</span
+                  >{{ priceParts(planPrice(plan.id)).value }}</span
+                >
+                <span class="mkp__period">{{ periodSuffix }}</span>
               </template>
             </p>
+            <p class="mkp__terms">
+              {{ plan.id === 'micro' ? 'No card needed' : 'Billed monthly · cancel any time' }}
+            </p>
+            <ul class="mkp__list">
+              <li v-for="line in plan.highlights" :key="line">
+                <Check :size="16" :stroke-width="2" aria-hidden="true" />
+                {{ line }}
+              </li>
+            </ul>
             <!-- Outline only: the filled button on each screen is the free-store signup. -->
-            <SButton variant="secondary" class="mk-btn" block :to="signupUrl">
+            <NuxtLink :to="signupUrl" class="mkp__btn">
               {{ plan.cta }}
-            </SButton>
-          </article>
+              <ArrowRight :size="16" :stroke-width="2" aria-hidden="true" />
+            </NuxtLink>
+          </li>
+        </ol>
+        <!-- Phones: the plans swipe sideways; this shows which one is in view -->
+        <div class="mkp__pager" aria-hidden="true">
+          <span
+            v-for="(plan, i) in MARKETING_PLANS"
+            :key="plan.id"
+            class="mkp__pager-dot"
+            :class="{ 'is-on': planInView === i }"
+          />
+          <span class="mkp__pager-label">{{ MARKETING_PLANS[planInView]?.name }}</span>
         </div>
-        <p class="mk-hero__note mk-pricing-more">
-          <NuxtLink to="/pricing" class="mk-link">
-            Compare every plan
-            <ArrowRight :size="16" aria-hidden="true" />
-          </NuxtLink>
-        </p>
       </div>
     </section>
 
@@ -113,9 +139,8 @@ import MkTestimonials from '~/components/marketing/MkTestimonials.vue'
 import { faqJsonLd, organizationJsonLd, softwareJsonLd, websiteJsonLd } from '~/utils/marketing-seo'
 import { marketingSoftwareOffers } from '~/composables/useMarketingPricing'
 import { useMarketingSeo } from '~/composables/useMarketingSeo'
-import { ref } from 'vue'
-import { ArrowRight } from '@lucide/vue'
-import SButton from '~/components/s/SButton.vue'
+import { onMounted, ref } from 'vue'
+import { ArrowRight, Check } from '~/icons'
 import SDialog from '~/components/s/SDialog.vue'
 import MkHero from '~/components/marketing/MkHero.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
@@ -135,7 +160,36 @@ definePageMeta({ layout: 'marketing' })
 
 const signupUrl = useMarketingSignupUrl()
 const { planPrice, periodSuffix } = useMarketingPricing()
+/** "₦15,000" → symbol "₦", value "15,000", so the symbol can sit small beside the figure */
+function priceParts(price: string) {
+  const match = price.match(/^(\D*)(.*)$/)
+  return { symbol: match?.[1]?.trim() ?? '', value: match?.[2] ?? price }
+}
 const contactOpen = ref(false)
+
+// Phones: the plans sit in a swipeable row that opens on the featured plan
+const plansEl = ref<HTMLElement | null>(null)
+const planInView = ref(
+  Math.max(
+    0,
+    MARKETING_PLANS.findIndex((plan) => plan.featured)
+  )
+)
+function onPlansScroll() {
+  const el = plansEl.value
+  const first = el?.firstElementChild as HTMLElement | null
+  if (!el || !first) return
+  const step = first.offsetWidth + parseFloat(getComputedStyle(el).columnGap || '0')
+  planInView.value = Math.min(MARKETING_PLANS.length - 1, Math.round(el.scrollLeft / step))
+}
+onMounted(() => {
+  const el = plansEl.value
+  if (!el || el.scrollWidth <= el.clientWidth) return
+  const featured = el.children[planInView.value] as HTMLElement | undefined
+  if (featured)
+    el.scrollLeft =
+      featured.offsetLeft - el.offsetLeft - (el.clientWidth - featured.offsetWidth) / 2
+})
 
 const faq: MkFaqItem[] = [
   {

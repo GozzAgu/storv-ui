@@ -277,7 +277,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { Bell, ChevronDown, Package, Pencil, Plus, SlidersHorizontal, Trash2 } from '@lucide/vue'
+import { Bell, ChevronDown, Package, Pencil, Plus, SlidersHorizontal, Trash2 } from '~/icons'
 import { useThemeStore } from '~/stores/theme'
 import SAvatar from '~/components/s/SAvatar.vue'
 import SBadge from '~/components/s/SBadge.vue'

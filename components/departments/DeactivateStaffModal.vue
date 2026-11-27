@@ -40,7 +40,7 @@ import SCheckbox from '~/components/s/SCheckbox.vue'
 import SDialog from '~/components/s/SDialog.vue'
 import SDialogActions from '~/components/s/SDialogActions.vue'
 import { computed, ref, watch } from 'vue'
-import { UserMinus } from '@lucide/vue'
+import { UserMinus } from '~/icons'
 import type { Staff } from '~/composables/useStaff'
 
 const props = defineProps<{

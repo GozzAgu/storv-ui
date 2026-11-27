@@ -41,6 +41,24 @@ export default tseslint.config(
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       'vue/multi-word-component-names': 'off',
+      // Every icon is Storvv's own (icons/README.md). Draw a missing one in icons/sets.
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@lucide/vue',
+              message:
+                "Import icons from '~/icons'. Need a new one? Draw it in icons/sets (see icons/README.md).",
+            },
+          ],
+        },
+      ],
     },
+  },
+  {
+    // The preview script compares Storvv icons with the Lucide originals.
+    files: ['scripts/icons/**'],
+    rules: { 'no-restricted-imports': 'off' },
   }
 )

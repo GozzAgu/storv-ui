@@ -132,7 +132,7 @@ import {
   Target,
   UserRound,
   WifiOff,
-} from '@lucide/vue'
+} from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'

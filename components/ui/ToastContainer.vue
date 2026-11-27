@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { CircleAlert, CircleCheck, CircleX, Info, X } from '@lucide/vue'
+import { CircleAlert, CircleCheck, CircleX, Info, X } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import { useAppToast, type Toast, type ToastType } from '~/composables/useAppToast'

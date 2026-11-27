@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { WifiOff, Zap } from '@lucide/vue'
+import { WifiOff, Zap } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import { useNetworkStatus } from '~/composables/useNetworkStatus'
 import { useSalesOutbox } from '~/composables/useSalesOutbox'

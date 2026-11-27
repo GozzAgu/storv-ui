@@ -114,7 +114,7 @@
 <script setup lang="ts">
 import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { ref, computed, onMounted } from 'vue'
-import { Check, Lock, TriangleAlert } from '@lucide/vue'
+import { Check, Lock, TriangleAlert } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'
 import SInput from '~/components/s/SInput.vue'

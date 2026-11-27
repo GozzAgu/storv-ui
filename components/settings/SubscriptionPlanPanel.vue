@@ -247,7 +247,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { ChevronRight, ExternalLink, Store, UserPlus } from '@lucide/vue'
+import { ChevronRight, ExternalLink, Store, UserPlus } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'

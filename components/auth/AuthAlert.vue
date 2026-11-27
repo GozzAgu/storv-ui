@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { CircleAlert } from '@lucide/vue'
+import { CircleAlert } from '~/icons'
 
 withDefaults(
   defineProps<{

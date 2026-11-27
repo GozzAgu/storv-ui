@@ -186,7 +186,7 @@ import {
   Smartphone,
   Sparkles,
   UserRound,
-} from '@lucide/vue'
+} from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'

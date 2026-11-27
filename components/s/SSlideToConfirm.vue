@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { ChevronsRight } from '@lucide/vue'
+import { ChevronsRight } from '~/icons'
 import SSpinner from '~/components/s/SSpinner.vue'
 import { useHaptics } from '~/composables/useHaptics'
 

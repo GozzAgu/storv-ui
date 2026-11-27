@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import { Undo2, UsersRound } from '@lucide/vue'
+import { Undo2, UsersRound } from '~/icons'
 import { DASHBOARD_NAV_ICONS, type DashboardNavIconKey } from '~/utils/dashboard-nav-icons'
 
 /** Marketing + demo surfaces reuse the same Lucide set as dashboard navigation. */

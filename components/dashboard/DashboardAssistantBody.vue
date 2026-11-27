@@ -151,7 +151,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, useId, watch } from 'vue'
-import { SendHorizontal } from '@lucide/vue'
+import { SendHorizontal } from '~/icons'
 import SAvatar from '~/components/s/SAvatar.vue'
 import SButton from '~/components/s/SButton.vue'
 import SIconButton from '~/components/s/SIconButton.vue'

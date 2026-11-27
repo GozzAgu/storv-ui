@@ -111,7 +111,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ArrowRight, Check, ChevronRight, Folder, Store, X } from '@lucide/vue'
+import { ArrowRight, Check, ChevronRight, Folder, Store, X } from '~/icons'
 import { stockItemDetailChips, type StockItemRow } from '~/utils/stock-item-details'
 
 /** One end of a transfer: branch and its category path, top level first. */

@@ -8,7 +8,7 @@ import {
   searchCategoryKinds,
 } from '~/utils/category-kinds'
 import { categoryKindIcon } from '~/utils/category-kind-icons'
-import { Package } from '@lucide/vue'
+import { Package } from '~/icons'
 
 describe('category kinds', () => {
   it('keeps the original type ids so existing categories still resolve', () => {

@@ -64,7 +64,7 @@ import {
   RefreshCw,
   Tag,
   Wrench,
-} from '@lucide/vue'
+} from '~/icons'
 import { useItemTimeline, type TimelineEventType } from '~/composables/useItemTimeline'
 import type { InventoryItem } from '~/stores/inventory'
 import { usePreferences } from '~/composables/usePreferences'

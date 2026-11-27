@@ -7,79 +7,84 @@
         title="Set up in an afternoon,"
         accent="with help when you need it."
         lede="Bring the stock list you already have, add your team and start selling. If you get stuck, we reply the same day."
-      >
-        <NuxtLink to="/help" class="mk-pill-link">Visit the help centre</NuxtLink>
-      </MkSectionHead>
+      />
 
-      <ul class="mko__grid">
-        <li class="mko__card mk-reveal" style="--i: 0">
-          <div class="mko__copy">
-            <h3 class="mko__title">Bring your stock list</h3>
-            <p class="mko__text">
-              Import an Excel file into any category. Storvv shows what was added and what was
-              skipped, so nothing goes missing.
-            </p>
-          </div>
-          <div class="mk-tint--sand mko__visual" aria-hidden="true">
-            <div class="mko-file">
-              <FileSpreadsheet :size="20" :stroke-width="1.75" />
-              <span>stock-list.xlsx</span>
+      <ul class="mko__rows">
+        <li
+          v-for="(row, i) in rows"
+          :key="row.area"
+          class="mkor mk-reveal"
+          :style="{ '--i': i, '--row': row.colour }"
+        >
+          <!-- Coloured panel: the area, one line, and what it works with -->
+          <div class="mkor__panel">
+            <div>
+              <h3 class="mkor__area">{{ row.area }}</h3>
+              <p class="mkor__blurb">{{ row.blurb }}</p>
             </div>
-            <div class="mko-row"><span>Added</span><b>248</b></div>
-            <div class="mko-row"><span>Skipped</span><b>3</b></div>
-            <div class="mko-pill"><Check :size="14" />Import finished</div>
-          </div>
-        </li>
-
-        <li class="mko__card mk-reveal" style="--i: 1">
-          <div class="mko__copy">
-            <h3 class="mko__title">Add your branches and team</h3>
-            <p class="mko__text">
-              Give each person a role, so cashiers sell, managers approve and only you see the
-              profit.
-            </p>
-          </div>
-          <div class="mk-tint--lilac mko__visual" aria-hidden="true">
-            <div v-for="person in team" :key="person.name" class="mko-person">
-              <span class="mko-avatar">{{ person.name[0] }}</span>
-              <span class="mko-person__who">
-                <b>{{ person.name }}</b>
-                <span>{{ person.role }}</span>
-              </span>
+            <div class="mkor__with">
+              <p class="mkor__with-label">{{ row.withLabel }}</p>
+              <p class="mkor__with-value">
+                <component :is="row.withIcon" :size="30" :stroke-width="1.6" aria-hidden="true" />
+                {{ row.withValue }}
+              </p>
             </div>
           </div>
-        </li>
 
-        <li class="mko__card mk-reveal" style="--i: 2">
-          <div class="mko__copy">
-            <h3 class="mko__title">Sell from the devices you have</h3>
-            <p class="mko__text">
-              Storvv runs in the browser on a phone, tablet or laptop. No special hardware, no
-              installation.
-            </p>
+          <!-- What it does, and where to go next -->
+          <div class="mkor__body">
+            <div>
+              <p class="mkor__title">{{ row.title }}</p>
+              <p class="mkor__text">{{ row.text }}</p>
+            </div>
+            <div class="mkor__actions">
+              <template v-for="link in row.links" :key="link.label">
+                <a
+                  v-if="link.href"
+                  :href="link.href"
+                  target="_blank"
+                  rel="noopener"
+                  class="mko-btn"
+                  :class="{ 'mko-btn--primary': link.primary }"
+                  >{{ link.label }}</a
+                >
+                <NuxtLink
+                  v-else
+                  :to="link.to"
+                  class="mko-btn"
+                  :class="{ 'mko-btn--primary': link.primary }"
+                  >{{ link.label }}</NuxtLink
+                >
+              </template>
+            </div>
           </div>
-          <div class="mk-tint--sky mko__visual mko__visual--devices" aria-hidden="true">
-            <span class="mko-device"><Smartphone :size="22" :stroke-width="1.75" /></span>
-            <span class="mko-line" />
-            <span class="mko-device mko-device--main"><StorvvMark :size="28" /></span>
-            <span class="mko-line" />
-            <span class="mko-device"><Laptop :size="22" :stroke-width="1.75" /></span>
-          </div>
-        </li>
 
-        <li class="mko__card mk-reveal" style="--i: 3">
-          <div class="mko__copy">
-            <h3 class="mko__title">Answers the same day</h3>
-            <p class="mko__text">
-              Ask us anything by email or the contact form, and find step-by-step guides in the help
-              centre.
-            </p>
-          </div>
-          <div class="mk-tint--sage mko__visual" aria-hidden="true">
-            <p class="mko-bubble">How do I import my stock list?</p>
-            <p class="mko-bubble mko-bubble--reply">
-              Open the category in Inventory, then choose Import Excel.
-            </p>
+          <!-- A ranked list from a sample shop, like a small leaderboard -->
+          <div class="mkor__board" aria-label="Example from a sample shop">
+            <p class="mkor__board-label">{{ row.boardLabel }}</p>
+            <ol class="mko-board">
+              <li v-for="item in row.board" :key="item.name" class="mko-board__item">
+                <div class="mko-board__line">
+                  <component
+                    :is="item.icon"
+                    :size="20"
+                    :stroke-width="1.75"
+                    class="mko-board__icon"
+                    aria-hidden="true"
+                  />
+                  <span class="mko-board__name">{{ item.name }}</span>
+                  <span class="mko-board__meta">{{ item.meta }}</span>
+                  <span
+                    class="mko-board__value"
+                    :class="{ 'mko-board__value--text': item.share === undefined }"
+                    >{{ item.value }}</span
+                  >
+                </div>
+                <span v-if="item.share !== undefined" class="mko-board__bar" aria-hidden="true">
+                  <span :style="{ width: `${item.share}%` }" />
+                </span>
+              </li>
+            </ol>
           </div>
         </li>
       </ul>
@@ -88,13 +93,167 @@
 </template>
 
 <script setup lang="ts">
-import { Check, FileSpreadsheet, Laptop, Smartphone } from '@lucide/vue'
+import type { Component } from 'vue'
+import {
+  CircleUserRound,
+  CircleX,
+  FileSpreadsheet,
+  Headset,
+  Laptop,
+  LifeBuoy,
+  Mail,
+  MessageCircle,
+  Monitor,
+  CalendarDays,
+  Shirt,
+  ShoppingBasket,
+  Smartphone,
+  Tablet,
+  TabletSmartphone,
+  Users,
+} from '~/icons'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
-import StorvvMark from '~/components/shell/StorvvMark.vue'
+import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
+import { storvvWhatsappLink } from '~/utils/storvv-whatsapp'
 
-const team = [
-  { name: 'Amaka', role: 'Cashier · Ikeja' },
-  { name: 'Tunde', role: 'Manager · Lekki' },
-  { name: 'Ifeoma', role: 'Stock keeper' },
+const signupUrl = useMarketingSignupUrl()
+const whatsappUrl = storvvWhatsappLink('Hi Storvv, I need help setting up.')
+
+interface BoardItem {
+  icon: Component
+  name: string
+  meta: string
+  value: string
+  /** Bar length, 0–100. Left out for rows that aren't a measure. */
+  share?: number
+}
+
+interface Row {
+  area: string
+  blurb: string
+  /** Panel and bar colour. */
+  colour: string
+  withLabel: string
+  withIcon: Component
+  withValue: string
+  title: string
+  text: string
+  links: { label: string; to?: string; href?: string; primary?: boolean }[]
+  boardLabel: string
+  board: BoardItem[]
+}
+
+const rows: Row[] = [
+  {
+    area: 'Stock',
+    blurb: 'Bring the list you already keep. Every item lands in the right category.',
+    colour: '#16171d',
+    withLabel: 'Works with',
+    withIcon: FileSpreadsheet,
+    withValue: 'Excel and CSV',
+    title: 'Bring your stock list',
+    text: 'Import an Excel file into any category, from phones and laptops to provisions and fashion. Storvv shows what was added and what was skipped, so nothing goes missing.',
+    links: [
+      { label: 'Start free', to: signupUrl.value, primary: true },
+      { label: 'Import guide', to: '/help#help-inventory' },
+    ],
+    boardLabel: 'Sample import · items added by category',
+    board: [
+      { icon: Smartphone, name: 'Phones', meta: 'Serial · IMEI', value: '112', share: 42 },
+      { icon: Laptop, name: 'Laptops', meta: 'Serial', value: '69', share: 26 },
+      { icon: ShoppingBasket, name: 'Provisions', meta: 'Quantity', value: '54', share: 20 },
+      { icon: Shirt, name: 'Fashion', meta: 'Quantity', value: '31', share: 12 },
+      { icon: CircleX, name: 'Skipped', meta: 'Duplicates', value: '3', share: 1 },
+    ],
+  },
+  {
+    area: 'Team',
+    blurb: 'Every branch, every person, with the access their job needs and no more.',
+    colour: '#3149d8',
+    withLabel: 'Roles across',
+    withIcon: Users,
+    withValue: 'Every branch',
+    title: 'Add your branches and team',
+    text: 'Give each person a role, so cashiers sell, managers approve and only you see the profit. Every action is logged with a name.',
+    links: [
+      { label: 'Start free', to: signupUrl.value, primary: true },
+      { label: 'Roles explained', to: '/help#help-team' },
+    ],
+    boardLabel: 'Sample day · sales by staff',
+    board: [
+      {
+        icon: CircleUserRound,
+        name: 'Amaka',
+        meta: 'Cashier · Ikeja',
+        value: '₦184,000',
+        share: 92,
+      },
+      {
+        icon: CircleUserRound,
+        name: 'Tunde',
+        meta: 'Manager · Lekki',
+        value: '₦152,500',
+        share: 76,
+      },
+      {
+        icon: CircleUserRound,
+        name: 'Chidi',
+        meta: 'Cashier · Abuja',
+        value: '₦97,000',
+        share: 49,
+      },
+      {
+        icon: CircleUserRound,
+        name: 'Ifeoma',
+        meta: 'Cashier · Lekki',
+        value: '₦64,000',
+        share: 32,
+      },
+      { icon: CircleUserRound, name: 'Musa', meta: 'Sales · Ikeja', value: '₦41,500', share: 21 },
+    ],
+  },
+  {
+    area: 'Selling',
+    blurb: 'No till to buy and nothing to install. Open Storvv and ring up the sale.',
+    colour: '#0c6b3e',
+    withLabel: 'Runs on',
+    withIcon: TabletSmartphone,
+    withValue: 'Any device',
+    title: 'Sell from the devices you have',
+    text: 'Storvv runs in the browser on any phone, tablet or laptop. Staff sign in on their own device and pick up where the counter left off.',
+    links: [
+      { label: 'Start free', to: signupUrl.value, primary: true },
+      { label: 'Try the demo', to: '/demo/dashboard' },
+    ],
+    boardLabel: 'Sample week · share of sales by device',
+    board: [
+      { icon: Smartphone, name: 'Phone', meta: 'Android, iPhone', value: '48%', share: 48 },
+      { icon: Laptop, name: 'Laptop', meta: 'Any browser', value: '29%', share: 29 },
+      { icon: Tablet, name: 'Tablet', meta: 'Counter stand', value: '15%', share: 15 },
+      { icon: Monitor, name: 'Desktop', meta: 'Back office', value: '8%', share: 8 },
+    ],
+  },
+  {
+    area: 'Support',
+    blurb: 'Real people who know shops. Ask in your own words and get a straight answer.',
+    colour: '#5b34c7',
+    withLabel: 'Reach us on',
+    withIcon: MessageCircle,
+    withValue: 'WhatsApp',
+    title: 'Answers the same day',
+    text: 'Ask us anything on WhatsApp or by email, book a walkthrough, or follow step-by-step guides in the help centre.',
+    links: [
+      { label: 'WhatsApp us', href: whatsappUrl, primary: true },
+      { label: 'Help centre', to: '/help' },
+    ],
+    boardLabel: 'Ways to get help',
+    board: [
+      { icon: MessageCircle, name: 'WhatsApp', meta: '', value: 'Same day' },
+      { icon: Mail, name: 'Email', meta: '', value: 'Same day' },
+      { icon: CalendarDays, name: 'Walkthrough', meta: '', value: 'Book a time' },
+      { icon: LifeBuoy, name: 'Help centre', meta: '', value: 'Any time' },
+      { icon: Headset, name: 'Setup help', meta: '', value: 'Free' },
+    ],
+  },
 ]
 </script>

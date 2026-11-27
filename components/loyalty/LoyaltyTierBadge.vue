@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
-import { Award, Crown, Gem, Medal, Shield } from '@lucide/vue'
+import { Award, Crown, Gem, Medal, Shield } from '~/icons'
 
 const props = withDefaults(defineProps<{ tier: string; size?: number; label?: string }>(), {
   size: 24,

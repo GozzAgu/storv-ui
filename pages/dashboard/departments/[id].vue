@@ -395,7 +395,7 @@ import {
   UserMinus,
   UserPlus,
   Users,
-} from '@lucide/vue'
+} from '~/icons'
 import SAvatar from '~/components/s/SAvatar.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'

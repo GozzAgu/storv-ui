@@ -7,6 +7,7 @@
         title="From delivery to daily report,"
         accent="in one system."
         lede="Follow your stock from the day it arrives to the report that shows it sold. Nothing is typed twice."
+        align="start"
       />
 
       <ol class="mkf__rail" aria-label="Steps">
@@ -17,7 +18,7 @@
           :class="`mk-tint--${step.tint}`"
         >
           <a :href="`#flow-${step.id}`" class="mkf__rail-link">
-            <span class="mkf__rail-num">{{ i + 1 }}</span>
+            <span class="mkf__rail-num">{{ String(i + 1).padStart(2, '0') }}</span>
             {{ step.short }}
           </a>
         </li>
@@ -33,7 +34,10 @@
           :style="{ '--i': i }"
         >
           <div class="mkf__body">
-            <span class="mkf__num">Step {{ i + 1 }}</span>
+            <span class="mkf__num"
+              ><b>Step {{ String(i + 1).padStart(2, '0') }}</b> /
+              {{ String(steps.length).padStart(2, '0') }}</span
+            >
             <h3 class="mkf__title">{{ step.title }}</h3>
             <p class="mkf__text">{{ step.text }}</p>
             <span v-if="step.plan" class="mk-tag">{{ step.plan }}</span>

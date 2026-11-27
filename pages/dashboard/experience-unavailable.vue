@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { Lock } from '@lucide/vue'
+import { Lock } from '~/icons'
 import PlanGate from '~/components/subscription/PlanGate.vue'
 import SPageHeader from '~/components/s/SPageHeader.vue'
 import SCard from '~/components/s/SCard.vue'

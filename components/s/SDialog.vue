@@ -49,7 +49,7 @@
 
 <script setup lang="ts">
 import { nextTick, onUnmounted, ref, useId, watch } from 'vue'
-import { X } from '@lucide/vue'
+import { X } from '~/icons'
 import SIconButton from '~/components/s/SIconButton.vue'
 import { isCapacitorNative } from '~/utils/capacitor-env'
 import { blurActiveElementIfNative } from '~/utils/native-focus'

@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { Check } from '@lucide/vue'
+import { Check } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
