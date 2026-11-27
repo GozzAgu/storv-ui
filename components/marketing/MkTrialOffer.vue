@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { Gift } from '@lucide/vue'
+import { Gift } from '~/icons'
 import { getTrialOffer } from '~/utils/trial-offer'
 
 const offer = getTrialOffer()

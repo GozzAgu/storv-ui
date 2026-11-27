@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowDown, ArrowUp, ArrowUpDown } from '@lucide/vue'
+import { ArrowDown, ArrowUp, ArrowUpDown } from '~/icons'
 
 /** Column header button; the parent `<th>` carries `aria-sort`. */
 defineProps<{

@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { Check, ChevronRight, CircleAlert, Info, TriangleAlert } from '@lucide/vue'
+import { Check, ChevronRight, CircleAlert, Info, TriangleAlert } from '~/icons'
 import SCard from '~/components/s/SCard.vue'
 import type { DashboardAlert, DashboardAlertLevel } from '~/composables/useDashboardInsights'
 

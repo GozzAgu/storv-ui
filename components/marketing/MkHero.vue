@@ -1,56 +1,71 @@
 <template>
   <section class="mkh" :class="{ 'is-paused': paused }" aria-labelledby="home-title">
-    <div class="mk-container">
-      <div class="mkh__copy">
-        <!-- One real word in the heading for search engines and screen readers; it changes for the eye -->
-        <h1 id="home-title" class="mkh__title mkh-in" style="--i: 0">
-          <span class="mkh__title-line">Sell and track stock</span>
-          <span class="mkh__title-line">
-            in every
-            <span
-              class="mkh__word"
-              :style="{ width: wordWidths[word] ? `${wordWidths[word]}px` : undefined }"
-            >
-              <Transition name="mkh-word" mode="out-in">
-                <span :key="word" class="mkh__word-text"
-                  >{{ word }}.<svg
-                    class="mkh__swash"
-                    viewBox="0 0 200 16"
-                    preserveAspectRatio="none"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path d="M3 11 C 45 4, 110 3, 197 8" pathLength="1" /></svg
-                ></span>
-              </Transition>
+    <!-- The stage: a matte shop photo that runs up behind the header -->
+    <div class="mkh__stage">
+      <img
+        class="mkh__photo"
+        :src="PHOTO(1600)"
+        :srcset="`${PHOTO(1000)} 1000w, ${PHOTO(1600)} 1600w`"
+        sizes="100vw"
+        alt=""
+        fetchpriority="high"
+        decoding="async"
+      />
+      <div class="mk-container">
+        <div class="mkh__copy">
+          <!-- One real word in the heading for search engines and screen readers; it changes for the eye -->
+          <h1 id="home-title" class="mkh__title mkh-in" style="--i: 0">
+            <span class="mkh__title-line">Sell and track stock</span>
+            <span class="mkh__title-line">
+              in every
+              <span
+                class="mkh__word"
+                :style="{ width: wordWidths[word] ? `${wordWidths[word]}px` : undefined }"
+              >
+                <Transition name="mkh-word" mode="out-in">
+                  <span :key="word" class="mkh__word-text"
+                    >{{ word }}.<svg
+                      class="mkh__swash"
+                      viewBox="0 0 200 16"
+                      preserveAspectRatio="none"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="M3 11 C 45 4, 110 3, 197 8" pathLength="1" /></svg
+                  ></span>
+                </Transition>
+              </span>
             </span>
-          </span>
-        </h1>
-        <!-- Invisible copies in the heading's type, measured so the word's slot eases to each width -->
-        <div ref="measureEl" class="mkh__title mkh__word-measure" aria-hidden="true">
-          <span v-for="w in words" :key="w" :data-word="w" class="mkh__word-text">{{ w }}.</span>
-        </div>
+          </h1>
+          <!-- Invisible copies in the heading's type, measured so the word's slot eases to each width -->
+          <div ref="measureEl" class="mkh__title mkh__word-measure" aria-hidden="true">
+            <span v-for="w in words" :key="w" :data-word="w" class="mkh__word-text">{{ w }}.</span>
+          </div>
 
-        <p class="mkh__lede mkh-in" style="--i: 1">
-          Point of sale and inventory for gadget stores, supermarkets and dealers. Every sale
-          updates your <mark>stock</mark>, <mark>receipts</mark> and <mark>balances</mark> at once.
-        </p>
+          <p class="mkh__lede mkh-in" style="--i: 1">
+            Point of sale and inventory for gadget stores, supermarkets and dealers. Every sale
+            updates your <mark>stock</mark>, <mark>receipts</mark> and <mark>balances</mark> at
+            once.
+          </p>
 
-        <div class="mkh__actions mkh-in" style="--i: 2">
-          <NuxtLink :to="signupUrl" class="mk-cta-btn" data-mk-primary>
-            Create your free store
-          </NuxtLink>
+          <div class="mkh__actions mkh-in" style="--i: 2">
+            <NuxtLink :to="signupUrl" class="mk-cta-btn" data-mk-primary>
+              Create your free store
+            </NuxtLink>
+          </div>
+          <p class="mkh__walk mkh-in" style="--i: 3">
+            Want a guided tour?
+            <button type="button" @click="walkthrough.open('landing_hero')">
+              Book a walkthrough
+              <ArrowRight :size="14" :stroke-width="2" aria-hidden="true" />
+            </button>
+          </p>
+          <MkTrustStrip class="mkh__trust mkh-in" style="--i: 3" />
         </div>
-        <p class="mkh__walk mkh-in" style="--i: 3">
-          Want a guided tour?
-          <button type="button" @click="walkthrough.open('landing_hero')">
-            Book a walkthrough
-            <ArrowRight :size="14" :stroke-width="2" aria-hidden="true" />
-          </button>
-        </p>
-        <MkTrustStrip class="mkh__trust mkh-in" style="--i: 3" />
       </div>
+    </div>
 
+    <div class="mk-container">
       <!-- Everything a shop runs, wired into one place -->
       <div class="mkh__hub mkh-in" style="--i: 4">
         <p class="ds-sr-only">
@@ -119,19 +134,20 @@
         </button>
       </div>
 
-      <div class="mkh__proof">
-        <p id="mkh-proof-label" class="mkh__proof-label">Built for shops that sell</p>
-        <ul class="mkh__trades" aria-labelledby="mkh-proof-label">
-          <li v-for="trade in trades" :key="trade.label" class="mkh__trade">
-            <component
-              :is="trade.icon"
-              class="mkh__trade-icon"
-              :size="20"
-              :stroke-width="1.75"
-              aria-hidden="true"
-            />
-            <span class="mkh__trade-name">{{ trade.label }}</span>
-            <span class="mkh__trade-line">{{ trade.line }}</span>
+      <!-- The trades Storvv is built for, as a numbered index -->
+      <div class="mks">
+        <div class="mks__head">
+          <p id="mkh-proof-label" class="mks__label">Built for shops that sell</p>
+          <p class="mks__count" aria-hidden="true">{{ trades.length }} trades · one workspace</p>
+        </div>
+        <ul class="mks__grid" aria-labelledby="mkh-proof-label">
+          <li v-for="(trade, i) in trades" :key="trade.label" class="mks__item">
+            <span class="mks__top" aria-hidden="true">
+              <span class="mks__num">{{ String(i + 1).padStart(2, '0') }}</span>
+              <StorvvIcon :name="trade.icon" :size="26" class="mks__icon" />
+            </span>
+            <span class="mks__name">{{ trade.label }}</span>
+            <span class="mks__line">{{ trade.line }}</span>
           </li>
         </ul>
       </div>
@@ -140,33 +156,29 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Hero photo: a finger tapping a tablet point of sale (Unsplash, free licence), kept in
+ * public/marketing. It sits under frosted glass, so 1600px covers even large screens.
+ */
+const PHOTO = (w: 1000 | 1600) => `/marketing/hero-pos-${w}.webp`
+
 import {
   ArrowRight,
   Banknote,
-  BookOpen,
-  Boxes,
-  Car,
   CreditCard,
   FileSpreadsheet,
-  Gift,
-  Hammer,
   Landmark,
   MessageCircle,
   Pause,
-  Pill,
   Play,
   Printer,
   ScanBarcode,
-  Shirt,
-  ShoppingBasket,
-  Smartphone,
-  Sofa,
-  Sprout,
   Store,
-  Tv,
   Wallet,
-} from '@lucide/vue'
+} from '~/icons'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import StorvvIcon from '~/components/brand/StorvvIcon.vue'
+import type { StorvvIconName } from '~/utils/storvv-icons'
 import { useMarketingMotion } from '~/composables/useMarketingMotion'
 import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 import { useWalkthrough } from '~/composables/useWalkthrough'
@@ -179,30 +191,62 @@ const { paused, toggle } = useMarketingMotion()
 /* Every sector Storvv's category kinds cover (utils/category-kinds.ts), with real examples */
 const trades = [
   {
-    icon: Smartphone,
+    icon: 'phone' as StorvvIconName,
     label: 'Phones & gadgets',
     line: 'Phone shops, laptops, accessories, gaming',
   },
-  { icon: Tv, label: 'Electronics & appliances', line: 'TVs, home appliances, solar and power' },
   {
-    icon: ShoppingBasket,
+    icon: 'tv' as StorvvIconName,
+    label: 'Electronics & appliances',
+    line: 'TVs, home appliances, solar and power',
+  },
+  {
+    icon: 'basket' as StorvvIconName,
     label: 'Food & drink',
     line: 'Supermarkets, provisions, bakeries, restaurants',
   },
-  { icon: Shirt, label: 'Fashion & beauty', line: 'Boutiques, shoes, cosmetics, perfumes, hair' },
-  { icon: Pill, label: 'Pharmacy & health', line: 'Medicines, medical supplies, wellness' },
-  { icon: Hammer, label: 'Building & hardware', line: 'Tools, paints, electrical, plumbing' },
-  { icon: Car, label: 'Auto & transport', line: 'Car dealers, auto parts, motorcycles, fuel' },
-  { icon: Sofa, label: 'Home & furniture', line: 'Furniture, decor, kitchen, bedding' },
   {
-    icon: BookOpen,
+    icon: 'shirt' as StorvvIconName,
+    label: 'Fashion & beauty',
+    line: 'Boutiques, shoes, cosmetics, perfumes, hair',
+  },
+  {
+    icon: 'pill' as StorvvIconName,
+    label: 'Pharmacy & health',
+    line: 'Medicines, medical supplies, wellness',
+  },
+  {
+    icon: 'hammer' as StorvvIconName,
+    label: 'Building & hardware',
+    line: 'Tools, paints, electrical, plumbing',
+  },
+  {
+    icon: 'car' as StorvvIconName,
+    label: 'Auto & transport',
+    line: 'Car dealers, auto parts, motorcycles, fuel',
+  },
+  {
+    icon: 'sofa' as StorvvIconName,
+    label: 'Home & furniture',
+    line: 'Furniture, decor, kitchen, bedding',
+  },
+  {
+    icon: 'book' as StorvvIconName,
     label: 'Books, office & school',
     line: 'Bookshops, stationery, printing, uniforms',
   },
-  { icon: Gift, label: 'Kids, sports & gifts', line: 'Toys, baby items, sports, music, gifts' },
-  { icon: Sprout, label: 'Farm, pets & garden', line: 'Agro supplies, pet shops, plants' },
   {
-    icon: Boxes,
+    icon: 'gift' as StorvvIconName,
+    label: 'Kids, sports & gifts',
+    line: 'Toys, baby items, sports, music, gifts',
+  },
+  {
+    icon: 'sprout' as StorvvIconName,
+    label: 'Farm, pets & garden',
+    line: 'Agro supplies, pet shops, plants',
+  },
+  {
+    icon: 'boxes' as StorvvIconName,
     label: 'Wholesale & procurement',
     line: 'Distributors, bulk stock, multi-site supply',
   },

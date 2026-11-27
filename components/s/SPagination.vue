@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ChevronLeft, ChevronRight } from '@lucide/vue'
+import { ChevronLeft, ChevronRight } from '~/icons'
 import SIconButton from '~/components/s/SIconButton.vue'
 
 const props = withDefaults(

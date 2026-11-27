@@ -238,7 +238,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { ChevronRight, Lock, Pencil, Receipt, SearchX, Trash2 } from '@lucide/vue'
+import { ChevronRight, Lock, Pencil, Receipt, SearchX, Trash2 } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'

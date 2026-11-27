@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { Lock } from '@lucide/vue'
+import { Lock } from '~/icons'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
 import AuthCard from '~/components/auth/AuthCard.vue'

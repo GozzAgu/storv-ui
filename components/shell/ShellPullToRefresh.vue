@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { ArrowDown } from '@lucide/vue'
+import { ArrowDown } from '~/icons'
 import SSpinner from '~/components/s/SSpinner.vue'
 import { useHaptics } from '~/composables/useHaptics'
 import { useDashboardPageRefreshHandler } from '~/composables/useDashboardPageRefresh'

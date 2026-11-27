@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Banknote, CreditCard, Hash, Landmark, Smartphone, Split, Wallet } from '@lucide/vue'
+import { Banknote, CreditCard, Hash, Landmark, Smartphone, Split, Wallet } from '~/icons'
 import { paymentKind } from '~/utils/sale-display'
 
 const props = defineProps<{ method?: string | null }>()

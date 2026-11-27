@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { useId } from 'vue'
-import { Check } from '@lucide/vue'
+import { Check } from '~/icons'
 
 defineOptions({ inheritAttrs: false })
 

@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { Trash2 } from '@lucide/vue'
+import { Trash2 } from '~/icons'
 import SInput from '~/components/s/SInput.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import type { TemplateField } from '~/stores/inventory'

@@ -71,7 +71,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, useId, watch } from 'vue'
-import { ChevronDown } from '@lucide/vue'
+import { ChevronDown } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'

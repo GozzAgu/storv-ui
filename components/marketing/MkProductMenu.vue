@@ -27,7 +27,7 @@ import {
   Tv,
   WifiOff,
   Workflow,
-} from '@lucide/vue'
+} from '~/icons'
 import MkNavMenu, {
   type MkNavMenuItem,
   type MkNavMenuSideItem,

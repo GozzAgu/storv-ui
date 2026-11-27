@@ -1074,7 +1074,7 @@ import {
   Store,
   SunMoon,
   Users,
-} from '@lucide/vue'
+} from '~/icons'
 import { useDashboardAssistant } from '~/composables/useDashboardAssistant'
 import { useAccountAvatar } from '~/composables/useAccountAvatar'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'

@@ -393,7 +393,6 @@ html.dark .mk-section--alt {
 }
 
 /* Links that stand on their own (not inside a sentence) get a full-size tap target */
-.mku__link,
 .mkb__more,
 .mk-pricing-more .mk-link,
 .mk-actions .mk-link {

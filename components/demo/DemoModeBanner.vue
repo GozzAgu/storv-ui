@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { CalendarDays, FlaskConical } from '@lucide/vue'
+import { CalendarDays, FlaskConical } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import { useWalkthrough } from '~/composables/useWalkthrough'
 import { useDemoConversionNudge } from '~/composables/useDemoConversionNudge'

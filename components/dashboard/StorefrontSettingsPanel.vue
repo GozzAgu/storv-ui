@@ -344,7 +344,7 @@
 import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { storeToRefs } from 'pinia'
 import QRCode from 'qrcode'
-import { Check, Copy, ExternalLink, MessageCircle } from '@lucide/vue'
+import { Check, Copy, ExternalLink, MessageCircle } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'

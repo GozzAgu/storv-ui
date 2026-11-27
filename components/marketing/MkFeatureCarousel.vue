@@ -1,17 +1,45 @@
 <template>
   <section class="mk-section mkc" aria-labelledby="mkc-title">
     <div class="mk-container">
-      <MkSectionHead
-        title-id="mkc-title"
-        :level="level"
-        title="Powerful tools,"
-        accent="simple to use."
-        lede="Built for busy counters: every screen does one job well, so new staff pick it up on their first shift."
-        align="start"
-      />
+      <div class="mkc__head">
+        <MkSectionHead
+          title-id="mkc-title"
+          :level="level"
+          title="Powerful tools,"
+          accent="simple to use."
+          lede="Built for busy counters: every screen does one job well, so new staff pick it up on their first shift."
+          align="start"
+        />
+        <div class="mkc__controls">
+          <p class="mkc__count" aria-hidden="true">
+            <span>{{ pad(index + 1) }}</span> / {{ pad(cards.length) }}
+          </p>
+          <span class="mkc__progress" aria-hidden="true">
+            <span :style="{ width: `${((index + 1) / cards.length) * 100}%` }" />
+          </span>
+          <button
+            type="button"
+            class="mkc__arrow"
+            aria-label="Previous features"
+            :disabled="atStart"
+            @click="scrollBy(-1)"
+          >
+            <ChevronLeft :size="20" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="mkc__arrow"
+            aria-label="More features"
+            :disabled="atEnd"
+            @click="scrollBy(1)"
+          >
+            <ChevronRight :size="20" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
 
       <ul ref="trackEl" class="mkc__track" @scroll.passive="update">
-        <li v-for="card in cards" :key="card.title" class="mkc__card">
+        <li v-for="(card, i) in cards" :key="card.title" class="mkc__card">
           <div class="mkc__visual" :class="`mk-tint--${card.tint}`">
             <img
               :src="card.src"
@@ -23,6 +51,10 @@
             />
           </div>
           <div class="mkc__body">
+            <p class="mkc__index" aria-hidden="true">
+              <span>{{ pad(i + 1) }}</span>
+              <span>{{ card.area }}</span>
+            </p>
             <h3 class="mkc__title">{{ card.title }}</h3>
             <p class="mkc__text">{{ card.text }}</p>
             <NuxtLink :to="card.to" class="mk-link mkc__link">
@@ -32,34 +64,13 @@
           </div>
         </li>
       </ul>
-
-      <div class="mkc__controls">
-        <button
-          type="button"
-          class="mkc__arrow"
-          aria-label="Previous features"
-          :disabled="atStart"
-          @click="scrollBy(-1)"
-        >
-          <ChevronLeft :size="20" aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          class="mkc__arrow"
-          aria-label="More features"
-          :disabled="atEnd"
-          @click="scrollBy(1)"
-        >
-          <ChevronRight :size="20" aria-hidden="true" />
-        </button>
-      </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { ArrowRight, ChevronLeft, ChevronRight } from '@lucide/vue'
+import { ArrowRight, ChevronLeft, ChevronRight } from '~/icons'
 import MkSectionHead from '~/components/marketing/MkSectionHead.vue'
 
 withDefaults(defineProps<{ level?: 'h1' | 'h2' }>(), { level: 'h2' })
@@ -67,6 +78,7 @@ withDefaults(defineProps<{ level?: 'h1' | 'h2' }>(), { level: 'h2' })
 const cards = [
   {
     title: 'Inventory',
+    area: 'Stock',
     tint: 'sand',
     text: "See what's on every shelf, by category, serial or IMEI, with low-stock alerts.",
     to: '/features?area=inventory#explore',
@@ -75,6 +87,7 @@ const cards = [
   },
   {
     title: 'Sales and receipts',
+    area: 'Selling',
     tint: 'peach',
     text: 'Ring up a sale in seconds, split the payment and send the receipt on WhatsApp.',
     to: '/features?area=sales#explore',
@@ -83,6 +96,7 @@ const cards = [
   },
   {
     title: 'Customers and balances',
+    area: 'Customers',
     tint: 'rose',
     text: 'Take deposits and part payments, and always know who still owes you.',
     to: '/features?area=sales#explore',
@@ -91,6 +105,7 @@ const cards = [
   },
   {
     title: 'Reports',
+    area: 'Insight',
     tint: 'sky',
     text: "Today's revenue, best sellers and stock value at a glance.",
     to: '/features?area=insights#explore',
@@ -99,6 +114,7 @@ const cards = [
   },
   {
     title: 'Team and roles',
+    area: 'Team',
     tint: 'lilac',
     text: 'Group staff into departments and decide what each person can see and do.',
     to: '/features?area=team#explore',
@@ -107,6 +123,7 @@ const cards = [
   },
   {
     title: 'Branches and transfers',
+    area: 'Branches',
     tint: 'sage',
     text: 'Run every branch from one login and move stock between them with approvals.',
     to: '/features?area=branches#explore',
@@ -118,12 +135,18 @@ const cards = [
 const trackEl = ref<HTMLElement | null>(null)
 const atStart = ref(true)
 const atEnd = ref(false)
+/** The card at the left edge of the track, for the counter */
+const index = ref(0)
+const pad = (n: number) => String(n).padStart(2, '0')
 
 function update() {
   const el = trackEl.value
   if (!el) return
   atStart.value = el.scrollLeft <= 4
   atEnd.value = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4
+  const card = el.querySelector<HTMLElement>('.mkc__card')
+  const step = card ? card.offsetWidth + parseFloat(getComputedStyle(el).columnGap || '0') : 1
+  index.value = atEnd.value ? cards.length - 1 : Math.round(el.scrollLeft / step)
 }
 
 function scrollBy(direction: 1 | -1) {

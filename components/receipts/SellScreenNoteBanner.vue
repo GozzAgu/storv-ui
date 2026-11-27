@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Bookmark } from '@lucide/vue'
+import { Bookmark } from '~/icons'
 import { useStoresStore } from '~/stores/stores'
 
 const storesStore = useStoresStore()

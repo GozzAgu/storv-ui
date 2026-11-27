@@ -107,7 +107,7 @@ import SIconButton from '~/components/s/SIconButton.vue'
 import SInput from '~/components/s/SInput.vue'
 import SSpinner from '~/components/s/SSpinner.vue'
 import { ref, computed } from 'vue'
-import { ArrowRight, Bookmark, Search, Trash2 } from '@lucide/vue'
+import { ArrowRight, Bookmark, Search, Trash2 } from '~/icons'
 import { useSearchStore } from '~/stores/search'
 import { useAppToast } from '~/composables/useAppToast'
 

@@ -840,7 +840,7 @@ import {
   PackageCheck,
   Send,
   Truck,
-} from '@lucide/vue'
+} from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'

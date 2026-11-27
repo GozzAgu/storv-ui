@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { ref, useId } from 'vue'
-import { Plus } from '@lucide/vue'
+import { Plus } from '~/icons'
 
 export interface MkFaqItem {
   q: string

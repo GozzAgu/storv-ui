@@ -157,7 +157,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick, computed, watch } from 'vue'
-import { ArrowLeft, ArrowRight } from '@lucide/vue'
+import { ArrowLeft, ArrowRight } from '~/icons'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
 import AuthAlert from '~/components/auth/AuthAlert.vue'

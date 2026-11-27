@@ -665,7 +665,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-import { Lock, PackageX, Plus, SearchX, Store, TriangleAlert } from '@lucide/vue'
+import { Lock, PackageX, Plus, SearchX, Store, TriangleAlert } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'

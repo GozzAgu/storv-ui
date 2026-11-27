@@ -214,7 +214,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { Lock, Plus, SearchX, Store, TriangleAlert, Undo2 } from '@lucide/vue'
+import { Lock, Plus, SearchX, Store, TriangleAlert, Undo2 } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'

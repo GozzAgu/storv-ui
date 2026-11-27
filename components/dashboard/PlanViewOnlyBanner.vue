@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Eye } from '@lucide/vue'
+import { Eye } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import { useUserStore } from '~/stores/user'
 import { usePlanViewOnly } from '~/composables/usePlanViewOnly'

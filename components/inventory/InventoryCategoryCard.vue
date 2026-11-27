@@ -60,7 +60,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ArrowUpRight, FolderTree, Lock } from '@lucide/vue'
+import { ArrowUpRight, FolderTree, Lock } from '~/icons'
 import { folderKindIcon } from '~/utils/category-kind-icons'
 import { formatCategoryDisplayName } from '~/utils/inventory-category-format'
 import type { FolderAvailabilityStats } from '~/utils/inventory-folder-availability'

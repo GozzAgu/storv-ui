@@ -179,7 +179,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { History } from '@lucide/vue'
+import { History } from '~/icons'
 import SAvatar from '~/components/s/SAvatar.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'

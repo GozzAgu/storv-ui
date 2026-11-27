@@ -118,7 +118,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ArrowRight, ArrowUpRight } from '@lucide/vue'
+import { ArrowRight, ArrowUpRight } from '~/icons'
 import {
   activityActionLabel,
   activityEntityTypeLabel,

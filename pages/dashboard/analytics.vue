@@ -587,7 +587,7 @@ import {
   defineAsyncComponent,
   type Component,
 } from 'vue'
-import { CalendarDays, ChevronRight, Clock, Download, Store } from '@lucide/vue'
+import { CalendarDays, ChevronRight, Clock, Download, Store } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import StockLossesReport from '~/components/analytics/StockLossesReport.vue'
 import SButton from '~/components/s/SButton.vue'

@@ -69,7 +69,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
-import { Check, ChevronDown } from '@lucide/vue'
+import { Check, ChevronDown } from '~/icons'
 import SField from '~/components/s/SField.vue'
 import SFlag from '~/components/s/SFlag.vue'
 import SPopover from '~/components/s/SPopover.vue'

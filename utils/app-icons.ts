@@ -97,4 +97,4 @@ export {
   Wrench as WrenchScrewdriverIcon,
   CircleX as XCircleIcon,
   X as XMarkIcon,
-} from '@lucide/vue'
+} from '~/icons'

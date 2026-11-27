@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { Check, Copy, KeyRound, Mail, Trash2 } from '@lucide/vue'
+import { Check, Copy, KeyRound, Mail, Trash2 } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
 import SIconButton from '~/components/s/SIconButton.vue'

@@ -86,7 +86,7 @@
 
 <script setup lang="ts">
 import { useId } from 'vue'
-import { LogOut, Monitor, Moon, Sun } from '@lucide/vue'
+import { LogOut, Monitor, Moon, Sun } from '~/icons'
 import SAvatar from '~/components/s/SAvatar.vue'
 import SBadge from '~/components/s/SBadge.vue'
 import SPopover from '~/components/s/SPopover.vue'

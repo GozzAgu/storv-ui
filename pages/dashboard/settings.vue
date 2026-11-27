@@ -508,7 +508,7 @@ import StorefrontSettingsPanel from '~/components/dashboard/StorefrontSettingsPa
 import PaymentsV2SettingsCard from '~/components/payments/PaymentsV2SettingsCard.vue'
 import LoyaltySettingsCard from '~/components/loyalty/LoyaltySettingsCard.vue'
 import { loyaltyUiFlag } from '~/composables/useLoyalty'
-import { Download, FileSpreadsheet, Pencil, Plus, Store, Upload, X } from '@lucide/vue'
+import { Download, FileSpreadsheet, Pencil, Plus, Store, Upload, X } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'

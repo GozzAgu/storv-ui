@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { Check } from '@lucide/vue'
+import { Check } from '~/icons'
 
 defineProps<{
   modelValue: boolean

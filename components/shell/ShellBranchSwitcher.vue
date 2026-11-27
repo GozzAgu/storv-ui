@@ -94,7 +94,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { Check, ChevronsUpDown, Settings2 } from '@lucide/vue'
+import { Check, ChevronsUpDown, Settings2 } from '~/icons'
 import SPopover from '~/components/s/SPopover.vue'
 import SSpinner from '~/components/s/SSpinner.vue'
 import { useStoresStore } from '~/stores/stores'

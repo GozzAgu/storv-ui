@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import { useId } from 'vue'
-import { CalendarDays } from '@lucide/vue'
+import { CalendarDays } from '~/icons'
 import { useWalkthrough } from '~/composables/useWalkthrough'
 
 defineProps<{

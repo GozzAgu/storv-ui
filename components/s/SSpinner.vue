@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { Loader2 } from '@lucide/vue'
+import { Loader2 } from '~/icons'
 
 withDefaults(
   defineProps<{

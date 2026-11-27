@@ -178,7 +178,7 @@ import {
   Users,
   Wallet,
   Zap,
-} from '@lucide/vue'
+} from '~/icons'
 import STabs from '~/components/s/STabs.vue'
 import MkCta from '~/components/marketing/MkCta.vue'
 import MkFeatureCarousel from '~/components/marketing/MkFeatureCarousel.vue'

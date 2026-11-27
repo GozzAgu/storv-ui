@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { CreditCard } from '@lucide/vue'
+import { CreditCard } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SCard from '~/components/s/SCard.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'

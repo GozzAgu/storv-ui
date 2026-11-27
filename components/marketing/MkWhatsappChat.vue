@@ -75,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { X } from '@lucide/vue'
+import { X } from '~/icons'
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue'
 import { storvvWhatsappLink } from '~/utils/storvv-whatsapp'
 import { whatsappChatMessage, type WhatsappTopic } from '~/utils/whatsapp-chat-message'

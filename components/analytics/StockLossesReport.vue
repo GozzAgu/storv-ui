@@ -160,7 +160,7 @@
 
 <script setup lang="ts">
 import { computed, watch } from 'vue'
-import { PackageMinus, TriangleAlert } from '@lucide/vue'
+import { PackageMinus, TriangleAlert } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'

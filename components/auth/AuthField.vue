@@ -63,7 +63,7 @@
 
 <script setup lang="ts">
 import { computed, ref, useAttrs, type Component } from 'vue'
-import { Eye, EyeOff, Fingerprint, X } from '@lucide/vue'
+import { Eye, EyeOff, Fingerprint, X } from '~/icons'
 
 defineOptions({ inheritAttrs: false })
 

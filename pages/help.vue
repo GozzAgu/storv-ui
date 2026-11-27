@@ -129,7 +129,7 @@ import { STORVV_CONTACT, breadcrumbJsonLd, faqJsonLd } from '~/utils/marketing-s
 import { storvvWhatsappLink } from '~/utils/storvv-whatsapp'
 import { useMarketingSeo } from '~/composables/useMarketingSeo'
 import { computed, ref } from 'vue'
-import { ArrowRight, Search } from '@lucide/vue'
+import { ArrowRight, Search } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import MkFaq, { type MkFaqItem } from '~/components/marketing/MkFaq.vue'
 import { HELP_TOPICS, searchHelp, type HelpTopic } from '~/utils/help-centre'

@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { ArrowRight } from '@lucide/vue'
+import { ArrowRight } from '~/icons'
 import SCard from '~/components/s/SCard.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import {

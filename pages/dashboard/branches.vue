@@ -381,7 +381,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted } from 'vue'
-import { ArrowLeftRight, EllipsisVertical, Pencil, Plus, Store, Trash2 } from '@lucide/vue'
+import { ArrowLeftRight, EllipsisVertical, Pencil, Plus, Store, Trash2 } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'

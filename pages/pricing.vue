@@ -292,7 +292,7 @@ import {
   UserRound,
   Users,
   UsersRound,
-} from '@lucide/vue'
+} from '~/icons'
 import { getPlanLimits, type SubscriptionAddOnKind } from '~/types/subscription'
 import SButton from '~/components/s/SButton.vue'
 import STabs from '~/components/s/STabs.vue'

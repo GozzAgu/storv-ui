@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { CircleAlert, Info, TriangleAlert, X } from '@lucide/vue'
+import { CircleAlert, Info, TriangleAlert, X } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 

@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { ArrowRight, CalendarDays, Gift, MessageCircle, X } from '@lucide/vue'
+import { ArrowRight, CalendarDays, Gift, MessageCircle, X } from '~/icons'
 import { useWalkthrough } from '~/composables/useWalkthrough'
 import { useMarketingSignupUrl } from '~/composables/useMarketingSite'
 import { getTrialOffer } from '~/utils/trial-offer'

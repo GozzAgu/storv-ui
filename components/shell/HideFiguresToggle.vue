@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, watch } from 'vue'
-import { Eye, EyeOff } from '@lucide/vue'
+import { Eye, EyeOff } from '~/icons'
 import SIconButton from '~/components/s/SIconButton.vue'
 
 const { figuresHidden, toggleFigures } = useHideFigures()

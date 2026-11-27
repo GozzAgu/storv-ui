@@ -151,7 +151,7 @@
 <script setup lang="ts">
 import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { computed, reactive, ref, useId, watch } from 'vue'
-import { CalendarDays, Check, CheckCircle2, MessageCircle } from '@lucide/vue'
+import { CalendarDays, Check, CheckCircle2, MessageCircle } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SDialog from '~/components/s/SDialog.vue'
 import SInput from '~/components/s/SInput.vue'

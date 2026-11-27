@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Mail } from '@lucide/vue'
+import { Mail } from '~/icons'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import AuthCard from '~/components/auth/AuthCard.vue'
 import AuthAlert from '~/components/auth/AuthAlert.vue'

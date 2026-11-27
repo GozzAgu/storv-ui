@@ -157,7 +157,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { ChevronLeft, ChevronRight, Plus, ReceiptText, Share2 } from '@lucide/vue'
+import { ChevronLeft, ChevronRight, Plus, ReceiptText, Share2 } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
 import SEmptyState from '~/components/s/SEmptyState.vue'

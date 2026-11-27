@@ -93,7 +93,7 @@
 import SDialog from '~/components/s/SDialog.vue'
 import { ref, computed, watch } from 'vue'
 import QRCode from 'qrcode'
-import { Check, Copy, Download, ExternalLink, MessageCircle, Send, Share2 } from '@lucide/vue'
+import { Check, Copy, Download, ExternalLink, MessageCircle, Send, Share2 } from '~/icons'
 import SButton from '~/components/s/SButton.vue'
 import SSkeleton from '~/components/s/SSkeleton.vue'
 import { buildPaymentLinkShareMessage } from '~/utils/payment-link-share'

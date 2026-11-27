@@ -325,7 +325,7 @@ import {
   Phone,
   Share2,
   ShoppingBag,
-} from '@lucide/vue'
+} from '~/icons'
 import type {
   StorefrontInquiryType,
   StorefrontPublicItemView,

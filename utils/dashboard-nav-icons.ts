@@ -24,7 +24,7 @@ import {
   ShoppingBag,
   UserPlus,
   UsersRound,
-} from '@lucide/vue'
+} from '~/icons'
 
 export type DashboardNavIconKey =
   | 'dashboard'

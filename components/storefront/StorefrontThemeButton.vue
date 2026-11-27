@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { Moon, Sun } from '@lucide/vue'
+import { Moon, Sun } from '~/icons'
 import SIconButton from '~/components/s/SIconButton.vue'
 
 const { actualTheme, setTheme, applyTheme, initTheme } = useTheme()

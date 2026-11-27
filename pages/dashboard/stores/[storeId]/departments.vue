@@ -397,7 +397,7 @@ import {
   SearchX,
   Trash2,
   TriangleAlert,
-} from '@lucide/vue'
+} from '~/icons'
 import SAvatar from '~/components/s/SAvatar.vue'
 import { nameInitials } from '~/utils/name-initials'
 import SBadge from '~/components/s/SBadge.vue'

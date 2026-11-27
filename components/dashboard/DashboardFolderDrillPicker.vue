@@ -59,7 +59,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { ChevronLeft, ChevronRight, CircleCheck } from '@lucide/vue'
+import { ChevronLeft, ChevronRight, CircleCheck } from '~/icons'
 import type { InventoryFolder } from '~/stores/inventory'
 import {
   folderHasChildren,

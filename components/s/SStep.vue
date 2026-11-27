@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { Check } from '@lucide/vue'
+import { Check } from '~/icons'
 
 /**
  * One numbered step of a guided form. The number turns into a tick once `done`, so people can

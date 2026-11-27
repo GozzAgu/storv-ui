@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronDown } from '@lucide/vue'
+import { ChevronDown } from '~/icons'
 import SField from '~/components/s/SField.vue'
 
 defineOptions({ inheritAttrs: false })

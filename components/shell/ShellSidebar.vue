@@ -98,7 +98,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { PanelLeftClose, PanelLeftOpen } from '@lucide/vue'
+import { PanelLeftClose, PanelLeftOpen } from '~/icons'
 import ShellSidebarItem from '~/components/shell/ShellSidebarItem.vue'
 import SIconButton from '~/components/s/SIconButton.vue'
 import type { ShellNavItem, ShellNavSection } from '~/utils/shell-nav'

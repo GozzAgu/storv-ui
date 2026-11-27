@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowRight, Lock, ShieldCheck, UserRoundCheck } from '@lucide/vue'
+import { ArrowRight, Lock, ShieldCheck, UserRoundCheck } from '~/icons'
 
 /** A quiet line of what keeps a store safe, linking to the full security page. */
 defineProps<{ compact?: boolean }>()

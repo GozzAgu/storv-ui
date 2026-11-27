@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import { Boxes, Building2, ChartColumn, CreditCard, ReceiptText, Rocket, Users } from '@lucide/vue'
+import { Boxes, Building2, ChartColumn, CreditCard, ReceiptText, Rocket, Users } from '~/icons'
 import { getTrialOffer } from '~/utils/trial-offer'
 
 const trialOffer = getTrialOffer()

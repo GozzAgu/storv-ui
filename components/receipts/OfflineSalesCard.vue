@@ -66,7 +66,7 @@
 <script setup lang="ts">
 import { friendlyDisplayMessage } from '~/utils/friendly-error'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { WifiOff } from '@lucide/vue'
+import { WifiOff } from '~/icons'
 import SBadge from '~/components/s/SBadge.vue'
 import SButton from '~/components/s/SButton.vue'
 import SCard from '~/components/s/SCard.vue'
